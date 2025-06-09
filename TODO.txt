@@ -3,7 +3,7 @@
 [x] Set up basic pygame window
 [x] Fix __main__ typo and game loop
 [x] Draw paddles and ball
-[ ] Handle paddle movement (W/S and UP/DOWN keys)
+[x] Handle paddle movement (W/S and UP/DOWN keys)
 [ ] Ball movement and bouncing
 [ ] Collision detection with paddles
 [ ] Scoring system
