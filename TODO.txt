@@ -1,0 +1,16 @@
+# PongWithIssues - TODO List
+
+[x] Set up basic pygame window
+[x] Fix __main__ typo and game loop
+[x] Draw paddles and ball
+[ ] Handle paddle movement (W/S and UP/DOWN keys)
+[ ] Ball movement and bouncing
+[ ] Collision detection with paddles
+[ ] Scoring system
+[ ] Add cursed bugs intentionally
+[ ] Add title screen with chaos
+[ ] Write final README.md
+
+// Optional cursed features:
+[ ] Paddle randomly disappears for 0.5s
+[ ] Ball changes speed unpredictably
