@@ -11,6 +11,15 @@
 [ ] Add title screen with chaos
 [ ] Write final README.md
 
-// Optional cursed features:
-[ ] Paddle randomly disappears for 0.5s
+[ ] Set up HTML webpage to host the game
+[ ] Connect the game to the game page
+[ ] Style the game page using CSS
+[ ] Add a link for the game page in GitHub
+
+// Optional features:
+[ ] Add famous quotes from PongShit.txt
+[ ] Option to choose the ball and the paddles color
+[ ] After 15-30 seconds another ball is thrown in
 [ ] Ball changes speed unpredictably
+[ ] Paddle randomly disappears for 0.5s
+[ ] Add a buy me coffee option when finish
