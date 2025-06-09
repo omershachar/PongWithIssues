@@ -1,9 +1,10 @@
 import pygame
 pygame.init()
+pygame.display.set_caption("Pong!")
 
+# Fields and constants
 WIDTH, HEIGHT = 700, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Pong")
 
 FPS = 60 #Frame Per Second
 
@@ -14,16 +15,26 @@ PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
 
 class Paddle:
 
+    # Fields
     COLOR = WHITE
+    VEL = 4 #Velocity of the paddle
     
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
+
+    # Functions: draw() and move()
     def draw(self, win):
         pygame.draw.rect(win, self.COLOR, (self.x, self.y, self.width, self.height))
 
+    def move(self, up=True):
+        if up:
+            self.y -= self.VEL
+        else:
+            self.y += self.VEL
+# End of Paddle class
 
 def draw(win, paddles):
     win.fill(BLACK)
@@ -33,6 +44,17 @@ def draw(win, paddles):
     
     pygame.display.update()
 
+# Function for moving the paddles
+def handle_paddle_movement(Keys, left_paddle, right_paddle):
+    if Keys[pygame.K_w]:
+        left_paddle.move(up=True)
+    if Keys[pygame.K_s]:
+        left_paddle.move(up=False)
+
+    if Keys[pygame.K_UP]:
+        right_paddle.move(up=True)
+    if Keys[pygame.K_DOWN]:
+        right_paddle.move(up=False)
 
 def main():
     run = True
@@ -48,6 +70,9 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
                 break
+        Keys = pygame.key.get_pressed()
+        handle_paddle_movement(Keys, left_paddle, right_paddle)
+
     pygame.quit()
 
 if __name__ == '__main__':
