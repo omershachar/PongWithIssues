@@ -1,31 +1,32 @@
 import pygame
+
 pygame.init()
-pygame.display.set_caption("Pong!")
+pygame.display.set_caption("Pong!") # Windows title
 
 # Fields and constants
-WIDTH, HEIGHT = 700, 500
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-
-FPS = 60 #Frame Per Second
-
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100 # Paddles dimensions
+WIDTH, HEIGHT = 700, 500 # Board size
+PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
+BALL_RADIUS = 7
+
+FPS = 60 # Frame Per Second
+
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 class Paddle:
-
-    # Fields
-    COLOR = WHITE # Paddles color
-    VEL = 4 # Velocity of the paddle
-    
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
 
-    # Functions: draw() and move()
+    # Fields - Paddle
+    COLOR = WHITE # Paddles color
+    VEL = 4 # Velocity of the paddle
+    
+    # Functions - Paddle
     def draw(self, win):
         pygame.draw.rect(win, self.COLOR, (self.x, self.y, self.width, self.height))
 
@@ -34,10 +35,30 @@ class Paddle:
             self.y -= self.VEL
         else:
             self.y += self.VEL
-# End of Paddle class
+# End of class Paddle
 
+class Ball:
+    # Fields - Ball
+    MAX_VEL = 5
+    COLOR = WHITE
 
-# Function for moving the paddles
+    def __init__(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.x_vel = self.MAX_VEL
+        self.y_vel = 0
+
+    # Functions - Ball
+    def draw(self, win):
+        pygame.draw.circle(win, self.COLOR, (self.x, self.y,), self.radius)
+
+    def move(self):
+        self.x += self.x_vel
+        self.y += self.y_vel
+# End of class Ball
+
+# Functions for moving the paddles
 def handle_paddle_movement(Keys, left_paddle, right_paddle):
     # Checking if the 'w' key was pressed, and making sure the paddle won't go out of the board
     if Keys[pygame.K_w] and left_paddle.y - left_paddle.VEL >= 0:
@@ -54,8 +75,9 @@ def handle_paddle_movement(Keys, left_paddle, right_paddle):
         right_paddle.move(up=False)
 
 # Function for drawing the board
-def draw(win, paddles):
+def draw(win, paddles, ball):
     win.fill(BLACK)
+
     for paddle in paddles:
         paddle.draw(win)
 
@@ -64,6 +86,7 @@ def draw(win, paddles):
             continue
         pygame.draw.rect(win, WHITE, (WIDTH//2 - 5, i, 10, HEIGHT//20))
     
+    ball.draw(win)
     pygame.display.update()
 
 
@@ -72,19 +95,22 @@ def main():
     clock = pygame.time.Clock()
 
     left_paddle = Paddle(10, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
+
     right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
+
+    ball = Ball(WIDTH // 2, HEIGHT // 2, BALL_RADIUS)
 
     while run:
         clock.tick(FPS)
-        draw(WIN, [left_paddle,right_paddle])
+        draw(WIN, [left_paddle,right_paddle], ball)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
                 break
         Keys = pygame.key.get_pressed()
         handle_paddle_movement(Keys, left_paddle, right_paddle)
-
     pygame.quit()
+# End of main()
 
 if __name__ == '__main__':
     main()
