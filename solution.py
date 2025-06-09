@@ -11,13 +11,13 @@ FPS = 60 #Frame Per Second
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
+PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100 # Paddles dimensions
 
 class Paddle:
 
     # Fields
-    COLOR = WHITE
-    VEL = 4 #Velocity of the paddle
+    COLOR = WHITE # Paddles color
+    VEL = 4 # Velocity of the paddle
     
     def __init__(self, x, y, width, height):
         self.x = x
@@ -36,25 +36,30 @@ class Paddle:
             self.y += self.VEL
 # End of Paddle class
 
-def draw(win, paddles):
-    win.fill(BLACK)
-
-    for paddle in paddles:
-        paddle.draw(win)
-    
-    pygame.display.update()
 
 # Function for moving the paddles
 def handle_paddle_movement(Keys, left_paddle, right_paddle):
-    if Keys[pygame.K_w]:
+    # Checking if the 'w' key was pressed, and making sure the paddle won't go out of the board
+    if Keys[pygame.K_w] and left_paddle.y - left_paddle.VEL >= 0:
         left_paddle.move(up=True)
-    if Keys[pygame.K_s]:
+    # Checking if the 's' key was pressed, and making sure the paddle won't go out of the board
+    if Keys[pygame.K_s] and left_paddle.y + left_paddle.VEL + left_paddle.height <= HEIGHT:
         left_paddle.move(up=False)
 
-    if Keys[pygame.K_UP]:
+    # Checking if the 'UP' key was pressed, and making sure the paddle won't go out of the board
+    if Keys[pygame.K_UP] and right_paddle.y - right_paddle.VEL >= 0:
         right_paddle.move(up=True)
-    if Keys[pygame.K_DOWN]:
+    # Checking if the 'DOWN' key was pressed, and making sure the paddle won't go out of the board
+    if Keys[pygame.K_DOWN] and right_paddle.y + right_paddle.VEL + right_paddle.height <= HEIGHT:
         right_paddle.move(up=False)
+
+# Function for drawing the board
+def draw(win, paddles):
+    win.fill(BLACK)
+    for paddle in paddles:
+        paddle.draw(win)
+    pygame.display.update()
+
 
 def main():
     run = True
