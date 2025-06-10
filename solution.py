@@ -10,6 +10,8 @@ WIDTH, HEIGHT = 700, 500 # Board size
 PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100 # Paddles size
 BALL_RADIUS = 7 # Ball size
 
+SCORE_FONT = pygame.font.SysFont("comicsans", 50)
+
 FPS = 60 # Frame Per Second
 WIN = pygame.display.set_mode((WIDTH, HEIGHT)) # Not sure...
 
@@ -41,8 +43,8 @@ class Ball: # Class for storing ball attributes and methods
 
     # Constructor
     def __init__(self, x, y, radius):
-        self.x = x
-        self.y = y
+        self.x = self.original_x = x
+        self.y = self.original_y = y
         self.radius = radius
         self.x_vel = self.MAX_VEL
         self.y_vel = 0
@@ -58,6 +60,12 @@ class Ball: # Class for storing ball attributes and methods
     def move(self): # Function for moving the ball around the board by its velocity
         self.x += self.x_vel
         self.y += self.y_vel
+
+    def reset(self):
+        self.x = self.original_x
+        self.y = self.original_y
+        self.x_vel *= -1
+        self.y_vel = 0
 # End of class Ball
 
 
@@ -119,8 +127,13 @@ def handle_paddle_movement(Keys, left_paddle, right_paddle):
 # End of handle_paddle_movement()
 
 # Function for drawing the board
-def draw(win, paddles, ball):
+def draw(win, paddles, ball, left_score, right_score):
     win.fill(BLACK)
+
+    left_score_text = SCORE_FONT.render(f"{left_score}", 1, WHITE)
+    right_score_text = SCORE_FONT.render(f"{right_score}", 1, WHITE)
+    win.blit(left_score_text, (WIDTH//4 - left_score_text.get_width()//2, 20))
+    win.blit(right_score_text, (WIDTH * (3/4) - right_score_text.get_width()//2, 20))
 
     for paddle in paddles:
         paddle.draw(win)
@@ -142,9 +155,12 @@ def main():
     right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
     ball = Ball(WIDTH // 2, HEIGHT // 2, BALL_RADIUS)
 
+    left_score = 0
+    right_score = 0
+
     while run:
         clock.tick(FPS)
-        draw(WIN, [left_paddle,right_paddle], ball)
+        draw(WIN, [left_paddle,right_paddle], ball, left_score, right_score)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False # Breaking the loop
@@ -154,6 +170,14 @@ def main():
         ball.move()
         handle_ball_collision(ball, left_paddle, right_paddle)
         handle_paddle_movement(Keys, left_paddle, right_paddle)
+
+        # Updating players score
+        if ball.x < 0:
+            right_score += 1
+            ball.reset()
+        elif ball.x > WIDTH:
+            left_score += 1
+            ball.reset()
 
     pygame.quit() # Exiting the game
 # End of main()
