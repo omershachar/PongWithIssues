@@ -58,6 +58,23 @@ class Ball:
         self.y += self.y_vel
 # End of class Ball
 
+# Function for managing the ball movement and collision
+def handle_ball_collision(ball, left_paddle, right_paddle):
+    if ball.y + ball.radius >= HEIGHT: # Check if the ball has reach the bottom of the board
+        ball.y_vel *= -1 # Changing the ball bouncing direction downwards
+    elif ball.y - ball.radius <= 0: # Check if the ball has reach the top of the board
+        ball.y_vel *= -1 # Changing the ball bouncing direction downwards
+    
+    if ball.x_vel < 0: # Ball is moving to the left
+        if ball.y >= left_paddle.y and ball.y <= left_paddle.y + left_paddle.height: # Ball is in the right paddle height range
+            if ball.x - ball.radius <= left_paddle.x + left_paddle.width: # Ball is in the right paddle width range
+                ball.x_vel *= -1 # Collision! Changing the ball direction
+
+    if ball.x_vel > 0: # Ball is moving to the right
+        if ball.y >= right_paddle.y and ball.y <= right_paddle.y + right_paddle.height: # Ball is in the right paddle height range
+            if ball.x + ball.radius >= right_paddle.x: # Ball is in the right paddle width range
+                ball.x_vel *= -1 # Collision! Changing the ball direction
+
 # Functions for moving the paddles
 def handle_paddle_movement(Keys, left_paddle, right_paddle):
     # Checking if the 'w' key was pressed, and making sure the paddle won't go out of the board
@@ -110,7 +127,8 @@ def main():
         Keys = pygame.key.get_pressed()
         
         ball.move()
-        
+        handle_ball_collision(ball, left_paddle, right_paddle)
+
         handle_paddle_movement(Keys, left_paddle, right_paddle)
     pygame.quit()
 # End of main()
