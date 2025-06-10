@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 pygame.display.set_caption("Pong!") # Windows title
 
-# Fields and constants
+# Constants
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -38,16 +38,16 @@ class Paddle:
 # End of class Paddle
 
 class Ball:
-    # Fields - Ball
-    MAX_VEL = 5
-    COLOR = WHITE
-
     def __init__(self, x, y, radius):
         self.x = x
         self.y = y
         self.radius = radius
         self.x_vel = self.MAX_VEL
         self.y_vel = 0
+
+    # Fields - Ball
+    MAX_VEL = 5
+    COLOR = WHITE
 
     # Functions - Ball
     def draw(self, win):
@@ -68,12 +68,25 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
     if ball.x_vel < 0: # Ball is moving to the left
         if ball.y >= left_paddle.y and ball.y <= left_paddle.y + left_paddle.height: # Ball is in the right paddle height range
             if ball.x - ball.radius <= left_paddle.x + left_paddle.width: # Ball is in the right paddle width range
-                ball.x_vel *= -1 # Collision! Changing the ball direction
+                ball.x_vel *= -1 # Collision! Changing the ball direction to the right
+
+                middle_y = left_paddle.y + left_paddle.height / 2
+                difference_in_y = middle_y - ball.y
+                reduction_factor = (left_paddle.height / 2) / ball.MAX_VEL
+                y_vel = difference_in_y / reduction_factor
+                ball.y_vel = -1 * y_vel
+
 
     if ball.x_vel > 0: # Ball is moving to the right
         if ball.y >= right_paddle.y and ball.y <= right_paddle.y + right_paddle.height: # Ball is in the right paddle height range
             if ball.x + ball.radius >= right_paddle.x: # Ball is in the right paddle width range
-                ball.x_vel *= -1 # Collision! Changing the ball direction
+                ball.x_vel *= -1 # Collision! Changing the ball direction to the left
+
+                middle_y = right_paddle.y + right_paddle.height / 2
+                difference_in_y = middle_y - ball.y
+                reduction_factor = (right_paddle.height / 2) / ball.MAX_VEL
+                y_vel = difference_in_y / reduction_factor
+                ball.y_vel = -1 * y_vel
 
 # Functions for moving the paddles
 def handle_paddle_movement(Keys, left_paddle, right_paddle):
