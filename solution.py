@@ -70,6 +70,7 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
             if ball.x - ball.radius <= left_paddle.x + left_paddle.width: # Ball is in the right paddle width range
                 ball.x_vel *= -1 # Collision! Changing the ball direction to the right
 
+                # Vertical movement logic
                 middle_y = left_paddle.y + left_paddle.height / 2
                 difference_in_y = middle_y - ball.y
                 reduction_factor = (left_paddle.height / 2) / ball.MAX_VEL
@@ -82,6 +83,7 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
             if ball.x + ball.radius >= right_paddle.x: # Ball is in the right paddle width range
                 ball.x_vel *= -1 # Collision! Changing the ball direction to the left
 
+                # Vertical movement logic
                 middle_y = right_paddle.y + right_paddle.height / 2
                 difference_in_y = middle_y - ball.y
                 reduction_factor = (right_paddle.height / 2) / ball.MAX_VEL
