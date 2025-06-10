@@ -1,0 +1,19 @@
+# Ignore personal tracking files
+TODO.txt
+
+# Python junk
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+# Pygame executable (if you build one later)
+dist/
+build/
+*.exe
+
+# VSCode settings
+.vscode/
+
+# Virtual environments
+venv/
