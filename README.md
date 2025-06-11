@@ -24,11 +24,14 @@
 ### 🚀 How to Play
 
 1. Clone the repo  
-   `git clone https://github.com/omershachar/PongWithIssues.git`
+   ```bash
+   git clone https://github.com/omershachar/PongWithIssues.git
 2. Install dependencies  
-   `pip install -r requirements.txt`
-3. Run it  
-   `python solution.py`
+   ```bash
+   pip install -r ./PongWithIssues/requirements.txt
+3. Run it
+   ```bash 
+   python3 ./PongWithIssues/solution.py
 
 > Or download the `.exe` version from the [Releases](#) tab (coming soon).
 
