@@ -26,7 +26,7 @@
 1. Clone the repo  
    `git clone https://github.com/omershachar/PongWithIssues.git`
 2. Install dependencies  
-   `pip install pygame`
+   `pip install -r requirements.txt`
 3. Run it  
    `python solution.py`
 
