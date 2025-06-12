@@ -10,6 +10,8 @@ WIDTH, HEIGHT = 700, 500 # Board size
 PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100 # Paddles size
 BALL_RADIUS = 7 # Ball size
 
+WINNING_SCORE = 3
+
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 
 FPS = 60 # Frame Per Second
@@ -19,8 +21,8 @@ class Paddle: # Class for storing paddles attributes and methods
 
     # Constructor
     def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
+        self.x = self.original_x = x
+        self.y = self.original_y = y
         self.width = width
         self.height = height
 
@@ -37,6 +39,10 @@ class Paddle: # Class for storing paddles attributes and methods
             self.y -= self.VEL
         else:
             self.y += self.VEL
+    
+    def reset(self):
+        self.x = self.original_x
+        self.y = self.original_y
 # End of class Paddle
 
 class Ball: # Class for storing ball attributes and methods
@@ -138,7 +144,7 @@ def draw(win, paddles, ball, left_score, right_score):
     for paddle in paddles:
         paddle.draw(win)
 
-    for i in range(10, HEIGHT, HEIGHT//20):
+    for i in range(10, HEIGHT, HEIGHT//20): # Drawing the border (net)
         if i % 2 == 1:
             continue
         pygame.draw.rect(win, WHITE, (WIDTH//2 - 5, i, 10, HEIGHT//20))
@@ -178,6 +184,20 @@ def main():
         elif ball.x > WIDTH:
             left_score += 1
             ball.reset()
+
+        # Determining winner
+        if left_score >= WINNING_SCORE:
+            ball.reset()
+            left_paddle.reset()
+            right_paddle.reset()
+            left_score = 0
+            right_score = 0
+        elif right_score >= WINNING_SCORE:
+            ball.reset()
+            left_paddle.reset()
+            right_paddle.reset()
+            left_score = 0
+            right_score = 0
 
     pygame.quit() # Exiting the game
 # End of main()
