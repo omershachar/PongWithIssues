@@ -17,6 +17,7 @@ SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 FPS = 60 # Frame Per Second
 WIN = pygame.display.set_mode((WIDTH, HEIGHT)) # Not sure...
 
+
 class Paddle: # Class for storing paddles attributes and methods
 
     # Constructor
@@ -44,6 +45,7 @@ class Paddle: # Class for storing paddles attributes and methods
         self.x = self.original_x
         self.y = self.original_y
 # End of class Paddle
+
 
 class Ball: # Class for storing ball attributes and methods
 
@@ -132,6 +134,7 @@ def handle_paddle_movement(Keys, left_paddle, right_paddle):
         right_paddle.move(up=False)
 # End of handle_paddle_movement()
 
+
 # Function for drawing the board
 def draw(win, paddles, ball, left_score, right_score):
     win.fill(BLACK)
@@ -186,13 +189,19 @@ def main():
             ball.reset()
 
         # Determining winner
+        won = False
         if left_score >= WINNING_SCORE:
-            ball.reset()
-            left_paddle.reset()
-            right_paddle.reset()
-            left_score = 0
-            right_score = 0
+            won = True
+            win_text = "Left Player Won!"
         elif right_score >= WINNING_SCORE:
+            won = True
+            win_text = "Right Player Won!"
+        
+        if won:
+            text = SCORE_FONT.render(win_text, 1, WHITE)
+            WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
+            pygame.display.update()
+            pygame.time.delay(4000)
             ball.reset()
             left_paddle.reset()
             right_paddle.reset()
