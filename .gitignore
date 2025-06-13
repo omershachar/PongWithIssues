@@ -1,6 +1,7 @@
 # Ignore personal tracking files
 TODO.txt
 PongShit.txt
+helpers.py
 
 # Python junk
 __pycache__/
