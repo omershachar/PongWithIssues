@@ -17,19 +17,35 @@ class PhysicsObject:
 class Ball(PhysicsObject):
     def __init__(self, x, y, radius, mass=1):
         super().__init__(mass, x, y, x_vel=5, y_vel=0)
+        self.trail = []  # stores past positions
+        self.max_trail = 10  # max trail length
         self.radius = radius
         self.original_x = x
         self.original_y = y
 
     def draw(self, win):
         import pygame
+        # draw trail
+        for i, pos in enumerate(self.trail):
+            alpha = max(50, 255 - i * 20)
+            radius = max(1, self.radius - i // 2)
+            surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(surface, (255, 255, 255, alpha), (radius, radius), radius)
+            win.blit(surface, (pos[0] - radius, pos[1] - radius))
+
+        # draw main ball
         pygame.draw.circle(win, (255, 255, 255), (int(self.x), int(self.y)), self.radius)
+
 
     def move(self):
         self.x += self.x_vel
         self.y += self.y_vel
 
     def update(self):
+        # Add current position to trail
+        self.trail.insert(0, (int(self.x), int(self.y)))
+        if len(self.trail) > self.max_trail:
+            self.trail.pop()
         self.move()  # reuse existing move
         # optionally add decay/friction logic here
 
