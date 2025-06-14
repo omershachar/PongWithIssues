@@ -46,6 +46,7 @@ class Ball(PhysicsObject):
 
     def move(self):
         self.y_vel += self.spin * 0.1  # Magnus effect curve
+        self.spin *= 0.96 
         self.x += self.x_vel
         self.y += self.y_vel
 
