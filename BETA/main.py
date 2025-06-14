@@ -16,6 +16,7 @@ FPS = 60
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
+MAX_DEFLECTION_SPEED = 5  # max vertical speed added from paddle hit
 SPIN_FACTOR = 0.3
 
 def handle_ball_collision(ball, left_paddle, right_paddle):
@@ -35,8 +36,8 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 # angle deflection logic
                 middle_y = left_paddle.y + left_paddle.height / 2
                 offset = ball.y - middle_y
-                reduction = (left_paddle.height / 2) / ball.VEL
-                ball.y_vel = offset / reduction + left_paddle.y_vel * SPIN_FACTOR
+                normalized_offset = offset / (left_paddle.height / 2)  # from -1 to 1
+                ball.y_vel = normalized_offset * MAX_DEFLECTION_SPEED + left_paddle.y_vel * SPIN_FACTOR
 
 
                 ball.x_vel *= -1
@@ -49,10 +50,10 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 ball.apply_impulse(0, -impulse)
                 right_paddle.apply_impulse(0, -impulse * 0.1)
 
-                middle_y = left_paddle.y + left_paddle.height / 2
+                middle_y = right_paddle.y + right_paddle.height / 2
                 offset = ball.y - middle_y
-                reduction = (left_paddle.height / 2) / ball.VEL
-                ball.y_vel = offset / reduction + left_paddle.y_vel * SPIN_FACTOR
+                normalized_offset = offset / (right_paddle.height / 2)
+                ball.y_vel = normalized_offset * MAX_DEFLECTION_SPEED + right_paddle.y_vel * SPIN_FACTOR
 
                 ball.x_vel *= -1
 
