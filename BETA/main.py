@@ -1,6 +1,8 @@
 import pygame
+import helpers
+# from helpers import timer
 pygame.init()
-pygame.display.set_caption("Pong!") # Windows title
+pygame.display.set_caption("BETA")
 
 # Constants
 WHITE = (255, 255, 255)
@@ -9,6 +11,12 @@ BLACK = (0, 0, 0)
 WIDTH, HEIGHT = 700, 500 # Board size
 PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100 # Paddles size
 BALL_RADIUS = 7 # Ball size
+
+DEFAULT_PADDLE_VEL = 4
+DEFAULT_PADDLE_ACC = 0
+
+MIN_BALL_VEL = 5
+DEFAULT_BALL_ACC = 0
 
 WINNING_SCORE = 3
 
@@ -29,7 +37,8 @@ class Paddle: # Class for storing paddles attributes and methods
 
     # Fields
     COLOR = WHITE # Color of the paddles
-    VEL = 4 # Velocity of the paddle
+    VEL = DEFAULT_PADDLE_VEL # Velocity of the paddle
+    ACC = DEFAULT_PADDLE_ACC # Acceleration for the paddle
     
     # Functions
     def draw(self, win): # Function for displaying the paddle on the board
@@ -54,12 +63,13 @@ class Ball: # Class for storing ball attributes and methods
         self.x = self.original_x = x
         self.y = self.original_y = y
         self.radius = radius
-        self.x_vel = self.MAX_VEL
+        self.x_vel = MIN_BALL_VEL
         self.y_vel = 0
 
     # Fields - Ball
     COLOR = WHITE # Color of the ball
-    MAX_VEL = 5 # Max velocity of the ball
+    VEL = MIN_BALL_VEL # Velocity of the ball
+    ACC = DEFAULT_BALL_ACC # Acceleration for the ball
 
     # Functions - Ball
     def draw(self, win): # Function for displaying the ball on the board
@@ -86,9 +96,9 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
     
     # Ball is moving to the left
     if ball.x_vel < 0:
-        # Ball is in the right paddle height range
+        # Ball is in the correct paddle height range
         if ball.y >= left_paddle.y and ball.y <= left_paddle.y + left_paddle.height:
-            # Ball is in the right paddle width range
+            # Ball is in the correct paddle width range
             if ball.x - ball.radius <= left_paddle.x + left_paddle.width:
                 # Collision! Changing the ball direction to the right
                 ball.x_vel *= -1
@@ -96,15 +106,15 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 # Vertical movement logic
                 middle_y = left_paddle.y + left_paddle.height / 2
                 difference_in_y = middle_y - ball.y
-                reduction_factor = (left_paddle.height / 2) / ball.MAX_VEL
+                reduction_factor = (left_paddle.height / 2) / ball.VEL
                 y_vel = difference_in_y / reduction_factor
                 ball.y_vel = -1 * y_vel
 
     # Ball is moving to the right
     if ball.x_vel > 0:
-        # Ball is in the right paddle height range
+        # Ball is in the correct paddle height range
         if ball.y >= right_paddle.y and ball.y <= right_paddle.y + right_paddle.height:
-            # Ball is in the right paddle width range
+            # Ball is in the correct paddle width range
             if ball.x + ball.radius >= right_paddle.x:
                 # Collision! Changing the ball direction to the left
                 ball.x_vel *= -1
@@ -112,7 +122,7 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 # Vertical movement logic
                 middle_y = right_paddle.y + right_paddle.height / 2
                 difference_in_y = middle_y - ball.y
-                reduction_factor = (right_paddle.height / 2) / ball.MAX_VEL
+                reduction_factor = (right_paddle.height / 2) / ball.VEL
                 y_vel = difference_in_y / reduction_factor
                 ball.y_vel = -1 * y_vel
 # End of handle_ball_collision()
@@ -166,6 +176,8 @@ def main():
 
     left_score = 0
     right_score = 0
+
+
 
     while run:
         clock.tick(FPS)
