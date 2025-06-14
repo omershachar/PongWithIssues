@@ -16,6 +16,7 @@ FPS = 60
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
+SPIN_FACTOR = 0.3
 
 def handle_ball_collision(ball, left_paddle, right_paddle):
     if ball.y + ball.radius >= HEIGHT or ball.y - ball.radius <= 0:
@@ -35,7 +36,8 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 middle_y = left_paddle.y + left_paddle.height / 2
                 offset = ball.y - middle_y
                 reduction = (left_paddle.height / 2) / ball.VEL
-                ball.y_vel = offset / reduction
+                ball.y_vel = offset / reduction + left_paddle.y_vel * SPIN_FACTOR
+
 
                 ball.x_vel *= -1
 
@@ -47,10 +49,10 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 ball.apply_impulse(0, -impulse)
                 right_paddle.apply_impulse(0, -impulse * 0.1)
 
-                middle_y = right_paddle.y + right_paddle.height / 2
+                middle_y = left_paddle.y + left_paddle.height / 2
                 offset = ball.y - middle_y
-                reduction = (right_paddle.height / 2) / ball.VEL
-                ball.y_vel = offset / reduction
+                reduction = (left_paddle.height / 2) / ball.VEL
+                ball.y_vel = offset / reduction + left_paddle.y_vel * SPIN_FACTOR
 
                 ball.x_vel *= -1
 
