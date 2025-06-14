@@ -29,6 +29,7 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 relative_velocity = ball.y_vel - left_paddle.y_vel
                 impulse = 2 * ball.mass * relative_velocity
                 ball.apply_impulse(0, -impulse)
+                ball.spin = left_paddle.y_vel * 0.5
 
                 # recoil effect on paddle
                 left_paddle.apply_impulse(0, -impulse * 0.1)
@@ -36,9 +37,8 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 # angle deflection logic
                 middle_y = left_paddle.y + left_paddle.height / 2
                 offset = ball.y - middle_y
-                normalized_offset = offset / (left_paddle.height / 2)  # from -1 to 1
+                normalized_offset = offset / (left_paddle.height / 2)
                 ball.y_vel = normalized_offset * MAX_DEFLECTION_SPEED + left_paddle.y_vel * SPIN_FACTOR
-
 
                 ball.x_vel *= -1
 
@@ -48,8 +48,12 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
                 relative_velocity = ball.y_vel - right_paddle.y_vel
                 impulse = 2 * ball.mass * relative_velocity
                 ball.apply_impulse(0, -impulse)
+                ball.spin = right_paddle.y_vel * 0.5
+
+                # recoil effect on paddle
                 right_paddle.apply_impulse(0, -impulse * 0.1)
 
+                # angle deflection logic
                 middle_y = right_paddle.y + right_paddle.height / 2
                 offset = ball.y - middle_y
                 normalized_offset = offset / (right_paddle.height / 2)

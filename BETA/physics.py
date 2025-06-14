@@ -17,6 +17,7 @@ class PhysicsObject:
 class Ball(PhysicsObject):
     def __init__(self, x, y, radius, mass=1):
         super().__init__(mass, x, y, x_vel=5, y_vel=0)
+        self.spin = 0
         self.trail = []  # stores past positions
         self.max_trail = 10  # max trail length
         self.radius = radius
@@ -36,8 +37,15 @@ class Ball(PhysicsObject):
         # draw main ball
         pygame.draw.circle(win, (255, 255, 255), (int(self.x), int(self.y)), self.radius)
 
+        if abs(self.spin) > 0.2:
+            import math
+            direction = 0 if self.spin > 0 else math.pi
+            arc_rect = pygame.Rect(int(self.x - self.radius), int(self.y - self.radius), self.radius * 2, self.radius * 2)
+            pygame.draw.arc(win, (0, 255, 0), arc_rect, direction, direction + math.pi, 2)
+
 
     def move(self):
+        self.y_vel += self.spin * 0.1  # Magnus effect curve
         self.x += self.x_vel
         self.y += self.y_vel
 
@@ -47,7 +55,6 @@ class Ball(PhysicsObject):
         if len(self.trail) > self.max_trail:
             self.trail.pop()
         self.move()  # reuse existing move
-        # optionally add decay/friction logic here
 
     def reset(self):
         self.x = self.original_x
