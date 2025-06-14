@@ -37,7 +37,7 @@ class Ball(PhysicsObject):
         self.x = self.original_x
         self.y = self.original_y
         self.x_vel *= -1
-        self.y_vel = 0
+        self.y_vel = 0.9
 
     @property
     def VEL(self):
@@ -51,21 +51,37 @@ class Paddle(PhysicsObject):
         self.original_y = y
         self.width = width
         self.height = height
-        self.VEL = 4
+        self.VEL = 0
+        self.ACC = 1.2
+        self.MAX_VEL = 7
 
     def draw(self, win):
         import pygame
         pygame.draw.rect(win, (255, 255, 255), (int(self.x), int(self.y), self.width, self.height))
 
-    def move(self, up=True):
+    def accelerate(self, up=True):
         if up:
-            self.y_vel = -self.VEL
+            self.y_vel -= self.ACC
         else:
-            self.y_vel = self.VEL
+            self.y_vel += self.ACC
+
+        # Clamp velocity to max speed
+        if self.y_vel > self.MAX_VEL:
+            self.y_vel = self.MAX_VEL
+        elif self.y_vel < -self.MAX_VEL:
+            self.y_vel = -self.MAX_VEL
 
     def update(self):
         self.y += self.y_vel
-        self.y_vel *= 0.8  # friction
+        self.y_vel *= 0.85  # decay / friction
+        # Clamp to screen bounds
+        if self.y < 0:
+            self.y = 0
+            self.y_vel = 0
+        elif self.y + self.height > 500:  # HEIGHT
+            self.y = 500 - self.height
+            self.y_vel = 0
+
 
     def reset(self):
         self.x = self.original_x
