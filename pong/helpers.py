@@ -1,6 +1,6 @@
 import pygame
 from pong.constants import WHITE, BLACK, HEIGHT, WIDTH, MAX_DEFLECTION_SPEED, SPIN_FACTOR
-SCORE_FONT = pygame.font.SysFont("comicsans", 50)
+# SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 
 def handle_ball_collision(ball, left_paddle, right_paddle):
     # Top/bottom wall bounce
@@ -58,11 +58,11 @@ def handle_paddle_movement(keys, left_paddle, right_paddle):
     if keys[pygame.K_DOWN]:
         right_paddle.accelerate(up=False)
 
-def draw(win, paddles, ball, left_score, right_score):
+def draw(win, paddles, ball, left_score, right_score, score_font):
     win.fill(BLACK)
 
-    left_text = SCORE_FONT.render(f"{left_score}", 1, WHITE)
-    right_text = SCORE_FONT.render(f"{right_score}", 1, WHITE)
+    left_text = score_font.render(f"{left_score}", 1, WHITE)
+    right_text = score_font.render(f"{right_score}", 1, WHITE)
     win.blit(left_text, (WIDTH // 4 - left_text.get_width() // 2, 20))
     win.blit(right_text, (WIDTH * 3 // 4 - right_text.get_width() // 2, 20))
 
