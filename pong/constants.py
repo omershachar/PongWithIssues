@@ -15,6 +15,7 @@ PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
 BALL_RADIUS = 7
 
 # Physics
+GRAVITY = 9.81
 MAX_DEFLECTION_SPEED = 5  # Max vertical speed added from paddle hit
 SPIN_FACTOR = 0.3
 
