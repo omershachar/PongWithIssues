@@ -1,6 +1,5 @@
 import pygame
 from pong.constants import WHITE, BLACK, HEIGHT, WIDTH, MAX_DEFLECTION_SPEED, SPIN_FACTOR
-# SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 
 def handle_ball_collision(ball, left_paddle, right_paddle):
     # Top/bottom wall bounce
