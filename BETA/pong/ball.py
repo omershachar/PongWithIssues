@@ -1,29 +1,27 @@
 from pong.physics_object import PhysicsObject
 import numpy as np
+import pygame
 
 class Ball(PhysicsObject):
     def __init__(self, x, y, radius, mass=1):
         super().__init__(mass, x, y, x_vel=5, y_vel=0)
         self.spin = 0
-        self.trail = []  # stores past positions
-        self.max_trail = 10  # max trail length
+        self.trail = []
+        self.max_trail = 10
         self.radius = radius
         self.original_pos = np.array([x, y], dtype=float)
+        self.prev_pos = self.original_pos.copy()
+        self.last_hit_by = None
 
     def draw(self, win):
-        import pygame
-        # draw trail
         for i, pos in enumerate(self.trail):
             alpha = max(50, 255 - i * 20)
             radius = max(1, self.radius - i // 2)
             surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
             pygame.draw.circle(surface, (255, 255, 255, alpha), (radius, radius), radius)
             win.blit(surface, (pos[0] - radius, pos[1] - radius))
-
-        # draw main ball
         pygame.draw.circle(win, (255, 255, 255), 
                            (int(self.pos[0]), int(self.pos[1])), self.radius)
-
         if abs(self.spin) > 0.2:
             import math
             direction = 0 if self.spin > 0 else math.pi
@@ -35,6 +33,7 @@ class Ball(PhysicsObject):
         self.pos += self.vel
 
     def update(self):
+        self.prev_pos = self.pos.copy()
         self.trail.insert(0, (int(self.pos[0]), int(self.pos[1])))
         if len(self.trail) > self.max_trail:
             self.trail.pop()
@@ -42,7 +41,10 @@ class Ball(PhysicsObject):
 
     def reset(self):
         self.pos = self.original_pos.copy()
-        self.vel = np.array([-self.vel[0], 0.9], dtype=float)  # Reverse x, set y_vel
+        self.vel = np.array([5.0, 0.0], dtype=float)  # Always gentle, rightward
+        self.prev_pos = self.pos.copy()
+        self.spin = 0
+        self.last_hit_by = None
 
     @property
     def speed(self):

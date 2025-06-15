@@ -21,4 +21,4 @@ SPIN_FACTOR = 0.3
 
 # Others
 FPS = 60 # Frame per second
-WINNING_SCORE = 3
+WINNING_SCORE = 20

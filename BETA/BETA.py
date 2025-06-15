@@ -13,8 +13,8 @@ def main():
     clock = pygame.time.Clock()
     run = True
 
-    left_paddle = Paddle(10, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
-    right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
+    left_paddle = Paddle(10, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT, is_right=False)
+    right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT, is_right=True)
     ball = Ball(WIDTH // 2, HEIGHT // 2, BALL_RADIUS)
 
     left_score = 0
@@ -38,7 +38,6 @@ def main():
 
         handle_ball_collision(ball, left_paddle, right_paddle)
 
-        # Scoring logic (using vector position)
         if ball.pos[0] < 0:
             right_score += 1
             ball.reset()
@@ -46,7 +45,6 @@ def main():
             left_score += 1
             ball.reset()
 
-        # Win check
         if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
             winner = "Left Player Won!" if left_score > right_score else "Right Player Won!"
             text = SCORE_FONT.render(winner, 1, WHITE)

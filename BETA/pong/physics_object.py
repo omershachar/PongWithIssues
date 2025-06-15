@@ -17,7 +17,7 @@ class PhysicsObject:
 
     @property
     def momentum(self):
-        return (self.mass * self.vel) # Momentum = P = m * v
+        return (self.mass * self.vel) # Momentum -> P = m * v
 
     @property
     def weight(self):
