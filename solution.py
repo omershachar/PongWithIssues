@@ -79,18 +79,18 @@ class Ball: # Class for storing ball attributes and methods
 
 # Function for managing the ball movement and collision
 def handle_ball_collision(ball, left_paddle, right_paddle):
-    if ball.y + ball.radius >= HEIGHT: # Check if the ball has reach the bottom of the board
+    if ball.y + ball.radius >= HEIGHT: # Check if the ball has reached the bottom of the board
         ball.y_vel *= -1 # Changing the ball bouncing direction downwards
-    elif ball.y - ball.radius <= 0: # Check if the ball has reach the top of the board
+    elif ball.y - ball.radius <= 0: # Check if the ball has reached the top of the board
         ball.y_vel *= -1 # Changing the ball bouncing direction downwards
     
     # Ball is moving to the left
     if ball.x_vel < 0:
-        # Ball is in the right paddle height range
+        # Ball is in the left paddle height range
         if ball.y >= left_paddle.y and ball.y <= left_paddle.y + left_paddle.height:
-            # Ball is in the right paddle width range
+            # Ball is in the left paddle width range
             if ball.x - ball.radius <= left_paddle.x + left_paddle.width:
-                # Collision! Changing the ball direction to the right
+                # Collision! Changing the ball direction to the left
                 ball.x_vel *= -1
 
                 # Vertical movement logic
