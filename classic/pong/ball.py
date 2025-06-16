@@ -20,6 +20,12 @@ class Ball:
     def move(self): # Moving the ball around the board by its current velocity
         self.pos += self.vel
 
+    def bounce_box(self, width, height):
+        if self.pos[0] <= 0 or self.pos[0] >= width:
+            self.vel *= [-1,1]
+        if self.pos[1] <= 0 or self.pos[1] >= height:
+            self.vel *= [1,-1]
+
     def reset(self): # Resetting the ball position to its original position
         self.pos[:] = self.original_pos[:]
         self.vel *= [-1, 0]
