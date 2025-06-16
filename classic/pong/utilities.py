@@ -5,9 +5,6 @@ utilities.py -- File for containing all environment and design methods for the g
 import pygame
 import numpy as np
 from pong.constants import BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, WIDTH, HEIGHT, FPS, WINNING_SCORE
-from pong.constants import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_DEFAULT_VEL, BALL_RADIUS
-from pong.paddle import Paddle
-from pong.ball import Ball
 
 # Function for drawing the board
 def draw(win, paddles, ball, left_score, right_score, score_font):

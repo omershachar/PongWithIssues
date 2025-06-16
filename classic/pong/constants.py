@@ -10,6 +10,7 @@ DARK_GREY = (64, 64, 64)
 GREY = (128, 128, 128)
 LIGHT_GREY = (224, 224, 224)
 WHITE = (255, 255, 255)
+PURPLE = (122, 118, 229)
 
 # Sizes and coordinates
 WIDTH, HEIGHT = 800, 800 # Board size

@@ -3,8 +3,7 @@ classicPong.py -- Main file contain only essentials and activation commands.
 """
 
 import pygame
-import numpy as np
-from pong.constants import BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, WIDTH, HEIGHT, MIDDLE_BOARD, FPS, WINNING_SCORE
+from pong.constants import BLACK, WHITE, LIGHT_GREY, PURPLE, WIDTH, HEIGHT, MIDDLE_BOARD, FPS, WINNING_SCORE
 from pong.constants import PADDLE_WIDTH, PADDLE_HEIGHT, ORIGINAL_LEFT_PADDLE_POS, ORIGINAL_RIGHT_PADDLE_POS, PADDLE_DEFAULT_VEL
 from pong.constants import BALL_RADIUS, BALL_DEFAULT_VEL
 from pong.paddle import Paddle
@@ -12,20 +11,39 @@ from pong.ball import Ball
 from pong.physics import handle_ball_collision, handle_paddle_movement
 from pong.utilities import draw
 
+MENU = 0
+PLAYING = 1
+
 pygame.init()
 pygame.display.set_caption("Pong!") # Windows title
 
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
-
+SMALL_FONT = pygame.font.SysFont("comicsans", 40)
+TITLE_FONT = pygame.font.SysFont("comicsans", 90)
 FPS = 60 # Frame Per Second
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
+def draw_menu(win):
+    WIN.fill(BLACK)
+    title = TITLE_FONT.render("PONG!", True, PURPLE)
+    WIN.blit(title, (WIDTH // 2 - title.get_width() // 2, HEIGHT // 3))
+
+    subtitle = SMALL_FONT.render("A project that probably works. Sometimes. Maybe", True, LIGHT_GREY)
+    WIN.blit(subtitle, (WIDTH // 2 - subtitle.get_width() // 2, HEIGHT // 3 + 90))
+    sub2 = SMALL_FONT.render("It compiles. That's enough.", True, LIGHT_GREY)
+    WIN.blit(sub2, (WIDTH // 2 - sub2.get_width() // 2, HEIGHT // 3 + 135))
+
+    prompt = SMALL_FONT.render("Press [SPACE] to start", True, PURPLE)
+    WIN.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, HEIGHT // 2 + 120))
+
+    pygame.display.update()
 
 def main():
-    run = True # Endless loop variable
+    # run = True # Endless loop variable
     clock = pygame.time.Clock()
+    state = MENU
 
-    # Initializing the paddles and the ball on the board
+    # Initializing game the objects
     left_paddle = Paddle(ORIGINAL_LEFT_PADDLE_POS[0], ORIGINAL_LEFT_PADDLE_POS[1], PADDLE_WIDTH, PADDLE_HEIGHT, WHITE, PADDLE_DEFAULT_VEL)
     right_paddle = Paddle(ORIGINAL_RIGHT_PADDLE_POS[0], ORIGINAL_RIGHT_PADDLE_POS[1], PADDLE_WIDTH, PADDLE_HEIGHT, WHITE, PADDLE_DEFAULT_VEL)
     ball = Ball(MIDDLE_BOARD[0], MIDDLE_BOARD[1], BALL_RADIUS, WHITE, BALL_DEFAULT_VEL[0], BALL_DEFAULT_VEL[1])
@@ -33,18 +51,30 @@ def main():
     left_score = 0
     right_score = 0
 
-    while run:
+    while True:
         clock.tick(FPS)
-        draw(WIN, [left_paddle,right_paddle], ball, left_score, right_score, SCORE_FONT)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False # Breaking the loop
-                break
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                return
+            if state == MENU:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    pygame.time.delay(300)
+                    state = PLAYING
+
+        if state == MENU:
+            draw_menu(WIN)
+            continue
+
         Keys = pygame.key.get_pressed() # Getting the pressed keys of the players
-        
         ball.move()
         handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
         handle_paddle_movement(Keys, left_paddle, right_paddle, HEIGHT)
+
+        if state == PLAYING and Keys[pygame.K_m]:
+                pygame.time.delay(300)
+                state = MENU
+                    
+        draw(WIN, [left_paddle,right_paddle], ball, left_score, right_score, SCORE_FONT)
 
         # Updating players score
         if ball.pos[0] - ball.radius < 0:
@@ -73,9 +103,9 @@ def main():
             right_paddle.reset()
             left_score = 0
             right_score = 0
-            won = False
+            state = MENU
 
-    pygame.quit() # Exiting the game
+        # if 
 # End of main()
 
 if __name__ == '__main__':
