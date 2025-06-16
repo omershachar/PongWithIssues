@@ -28,6 +28,11 @@ BALL_RADIUS = 7
 PADDLE_DEFAULT_VEL = 4
 BALL_DEFAULT_VEL = np.array([5, 0], dtype=float)
 
-# Game elements
+# Physics
+GRAVITY = 9.81
+MAX_DEFLECTION_SPEED = 5  # Max vertical speed added from paddle hit
+SPIN_FACTOR = 0.3
+
+# Others
 FPS = 60 # Frame per second
 WINNING_SCORE = 3
