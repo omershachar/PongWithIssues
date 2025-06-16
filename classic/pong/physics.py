@@ -3,7 +3,7 @@ physics.py -- File for containing all physics methods for the game objects colli
 """
 
 import pygame
-import numbers as np
+import numpy as np
 import math
 
 def handle_ball_collision(ball, left_paddle, right_paddle, board_height):

@@ -3,7 +3,7 @@ classicPong.py -- Main file contain only essentials and activation commands.
 """
 
 import pygame
-import numbers as np
+import numpy as np
 from pong.constants import BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, WIDTH, HEIGHT, MIDDLE_BOARD, FPS, WINNING_SCORE
 from pong.constants import PADDLE_WIDTH, PADDLE_HEIGHT, ORIGINAL_LEFT_PADDLE_POS, ORIGINAL_RIGHT_PADDLE_POS, PADDLE_DEFAULT_VEL
 from pong.constants import BALL_RADIUS, BALL_DEFAULT_VEL
