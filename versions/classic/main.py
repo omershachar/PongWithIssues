@@ -1,15 +1,20 @@
 """
 classicPong.py -- Main file contain only essentials and activation commands.
 """
-
+import sys
+import os
 import pygame
+
+# Add the project root to sys.path so "pong" can be found
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
 from pong.constants import BLACK, WHITE, LIGHT_GREY, PURPLE, LIGHT_PURPLE, WIDTH, HEIGHT, MIDDLE_BOARD, FPS, WINNING_SCORE
 from pong.constants import PADDLE_WIDTH, PADDLE_HEIGHT, ORIGINAL_LEFT_PADDLE_POS, ORIGINAL_RIGHT_PADDLE_POS, PADDLE_DEFAULT_VEL
 from pong.constants import BALL_RADIUS, BALL_DEFAULT_VEL
-from pong.paddle import Paddle
-from pong.ball import Ball
-from pong.physics import handle_ball_collision, handle_paddle_movement
-from pong.utilities import draw
+from pong.paddle_classic import Paddle
+from pong.ball_classic import Ball
+from pong.physics_classic import handle_ball_collision, handle_paddle_movement
+from pong.utilities_classic import draw
 
 MENU = 0
 PLAYING = 1
