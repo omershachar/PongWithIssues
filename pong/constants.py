@@ -44,6 +44,7 @@ MARGIN = 10
 MIDDLE_BOARD = np.array([WIDTH // 2, HEIGHT // 2], dtype=int)
 
 PADDLE_WIDTH, PADDLE_HEIGHT = 15, 85
+PADDLE_SIZE = np.array([PADDLE_WIDTH,PADDLE_HEIGHT], dtype=int)
 ORIGINAL_LEFT_PADDLE_POS = np.array([MARGIN, HEIGHT//2 - PADDLE_HEIGHT//2], dtype=int)
 ORIGINAL_RIGHT_PADDLE_POS = np.array([WIDTH - MARGIN - PADDLE_WIDTH, HEIGHT//2 - PADDLE_HEIGHT//2], dtype=int)
 
@@ -51,6 +52,7 @@ BALL_RADIUS = 7
 
 # Velocities
 PADDLE_DEFAULT_VEL = 4
+BALL_DEFAULT_VEL = (5,0)
 BALL_DEFAULT_VEL = np.array([5, 0], dtype=float)
 
 # Physics

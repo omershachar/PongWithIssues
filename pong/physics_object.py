@@ -10,11 +10,12 @@ from pong.constants import *
 
 class PhysicsObject:
     """A base class for all physical game objects with mass, position, and velocity."""
-    def __init__(self, mass, x, y, x_vel=0, y_vel=0):
+    def __init__(self, pos=(0, 0), mass=1, vel=(0, 0), acc=(0, 0)):
         self.mass = mass
-        self.pos = np.array([x, y], dtype=float) # Object position in (x,y)
-        self.vel = np.array([x_vel, y_vel], dtype=float) # Object velocity in (x,y)
-        self.acc = np.array([0.0, 0.0]) # Object acceleration in (x,y)
+        self.pos = np.array(pos, dtype=float)
+        self.vel = np.array(vel, dtype=float)
+        self.acc = np.array(acc, dtype=float)
+    # e.g. - obj1 = PhysicsObject(pos=(100, 200), mass=2, vel=(1, 0)) || obj2 = PhysicsObject() # All zeros, mass=1
 
     @property
     def momentum(self):
