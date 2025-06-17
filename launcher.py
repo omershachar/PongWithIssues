@@ -2,6 +2,7 @@ import pygame
 import sys
 import subprocess
 import os
+from pong.constants import *
 
 VERSIONS = [
     ("Classic Pong", "versions/classic/main.py"),
@@ -15,22 +16,19 @@ def launcher_version(script_path):
         )
 
 pygame.init()
-WIDTH, HEIGHT = 600, 400
-WHITE, BLACK = (255, 255, 255), (0, 0, 0)
-PURPLE = (122, 118, 229)
-FONT = pygame.font.SysFont("comicsans", 40)
-SMALL = pygame.font.SysFont("comicsans", 25)
-win = pygame.display.set_mode((WIDTH, HEIGHT))
+FONT_MENU = pygame.font.SysFont(*FONT_DEFAULT)
+FONT_MENU_SMALL = pygame.font.SysFont(*FONT_SMALL)
+win = pygame.display.set_mode((WIDTH_LAUNCHER, HEIGHT_LAUNCHER))
 pygame.display.set_caption("PongWithIssues Launcher")
 
 def draw_menu(selected):
     win.fill(BLACK)
-    title = FONT.render("Select Pong Version", True, PURPLE)
-    win.blit(title, (WIDTH//2 - title.get_width()//2, 50))
+    title = FONT_MENU.render("Select Pong Version", True, PURPLE)
+    win.blit(title, (WIDTH_LAUNCHER//2 - title.get_width()//2, 50))
     for i, (name, _) in enumerate(VERSIONS):
         color = PURPLE if i == selected else WHITE
-        label = SMALL.render(f"{name}", True, color)
-        win.blit(label, (WIDTH//2 - label.get_width()//2, 150 + i*60))
+        label = FONT_MENU_SMALL.render(f"{name}", True, color)
+        win.blit(label, (WIDTH_LAUNCHER//2 - label.get_width()//2, 150 + i*60))
     pygame.display.update()
 
 def main():
