@@ -9,10 +9,10 @@ import pygame
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from pong.constants import *
-from pong.paddle_classic import Paddle
-from pong.ball_classic import Ball
-from pong.physics_classic import handle_ball_collision, handle_paddle_movement
-from pong.utilities_classic import draw
+from pong.paddle import PaddleClassic as Paddle
+from pong.ball import BallClassic as Ball
+from pong.physics_object import handle_ball_collision, handle_paddle_movement
+from pong.utilities import draw
 
 MENU = 0
 PLAYING = 1

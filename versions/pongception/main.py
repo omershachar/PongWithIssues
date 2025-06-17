@@ -1,3 +1,6 @@
+"""
+pongception.py -- Main file contain only essentials and activation commands.
+"""
 import sys
 import os
 import pygame
@@ -5,10 +8,10 @@ import pygame
 # Add the project root to sys.path so "pong" can be found
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from pong.constants import WHITE, BLACK, HEIGHT, WIDTH, PADDLE_WIDTH, PADDLE_HEIGHT, BALL_RADIUS, WINNING_SCORE, FPS
-from pong.ball_pongception import Ball
-from pong.paddle_pongception import Paddle
-from pong.helpers_pongception import handle_ball_collision, handle_paddle_movement, draw
+from pong.constants import *
+from pong.paddle import PaddlePongception as Paddle
+from pong.ball import BallPongception as Ball
+from pong.helpers import handle_ball_collision, handle_paddle_movement, draw
 
 pygame.init()
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
@@ -18,6 +21,11 @@ pygame.display.set_caption("PongWithIssues")
 def main():
     clock = pygame.time.Clock()
     run = True
+
+    # Initializing game the objects (as in classic version)
+    # left_paddle = Paddle(ORIGINAL_LEFT_PADDLE_POS[0], ORIGINAL_LEFT_PADDLE_POS[1], PADDLE_WIDTH, PADDLE_HEIGHT, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
+    # right_paddle = Paddle(ORIGINAL_RIGHT_PADDLE_POS[0], ORIGINAL_RIGHT_PADDLE_POS[1], PADDLE_WIDTH, PADDLE_HEIGHT, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
+    # ball = Ball(MIDDLE_BOARD[0], MIDDLE_BOARD[1], BALL_RADIUS, LIGHT_PURPLE, BALL_DEFAULT_VEL[0], BALL_DEFAULT_VEL[1])
 
     left_paddle = Paddle(10, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
     right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
