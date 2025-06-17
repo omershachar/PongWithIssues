@@ -4,13 +4,14 @@ import subprocess
 import os
 
 VERSIONS = [
-    ("Classic Pong", "classic/main.py"),
-    ("Pongception", "pongception/main.py"),
+    ("Classic Pong", "versions/classic/main.py"),
+    ("Pongception", "versions/pongception/main.py"),
+    ("BETA", "versions/BETA/main.py"),
 ]
 
 def launcher_version(script_path):
     subprocess.run(
-        [sys.executable, f"versions/{script_path}"], cwd=os.path.dirname(os.path.abspath(__file__))
+        [sys.executable, script_path], cwd=os.path.dirname(os.path.abspath(__file__))
         )
 
 pygame.init()
