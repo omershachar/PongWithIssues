@@ -3,6 +3,29 @@ constants.py -- All game-wide settings and fixed values for PongWithIssues.
 """
 
 import numpy as np
+import pygame
+pygame.font.init()
+
+FONT_SMALL_DIGITAL = pygame.font.Font("pong/FONTS/digital-7.ttf", 20)
+FONT_DEFAULT_DIGITAL = pygame.font.Font("pong/FONTS/digital-7.ttf", 35)
+FONT_LARGE_DIGITAL = pygame.font.Font("pong/FONTS/digital-7.ttf", 45)
+FONT_BIG_DIGITAL = pygame.font.Font("pong/FONTS/digital-7.ttf", 65)
+FONT_TITLE_DIGITAL = pygame.font.SysFont("pong/FONTS/digital-7.ttf", 80)
+
+# Fonts (in a tuple)
+FONT_SMALL = ("comicsans", 25)
+FONT_DEFAULT = ("comicsans", 40)
+FONT_LARGE = ("comicsans", 50)
+FONT_BIG = ("comicsans", 65)
+FONT_TITLE = ("comicsans", 90)
+
+PONG_ASCII = """
+ _____    ____    _   _    ____     _ 
+|  __ \  |  _ \  | \ | |  / ___|   | |
+| |__| | | | | | |  \| | | |  _    | |
+|  ___/  | |_| | | |\  | | |_| |   |_|
+|_|      |____/  |_| \_|  \____|   (_)
+"""
 
 # Colors in RGB
 BLACK = (0, 0, 0)
@@ -13,12 +36,6 @@ WHITE = (255, 255, 255)
 PURPLE = (122, 118, 229)
 LIGHT_PURPLE = (185, 183, 232)
 
-# Fonts (in a tuple)
-FONT_SMALL = ("comicsans", 25)
-FONT_DEFAULT = ("comicsans", 40)
-FONT_LARGE = ("comicsans", 50)
-FONT_BIG = ("comicsans", 65)
-FONT_TITLE = ("comicsans", 90)
 
 # Sizes and coordinates
 WIDTH, HEIGHT = 800, 800 # Board size
