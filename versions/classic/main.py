@@ -20,26 +20,36 @@ PLAYING = 1
 pygame.init()
 pygame.display.set_caption("Pong!") # Windows title
 
-SCORE_FONT = pygame.font.SysFont(*FONT_LARGE)
-FONT = pygame.font.SysFont(*FONT_DEFAULT)
-FONT_BIG = pygame.font.SysFont(*FONT_BIG)
-FONT_TITLE = pygame.font.SysFont(*FONT_TITLE)
+SCORE_FONT = FONT_LARGE_DIGITAL
+FONT = FONT_DEFAULT_DIGITAL
+FONT_BIG = FONT_BIG_DIGITAL
+FONT_TITLE = FONT_TITLE_DIGITAL
+
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def draw_menu(WIN):
     WIN.fill(BLACK)
-    title = FONT_TITLE.render("PONG!", True, PURPLE)
-    WIN.blit(title, (WIDTH // 2 - title.get_width() // 2, HEIGHT // 3))
+    ascii_font = pygame.font.Font("pong/FONTS/LiberationMono-BoldItalic.ttf", 24)
+    y_offset = 100
 
-    subtitle = FONT.render("A project that probably works. Sometimes. Maybe", True, LIGHT_PURPLE)
-    WIN.blit(subtitle, (WIDTH // 2 - subtitle.get_width() // 2, HEIGHT // 3 + 90))
+    # Draw ASCII art
+    for i, line in enumerate(PONG_ASCII.splitlines()):
+        if line.strip() == "": continue
+        text_surface = ascii_font.render(line, True, PURPLE)
+        WIN.blit(text_surface, (WIDTH // 2 - text_surface.get_width() // 2, y_offset + i * 30))
+
+    subtitle_y = y_offset + 260
+    subtitle = FONT.render("A project that probably works. Sometimes. Maybe.", True, LIGHT_PURPLE)
+    WIN.blit(subtitle, (WIDTH // 2 - subtitle.get_width() // 2, subtitle_y))
+
     sub2 = FONT.render("It compiles. That's enough.", True, LIGHT_PURPLE)
-    WIN.blit(sub2, (WIDTH // 2 - sub2.get_width() // 2, HEIGHT // 3 + 135))
+    WIN.blit(sub2, (WIDTH // 2 - sub2.get_width() // 2, subtitle_y + 45))
 
     prompt = FONT.render("Press [SPACE] to start", True, PURPLE)
-    WIN.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, HEIGHT // 2 + 120))
-    pygame.display.update()
+    WIN.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, subtitle_y + 110))
 
+    pygame.display.update()
+    
 def main():
     clock = pygame.time.Clock()
     state = MENU
