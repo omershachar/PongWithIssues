@@ -1,10 +1,10 @@
 """
-utilities.py -- File for containing all environment and design methods for the game.
+utilities.py -- File for containing all environment and design methods for the classic version.
 """
 
 import pygame
 import numpy as np
-from pong.constants import BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, PURPLE, LIGHT_PURPLE, WIDTH, HEIGHT, FPS, WINNING_SCORE
+from pong.constants import *
 
 # Function for drawing the board
 def draw(win, paddles, ball, left_score, right_score, score_font):
