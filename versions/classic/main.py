@@ -20,28 +20,27 @@ PLAYING = 1
 pygame.init()
 pygame.display.set_caption("Pong!") # Windows title
 
-SCORE_FONT = pygame.font.SysFont("comicsans", 50)
-SMALL_FONT = pygame.font.SysFont("comicsans", 40)
-TITLE_FONT = pygame.font.SysFont("comicsans", 90)
-FPS = 60 # Frame Per Second
+SCORE_FONT = pygame.font.SysFont(*FONT_LARGE)
+FONT = pygame.font.SysFont(*FONT_DEFAULT)
+FONT_BIG = pygame.font.SysFont(*FONT_BIG)
+FONT_TITLE = pygame.font.SysFont(*FONT_TITLE)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def draw_menu(WIN):
     WIN.fill(BLACK)
-    title = TITLE_FONT.render("PONG!", True, PURPLE)
+    title = FONT_TITLE.render("PONG!", True, PURPLE)
     WIN.blit(title, (WIDTH // 2 - title.get_width() // 2, HEIGHT // 3))
 
-    subtitle = SMALL_FONT.render("A project that probably works. Sometimes. Maybe", True, LIGHT_PURPLE)
+    subtitle = FONT.render("A project that probably works. Sometimes. Maybe", True, LIGHT_PURPLE)
     WIN.blit(subtitle, (WIDTH // 2 - subtitle.get_width() // 2, HEIGHT // 3 + 90))
-    sub2 = SMALL_FONT.render("It compiles. That's enough.", True, LIGHT_PURPLE)
+    sub2 = FONT.render("It compiles. That's enough.", True, LIGHT_PURPLE)
     WIN.blit(sub2, (WIDTH // 2 - sub2.get_width() // 2, HEIGHT // 3 + 135))
 
-    prompt = SMALL_FONT.render("Press [SPACE] to start", True, PURPLE)
+    prompt = FONT.render("Press [SPACE] to start", True, PURPLE)
     WIN.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, HEIGHT // 2 + 120))
     pygame.display.update()
 
 def main():
-    # run = True # Endless loop variable
     clock = pygame.time.Clock()
     state = MENU
 
@@ -50,7 +49,7 @@ def main():
     right_paddle = Paddle(ORIGINAL_RIGHT_PADDLE_POS[0], ORIGINAL_RIGHT_PADDLE_POS[1], PADDLE_WIDTH, PADDLE_HEIGHT, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
     ball = Ball(MIDDLE_BOARD[0], MIDDLE_BOARD[1], BALL_RADIUS, LIGHT_PURPLE, BALL_DEFAULT_VEL[0], BALL_DEFAULT_VEL[1])
 
-    ball2 = Ball(MIDDLE_BOARD[0], MIDDLE_BOARD[1], BALL_RADIUS, WHITE, BALL_DEFAULT_VEL[0], 4)
+    ball_menu = Ball(MIDDLE_BOARD[0], MIDDLE_BOARD[1], BALL_RADIUS, WHITE, BALL_DEFAULT_VEL[0], 4)
 
     left_score = 0
     right_score = 0
@@ -68,10 +67,8 @@ def main():
         if state == MENU:
             draw_menu(WIN)
             Keys = pygame.key.get_pressed() # Getting the pressed keys of the players
-            ball2.draw(WIN)
-            ball2.move()
-            # handle_ball_collision(ball2, left_paddle, right_paddle, HEIGHT)
-            ball2.bounce_box(WIDTH,HEIGHT)
+            ball_menu.draw(WIN)
+            ball_menu.bounce_box(WIDTH,HEIGHT) # Bouncing ball around the menu window
             pygame.display.update()
             continue
 
@@ -104,7 +101,7 @@ def main():
             win_text = "Right Player Won!"
         
         if won:
-            text = SCORE_FONT.render(win_text, 1, PURPLE)
+            text = FONT_BIG.render(win_text, 1, PURPLE)
             WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
             pygame.display.update()
             pygame.time.delay(3000)
@@ -114,8 +111,6 @@ def main():
             left_score = 0
             right_score = 0
             state = MENU
-
-        # if 
 # End of main()
 
 if __name__ == '__main__':
