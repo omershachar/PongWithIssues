@@ -18,10 +18,14 @@ def draw(win, paddles, ball, left_score, right_score, score_font):
     for paddle in paddles:
         paddle.draw(win)
 
-    for i in range(10, HEIGHT-10, HEIGHT//20): # Drawing the net
-        if i % 2 == 1:
-            continue
-        pygame.draw.rect(win, LIGHT_PURPLE, (WIDTH//2, i, 3, WIDTH//70))
+    net_width = 6
+    net_height = 28
+    gap = 18
+
+    for y in range(0, HEIGHT, net_height + gap):
+        pygame.draw.rect(win, LIGHT_PURPLE, (WIDTH // 2 - net_width // 2, y, net_width, net_height))
+
+
     ball.draw(win)
     pygame.display.update()
 
