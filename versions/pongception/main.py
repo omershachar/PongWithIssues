@@ -12,6 +12,7 @@ from pong.constants import *
 from pong.paddle import Paddle
 from pong.ball import Ball
 from pong.helpers import *
+from pong.utilities import draw
 
 pygame.init()
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
