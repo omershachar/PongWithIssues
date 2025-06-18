@@ -52,6 +52,8 @@ BALL_RADIUS = 7
 
 # Velocities
 PADDLE_DEFAULT_VEL = 4
+PADDLE_MAX_VEL = 8
+PADDLE_DEFAULT_ACC = np.array([0, 1.5], dtype=float)
 BALL_DEFAULT_VEL = (5,0)
 BALL_DEFAULT_VEL = np.array([5, 0], dtype=float)
 
@@ -59,6 +61,7 @@ BALL_DEFAULT_VEL = np.array([5, 0], dtype=float)
 GRAVITY = 9.81
 MAX_DEFLECTION_SPEED = 5  # Max vertical speed added from paddle hit
 SPIN_FACTOR = 0.3
+FRICTION_COEFFICIENT = 0.4
 
 # Others
 FPS = 60 # Frame per second

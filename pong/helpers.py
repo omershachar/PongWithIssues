@@ -1,6 +1,5 @@
 """
-helpers.py -- File for helper function like draw and side calculating.
-currently only being used by pongception version.
+helpers.py -- File for handling object collision.
 """
 
 import pygame
@@ -62,20 +61,3 @@ def handle_paddle_movement(keys, left_paddle, right_paddle):
         right_paddle.accelerate(up=True)
     if keys[pygame.K_DOWN]:
         right_paddle.accelerate(up=False)
-
-def draw(win, paddles, ball, left_score, right_score, score_font):
-    win.fill(BLACK)
-    # Score
-    left_text = score_font.render(f"{left_score}", True, WHITE)
-    right_text = score_font.render(f"{right_score}", True, WHITE)
-    win.blit(left_text, (WIDTH // 4 - left_text.get_width() // 2, 20))
-    win.blit(right_text, (WIDTH * 3 // 4 - right_text.get_width() // 2, 20))
-    # Net
-    for i in range(10, HEIGHT, HEIGHT // 20):
-        if i % 2 == 0:
-            pygame.draw.rect(win, WHITE, (WIDTH // 2 - 5, i, 10, HEIGHT // 20))
-    # Paddles & Ball
-    for paddle in paddles:
-        paddle.draw(win)
-    ball.draw(win)
-    pygame.display.update()
