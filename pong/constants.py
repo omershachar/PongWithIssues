@@ -35,6 +35,8 @@ LIGHT_GREY = (224, 224, 224)
 WHITE = (255, 255, 255)
 PURPLE = (122, 118, 229)
 LIGHT_PURPLE = (185, 183, 232)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
 
 
 # Sizes and coordinates

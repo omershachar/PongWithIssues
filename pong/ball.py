@@ -5,11 +5,14 @@ ball.py -- Class for storing ball attributes and methods
 import pygame
 import numpy as np
 from pong.physics_object import PhysicsObject
+from pong.constants import *
+import math
 
 class Ball(PhysicsObject):
-    def __init__(self, x, y, radius, mass=1, vel=(0,0)):
+    def __init__(self, x, y, radius, color, mass=1, vel=(0,0)):
         super().__init__(pos=(x, y), mass=mass, vel=vel)
         self.radius = radius
+        self.color = color
         self.spin = 0
         self.trail = []
         self.max_trail = 10
@@ -23,18 +26,17 @@ class Ball(PhysicsObject):
             alpha = max(50, 255 - i * 20)
             radius = max(1, self.radius - i // 2)
             surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(surface, (255, 255, 255, alpha), (radius, radius), radius)
+            pygame.draw.circle(surface, (*GREY, alpha), (radius, radius), radius)
             win.blit(surface, (pos[0] - radius, pos[1] - radius))
 
         # Draw main ball
-        pygame.draw.circle(win, (255, 255, 255), (int(self.pos[0]), int(self.pos[1])), self.radius)
+        pygame.draw.circle(win, self.color, (int(self.pos[0]), int(self.pos[1])), self.radius)
 
-        # Optional: show spin as a green arc
+        # Show spin as a red arc
         if abs(self.spin) > 0.2:
-            import math
             direction = 0 if self.spin > 0 else math.pi
             arc_rect = pygame.Rect(int(self.pos[0] - self.radius), int(self.pos[1] - self.radius), self.radius * 2, self.radius * 2)
-            pygame.draw.arc(win, (0, 255, 0), arc_rect, direction, direction + math.pi, 2)
+            pygame.draw.arc(win, RED, arc_rect, direction, direction + math.pi, 2)
 
     def move(self):
         # Apply Magnus effect: curve due to spin

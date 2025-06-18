@@ -25,7 +25,7 @@ def main():
 
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
-    ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, vel=(BALL_DEFAULT_VEL))
+    ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, YELLOW, vel=(BALL_DEFAULT_VEL))
 
     left_score = 0
     right_score = 0
