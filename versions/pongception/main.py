@@ -37,6 +37,14 @@ def main():
 
         draw(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
 
+        debug_font = pygame.font.SysFont("consolas", 20)
+        vel_text = debug_font.render(f"Velocity: [{ball.vel[0]:.2f}, {ball.vel[1]:.2f}]", True, GREY)
+        spin_text = debug_font.render(f"Spin: {getattr(ball, 'spin', 0):.2f}", True, GREY)
+
+        WIN.blit(vel_text, (10, 60))
+        WIN.blit(spin_text, (10, 85))
+
+
         # Top-left mode label
         mode_text = FONT_SMALL_DIGITAL.render("MODE: PHYSICS", True, GREY)
         WIN.blit(mode_text, (10, 10))
@@ -87,7 +95,7 @@ def main():
             right_paddle.reset()
             ball.reset()
 
-    pygame.quit()
+    return
 
 if __name__ == '__main__':
     main()
