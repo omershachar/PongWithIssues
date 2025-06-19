@@ -6,27 +6,43 @@ import pygame
 import numpy as np
 from pong.constants import *
 
-# Function for drawing the board
 def draw(win, paddles, ball, left_score, right_score, score_font):
+    """
+    Renders all visual game elements to the window:
+    - Background
+    - Player scores
+    - Paddles
+    - Net
+    - Ball
+
+    Args:
+        win (pygame.Surface): The surface to draw on.
+        paddles (list): List of Paddle objects.
+        ball (Ball): The Ball object.
+        left_score (int): Left player's score.
+        right_score (int): Right player's score.
+        score_font (pygame.font.Font): Font used to render scores.
+    """
     win.fill(BLACK)
 
-    left_score_text = score_font.render(f"{left_score}", 1, LIGHT_PURPLE)
-    right_score_text = score_font.render(f"{right_score}", 1, LIGHT_PURPLE)
-    win.blit(left_score_text, (WIDTH//4 - left_score_text.get_width()//2, 20))
-    win.blit(right_score_text, (WIDTH * (3/4) - right_score_text.get_width()//2, 20))
+    # Draw scores
+    left_score_text = score_font.render(f"{left_score}", True, LIGHT_PURPLE)
+    right_score_text = score_font.render(f"{right_score}", True, LIGHT_PURPLE)
+    win.blit(left_score_text, (WIDTH // 4 - left_score_text.get_width() // 2, 20))
+    win.blit(right_score_text, (WIDTH * 3 // 4 - right_score_text.get_width() // 2, 20))
 
+    # Draw paddles and ball
     for paddle in paddles:
         paddle.draw(win)
+    ball.draw(win)
 
+    # Draw dashed net
     net_width = 6
     net_height = 28
     gap = 18
-
     for y in range(0, HEIGHT, net_height + gap):
         pygame.draw.rect(win, LIGHT_PURPLE, (WIDTH // 2 - net_width // 2, y, net_width, net_height))
 
-
-    ball.draw(win)
     pygame.display.update()
 
 def reset(ball, left_paddle, right_paddle):

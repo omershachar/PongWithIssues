@@ -18,19 +18,13 @@ from pong.helpers import handle_ball_collision, handle_paddle_movement
 
 # pygame setup
 pygame.init()
-SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pongception")
 
 def main():
-    """
-    Main game loop. Handles object initialization, input, updates, collisions,
-    rendering, scoring, and win condition.
-    """
     clock = pygame.time.Clock()
     run = True
 
-    # Initialize game objects
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
     ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, YELLOW, vel=BALL_DEFAULT_VEL)
@@ -39,27 +33,41 @@ def main():
     right_score = 0
 
     while run:
-        dt = clock.tick(FPS) / 1000.0  # delta time in seconds
+        dt = clock.tick(FPS) / 1000.0  # Delta time in seconds
 
-        draw(WIN, [left_paddle, right_paddle], ball, left_score, right_score, SCORE_FONT)
+        draw(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
+
+        # Top-left mode label
+        mode_text = FONT_SMALL_DIGITAL.render("MODE: PHYSICS", True, GREY)
+        WIN.blit(mode_text, (10, 10))
+
+        # Bottom footer instructions
+        footer = FONT_SMALL_DIGITAL.render("Press [M] to return | [ESC] to quit", True, GREY)
+        WIN.blit(footer, (WIDTH // 2 - footer.get_width() // 2, HEIGHT - 30))
+
+        pygame.display.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
                 break
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    run = False
+                    break
+                if event.key == pygame.K_m:
+                    run = False
+                    break
 
         keys = pygame.key.get_pressed()
         handle_paddle_movement(keys, left_paddle, right_paddle)
 
-        # Update objects
         left_paddle.update()
         right_paddle.update()
         ball.update()
 
-        # Handle collisions
         handle_ball_collision(ball, left_paddle, right_paddle)
 
-        # Scoring logic
         if ball.pos[0] < 0:
             right_score += 1
             ball.reset()
@@ -67,15 +75,13 @@ def main():
             left_score += 1
             ball.reset()
 
-        # Check for winner
         if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
             winner = "Left Player Won!" if left_score > right_score else "Right Player Won!"
-            text = SCORE_FONT.render(winner, True, WHITE)
+            text = FONT_BIG_DIGITAL.render(winner, True, PURPLE)
             WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
             pygame.display.update()
-            pygame.time.delay(4000)
+            pygame.time.delay(3000)
 
-            # Reset game state
             left_score = right_score = 0
             left_paddle.reset()
             right_paddle.reset()

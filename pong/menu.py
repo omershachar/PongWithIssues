@@ -2,12 +2,30 @@ import pygame
 from pong.constants import *
 from pong.ball import BallClassic as Ball
 
+def bounce_box(self, width, height):
+    if self.x - self.radius <= 0 or self.x + self.radius >= width:
+        self.vel_x *= -1
+    if self.y - self.radius <= 0 or self.y + self.radius >= height:
+        self.vel_y *= -1
+    self.x += self.vel_x
+    self.y += self.vel_y
+
+def draw(self, win):
+    pygame.draw.circle(win, self.color, (int(self.x), int(self.y)), self.radius)
+
+
 ball_menu = Ball(*MIDDLE_BOARD, BALL_RADIUS, WHITE, BALL_DEFAULT_VEL[0], 4)
 
-def draw_menu(WIN):
+def draw_menu(WIN, selected_mode):
     WIN.fill(BLACK)
     ascii_font = pygame.font.Font("pong/FONTS/LiberationMono-BoldItalic.ttf", 24)
     y_offset = 100
+
+
+    # Show mode selection
+    subtitle_y = y_offset + 260
+    mode_text = FONT_DEFAULT_DIGITAL.render(f"Mode: {'Classic' if selected_mode == 0 else 'Physics'}", True, WHITE)
+    WIN.blit(mode_text, (WIDTH // 2 - mode_text.get_width() // 2, subtitle_y + 80))
 
     # Draw ASCII art
     for i, line in enumerate(PONG_ASCII.splitlines()):
@@ -15,7 +33,6 @@ def draw_menu(WIN):
         text_surface = ascii_font.render(line, True, PURPLE)
         WIN.blit(text_surface, (WIDTH // 2 - text_surface.get_width() // 2, y_offset + i * 30))
 
-    subtitle_y = y_offset + 260
     subtitle = FONT_DEFAULT_DIGITAL.render("A project that probably works. Sometimes. Maybe.", True, LIGHT_PURPLE)
     WIN.blit(subtitle, (WIDTH // 2 - subtitle.get_width() // 2, subtitle_y))
 
