@@ -1,5 +1,5 @@
 """
-classicPong.py -- Main file contain only essentials and activation commands.
+classicPong.py -- Main file containing only essentials and activation commands.
 """
 import sys
 import os
@@ -11,18 +11,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from pong.constants import *
 from pong.paddle import PaddleClassic as Paddle
 from pong.ball import BallClassic as Ball
-from pong.utilities import *
-from pong.menu import *
+from pong.utilities import draw as draw_game, reset, handle_ball_collision, handle_paddle_movement
 
 pygame.init()
-pygame.display.set_caption("Pong!") # Windows title
+pygame.display.set_caption("Pong!")  # Window title
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-    
+
 def main():
     clock = pygame.time.Clock()
     state = MENU
 
-    # Initializing game the objects
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
     ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, LIGHT_PURPLE, *BALL_DEFAULT_VEL)
@@ -32,28 +30,42 @@ def main():
 
     while True:
         clock.tick(FPS)
-        Keys = pygame.key.get_pressed() # Getting the pressed keys of the players
+        keys = pygame.key.get_pressed()
+
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            if event.type == pygame.QUIT:
                 return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_m:
+                    return
+
             if state == MENU:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    state = PLAYING
+                # Top text
+                mode_text = FONT_SMALL_DIGITAL.render("MODE: CLASSIC", True, GREY)
+                WIN.blit(mode_text, (10, 10))
 
-        if state == MENU:
-            draw_menu(WIN)
-            pygame.display.update()
-            continue
+                # Footer
+                footer = FONT_SMALL_DIGITAL.render("Press [M] to return | [ESC] to quit", True, GREY)
+                WIN.blit(footer, (WIDTH // 2 - footer.get_width() // 2, HEIGHT - 30))
 
-        draw(WIN, [left_paddle,right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
+                pygame.display.update()
+                continue
+
+        draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
+
+        # Display "MODE: CLASSIC" at top left
+        mode_text = FONT_SMALL_DIGITAL.render("MODE: CLASSIC", True, GREY)
+        WIN.blit(mode_text, (10, 10))
+        pygame.display.update()
+
         ball.move()
         handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
-        handle_paddle_movement(Keys, left_paddle, right_paddle, HEIGHT)
+        handle_paddle_movement(keys, left_paddle, right_paddle, HEIGHT)
 
-        if state == PLAYING and Keys[pygame.K_m]:
-                state = MENU
+        if state == PLAYING and keys[pygame.K_m]:
+            state = MENU
+            left_score, right_score = reset(ball, left_paddle, right_paddle)
 
-        # Updating players score
         if ball.pos[0] - ball.radius < 0:
             right_score += 1
             ball.reset()
@@ -61,23 +73,14 @@ def main():
             left_score += 1
             ball.reset()
 
-        # Determining winner
-        won = False
-        if left_score >= WINNING_SCORE:
-            won = True
-            win_text = "Left Player Won!"
-        elif right_score >= WINNING_SCORE:
-            won = True
-            win_text = "Right Player Won!"
-        
-        if won:
-            text = FONT_BIG_DIGITAL.render(win_text, 1, PURPLE)
+        if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
+            win_text = "Left Player Won!" if left_score > right_score else "Right Player Won!"
+            text = FONT_BIG_DIGITAL.render(win_text, True, PURPLE)
             WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
             pygame.display.update()
             pygame.time.delay(3000)
             left_score, right_score = reset(ball, left_paddle, right_paddle)
             state = MENU
-# End of main()
 
 if __name__ == '__main__':
     main()
