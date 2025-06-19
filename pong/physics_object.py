@@ -9,37 +9,134 @@ import math
 from pong.constants import *
 
 class PhysicsObject:
-    """A base class for all physical game objects with mass, position, and velocity."""
-    def __init__(self, pos=(0, 0), mass=1, vel=(0, 0), acc=(0, 0)):
-        self.mass = mass
+    """
+    A base class for all physical game objects with mass, position, and velocity.
+    Handles motion using Newtonian physics and time-based integration.
+    """
+
+    def __init__(self, pos=(MIDDLE_BOARD[0], MIDDLE_BOARD[1]), vel=(0, 0), acc=(0, 0), mass=1, color=WHITE):
+        """
+        Initializes the physical object.
+
+        Args:
+            pos (tuple): Initial position (x, y).
+            vel (tuple): Initial velocity (vx, vy).
+            acc (tuple): Initial acceleration (ax, ay).
+            mass (float): Object's mass.
+            color (tuple): RGB color (used for drawing).
+        """
         self.pos = np.array(pos, dtype=float)
         self.vel = np.array(vel, dtype=float)
         self.acc = np.array(acc, dtype=float)
-    # e.g. - obj1 = PhysicsObject(pos=(100, 200), mass=2, vel=(1, 0)) || obj2 = PhysicsObject() # All zeros, mass=1
+        self.mass = mass
+        self.color = color
+        self.forces = []
 
     @property
     def momentum(self):
-        return (self.mass * self.vel) # Momentum = P = m * v
+        """Returns the linear momentum vector: P = m * v"""
+        return self.mass * self.vel
 
     @property
     def weight(self):
+        """Returns the gravitational force: W = m * g"""
         return self.mass * GRAVITY
-    
+
     @property
     def polar(self):
-        r = np.linalg.norm(self.pos) # r = sqrt(x^2 + y^2)
-        theta = math.atan2(self.pos[1], self.pos[0]) # theta = arctan(y/x)
+        """
+        Returns the position in polar coordinates (r, θ),
+        where r = √(x² + y²), θ = arctan(y / x)
+        """
+        r = np.linalg.norm(self.pos)
+        theta = math.atan2(self.pos[1], self.pos[0])
         return (r, theta)
 
-    # Functions
     def apply_impulse(self, impulse):
-        self.vel += np.array(impulse, dtype=float) / self.mass # Impulse -> J = F * ∆t
+        """
+        Applies an impulse vector to the object.
+        J = ΔP = m * Δv ⇒ v += J / m
 
-    def apply_force(self, force):
-        self.acc += np.array(force, dtype=float) / self.mass # force -> F = m * a -> a = F / m
+        Args:
+            impulse (array-like): Impulse vector (Ix, Iy)
+        """
+        self.vel += np.array(impulse, dtype=float) / self.mass
+
+    def apply_force(self, force, dt):
+        """
+        Applies a force over time, converting it to an impulse.
+
+        Args:
+            force (array-like): Force vector (Fx, Fy)
+            dt (float): Time interval (in seconds)
+        """
+        impulse = np.array(force, dtype=float) * dt
+        self.apply_impulse(impulse)
 
     def update(self, dt=1.0):
-        # Update velocity with acceleration, then position with velocity
+        """
+        Updates the velocity and position using kinematic equations:
+        s = v₀t + ½at², v = v₀ + at
+
+        Args:
+            dt (float): Time interval in seconds
+        """
+        self.pos += self.vel * dt + 0.5 * self.acc * dt ** 2
         self.vel += self.acc * dt
-        self.pos += self.vel * dt
-        self.acc[:] = 0  # Reset acceleration
+        self.acc[:] = 0  # Reset acceleration after update
+
+    def add_force(self, force):
+        """
+        Adds a force to be accumulated and integrated during the frame.
+
+        Args:
+            force (array-like): Force vector (Fx, Fy)
+        """
+        self.forces.append(np.array(force, dtype=float))
+
+    def integrate(self, dt):
+        """
+        Applies all accumulated forces and updates the object's motion.
+
+        Args:
+            dt (float): Time step in seconds
+        """
+        total_force = np.sum(self.forces, axis=0) if self.forces else np.zeros(2)
+        self.apply_force(total_force, dt)
+        self.update(dt)
+        self.forces.clear()
+
+    def clamp_velocity(self, max_speed):
+        """
+        Limits the velocity magnitude to a maximum value.
+
+        Args:
+            max_speed (float): Maximum speed allowed
+        """
+        speed = np.linalg.norm(self.vel)
+        if speed > max_speed:
+            self.vel = self.vel / speed * max_speed
+
+    def clamp_to_board(self, buffer=(0, 0)):
+        """
+        Constrains the object to stay within the visible board.
+
+        Args:
+            buffer (tuple): (x_buffer, y_buffer) padding from edges
+        """
+        min_x, min_y = 0, 0
+        max_x, max_y = WIDTH, HEIGHT
+        self.pos[0] = np.clip(self.pos[0], min_x + buffer[0], max_x - buffer[0])
+        self.pos[1] = np.clip(self.pos[1], min_y + buffer[1], max_y - buffer[1])
+
+    # --- Reference Physics Formulas ---
+    """
+    s = v₀t + ½at²       (position update)
+    v = v₀ + at          (velocity update)
+    a = dv/dt            (acceleration)
+    P = mv               (momentum)
+    J = FΔt = ΔP         (impulse)
+    F = ma = dP/dt       (force)
+
+    v² = v₀² + 2as       (used for some collision detection)
+    """

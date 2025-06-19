@@ -1,5 +1,5 @@
 """
-paddle.py -- Class for storing paddles attributes and methods
+paddle.py -- Paddle class with physics-based movement.
 """
 
 import pygame
@@ -8,38 +8,67 @@ from pong.physics_object import PhysicsObject
 from pong.constants import *
 
 class Paddle(PhysicsObject):
+    """
+    A vertical paddle controlled by the player or AI.
+    Inherits from PhysicsObject to support force-based movement.
+    """
+
     def __init__(self, x, y, width, height, color=LIGHT_PURPLE):
+        """
+        Initializes the paddle with position, size, and color.
+
+        Args:
+            x (float): Initial X position.
+            y (float): Initial Y position.
+            width (int): Paddle width.
+            height (int): Paddle height.
+            color (tuple): RGB color value.
+        """
         super().__init__(pos=(x, y), mass=1, vel=(0, 0))
         self.original_pos = np.array([x, y], dtype=float)
         self.width = width
         self.height = height
         self.color = color
-        
+
     def draw(self, win):
+        """
+        Draws the paddle on the game window.
+
+        Args:
+            win (pygame.Surface): Target surface to draw on.
+        """
         pygame.draw.rect(win, self.color, (int(self.pos[0]), int(self.pos[1]), self.width, self.height))
 
     def accelerate(self, up=True):
+        """
+        Applies vertical acceleration to the paddle.
+
+        Args:
+            up (bool): Direction of movement. True for up, False for down.
+        """
         if up:
             self.acc[:] -= PADDLE_DEFAULT_ACC[:]
         else:
             self.acc[:] += PADDLE_DEFAULT_ACC[:]
 
     def update(self):
-        # Apply acceleration to velocity, then decay/friction
+        """
+        Updates paddle position and velocity, applies vertical clamping,
+        velocity decay (friction), and keeps the paddle inside the screen.
+        """
         self.vel += self.acc
         self.acc[:] = 0
+
         # Clamp vertical velocity
-        if self.vel[1] > PADDLE_MAX_VEL:
-            self.vel[1] = PADDLE_MAX_VEL
-        elif self.vel[1] < -PADDLE_MAX_VEL:
-            self.vel[1] = -PADDLE_MAX_VEL
+        self.vel[1] = np.clip(self.vel[1], -PADDLE_MAX_VEL, PADDLE_MAX_VEL)
+
         # Update position
         self.pos += self.vel
-        # friction_force = self.mass * GRAVITY * FRICTION_COEFFICIENT * -1
-        # self.apply_force(friction_force)
-        # self.acc *= [0, 1]
-        self.vel[1] *= 0.85  # friction/decay only on y
-        # Clamp to screen bounds (assuming HEIGHT is global or import)
+
+        # Apply friction on Y axis
+        self.vel[1] *= 0.85
+
+        # Clamp paddle inside the window (Y axis only)
         if self.pos[1] < 0:
             self.pos[1] = 0
             self.vel[1] = 0
@@ -48,10 +77,12 @@ class Paddle(PhysicsObject):
             self.vel[1] = 0
 
     def reset(self):
+        """
+        Resets the paddle to its original position and clears movement.
+        """
         self.pos = self.original_pos.copy()
         self.vel[:] = 0
         self.acc[:] = 0
-# End of class paddle
 
 class PaddleClassic:
     def __init__(self, x, y, width, height, color, vel):
