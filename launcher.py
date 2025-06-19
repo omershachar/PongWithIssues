@@ -31,7 +31,7 @@ def launcher():
                 if event.key == pygame.K_SPACE:
                     if selected_mode == 0:
                         run_classic()
-                        WIN = pygame.display.set_mode((WIDTH, HEIGHT))  # Reset window after returning
+                        WIN = pygame.display.set_mode((WIDTH, HEIGHT))
                     else:
                         run_physics()
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
