@@ -21,7 +21,7 @@ def main():
     clock = pygame.time.Clock()
     state = MENU
     paused = False
-    show_instructions = True
+    show_instructions = False
 
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
@@ -53,17 +53,6 @@ def main():
                 mode_text = FONT_SMALL_DIGITAL.render("MODE: CLASSIC", True, GREY)
                 WIN.blit(mode_text, (10, 10))
 
-                # Footer
-                if show_instructions:
-                    footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
-                else:
-                    footer_text = "Press [H] to show instructions"
-                footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
-                WIN.blit(footer, (WIDTH // 2 - footer.get_width() // 2, HEIGHT - 30))
-
-                pygame.display.update()
-                continue
-
         draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
 
         # Display "MODE: CLASSIC" at top left
@@ -76,12 +65,13 @@ def main():
             WIN.blit(pause_text, (WIDTH // 2 - pause_text.get_width() // 2, HEIGHT // 2 - pause_text.get_height()))
             WIN.blit(resume_text, (WIDTH // 2 - resume_text.get_width() // 2, HEIGHT // 2 + 10))
 
+        # Bottom footer instructions
         if show_instructions:
-            footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
+                footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
         else:
-            footer_text = "Press [H] to show instructions"
+            footer_text = "Press [H] for help"
         footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
-        WIN.blit(footer, (WIDTH // 2 - footer.get_width() // 2, HEIGHT - 30))
+        WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
 
         pygame.display.update()
 

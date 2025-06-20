@@ -25,7 +25,7 @@ def main():
     clock = pygame.time.Clock()
     run = True
     paused = False
-    show_instructions = True
+    show_instructions = False
 
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
@@ -39,7 +39,7 @@ def main():
 
         draw(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
 
-        debug_font = pygame.font.SysFont("consolas", 20)
+        debug_font = pygame.font.SysFont(*FONT_DATA)
         vel_text = debug_font.render(f"Velocity: [{ball.vel[0]:.2f}, {ball.vel[1]:.2f}]", True, GREY)
         spin_text = debug_font.render(f"Spin: {getattr(ball, 'spin', 0):.2f}", True, GREY)
 
@@ -58,11 +58,11 @@ def main():
 
         # Bottom footer instructions
         if show_instructions:
-            footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
+                footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
         else:
-            footer_text = "Press [H] to show instructions"
+            footer_text = "Press [H] for help"
         footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
-        WIN.blit(footer, (WIDTH // 2 - footer.get_width() // 2, HEIGHT - 30))
+        WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
 
         pygame.display.update()
 
