@@ -13,7 +13,7 @@ FONT_SMALL_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 20)
 FONT_DEFAULT_DIGITAL = pygame.font.Font("pong/FONTS/digital-7.ttf", 35)
 FONT_LARGE_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 45)
 FONT_BIG_DIGITAL    = pygame.font.Font("pong/FONTS/digital-7.ttf", 65)
-FONT_TITLE_DIGITAL  = pygame.font.SysFont("pong/FONTS/digital-7.ttf", 80)
+FONT_TITLE_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 80)
 
 # Fallback system fonts (name + size tuples)
 FONT_SMALL   = ("comicsans", 25)
