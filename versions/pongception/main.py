@@ -25,6 +25,7 @@ def main():
     clock = pygame.time.Clock()
     run = True
     paused = False
+    show_instructions = True
 
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
@@ -51,13 +52,16 @@ def main():
             WIN.blit(pause_text, (WIDTH // 2 - pause_text.get_width() // 2, HEIGHT // 2 - pause_text.get_height()))
             WIN.blit(resume_text, (WIDTH // 2 - resume_text.get_width() // 2, HEIGHT // 2 + 10))
 
-
         # Top-left mode label
         mode_text = FONT_SMALL_DIGITAL.render("MODE: PHYSICS", True, GREY)
         WIN.blit(mode_text, (10, 10))
 
         # Bottom footer instructions
-        footer = FONT_SMALL_DIGITAL.render("Press [SPACE] to pause | [M] to return | [ESC] to quit", True, GREY)
+        if show_instructions:
+            footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
+        else:
+            footer_text = "Press [H] to show instructions"
+        footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
         WIN.blit(footer, (WIDTH // 2 - footer.get_width() // 2, HEIGHT - 30))
 
         pygame.display.update()
@@ -75,10 +79,19 @@ def main():
                     break
                 if event.key == pygame.K_SPACE:
                     paused = not paused
+                if event.key == pygame.K_r: # Fix through utilities
+                    left_score = right_score = 0
+                    left_paddle.reset()
+                    right_paddle.reset()
+                    ball.reset()
+                    paused = False
+                if event.key == pygame.K_h:
+                    show_instructions = not show_instructions
 
         keys = pygame.key.get_pressed()
         if not paused:
-            handle_paddle_movement(keys, left_paddle, right_paddle)
+            handle_paddle_movement(keys, left_paddle,
+             right_paddle)
 
             left_paddle.update()
             right_paddle.update()
