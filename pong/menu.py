@@ -10,7 +10,7 @@ ball_menu = Ball(*MIDDLE_BOARD, BALL_RADIUS, WHITE, BALL_DEFAULT_VEL[0], 4)
 
 def draw_menu(WIN, selected_mode):
     WIN.fill(BLACK)
-    ascii_font = pygame.font.Font("pong/FONTS/LiberationMono-BoldItalic.ttf", 24)
+    ascii_font = pygame.font.Font("pong/FONTS/LiberationMono-Bold.ttf", 24)
     y_offset = 100
 
 
