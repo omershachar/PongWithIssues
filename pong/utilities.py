@@ -1,5 +1,5 @@
 """
-utilities.py -- File for containing all environment and design methods for the classic version.
+utilities.py -- File for containing all environment and design methods for the game.
 """
 
 import pygame
@@ -40,8 +40,11 @@ def draw(win, paddles, ball, left_score, right_score, score_font):
     net_width = 6
     net_height = 28
     gap = 18
+    net_segment = pygame.Surface((net_width, net_height), pygame.SRCALPHA)
+    net_segment.fill(LIGHT_PURPLE)
+    net_segment.set_alpha(120)
     for y in range(0, HEIGHT, net_height + gap):
-        pygame.draw.rect(win, LIGHT_PURPLE, (WIDTH // 2 - net_width // 2, y, net_width, net_height))
+        win.blit(net_segment, (WIDTH // 2 - net_width // 2, y))
 
     pygame.display.update()
 
