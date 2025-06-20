@@ -49,10 +49,22 @@ def draw(win, paddles, ball, left_score, right_score, score_font):
     pygame.display.update()
 
 def reset(ball, left_paddle, right_paddle):
+    """
+    Reset all game objects.
+    """
     ball.reset()
     left_paddle.reset()
     right_paddle.reset()
     return 0, 0
+    
+def handle_score(ball, left_score, right_score):
+    if ball.pos[0] < 0:
+        right_score = right_score + 1
+        ball.reset()
+    elif ball.pos[0] > WIDTH:
+        left_score = left_score + 1
+        ball.reset()
+    return left_score, right_score
     
 """
 physics_objects_classic -- Section containing all physics methods for the game objects collision and movement.

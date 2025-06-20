@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from pong.constants import *
 from pong.paddle import Paddle
 from pong.ball import Ball
-from pong.utilities import draw, reset
+from pong.utilities import draw, reset, handle_score
 from pong.helpers import handle_ball_collision, handle_paddle_movement
 
 # pygame setup
@@ -90,21 +90,14 @@ def main():
 
         keys = pygame.key.get_pressed()
         if not paused:
-            handle_paddle_movement(keys, left_paddle,
-             right_paddle)
+            handle_paddle_movement(keys, left_paddle, right_paddle)
 
             left_paddle.update()
             right_paddle.update()
             ball.update()
 
             handle_ball_collision(ball, left_paddle, right_paddle)
-
-            if ball.pos[0] < 0:
-                right_score += 1
-                ball.reset()
-            elif ball.pos[0] > WIDTH:
-                left_score += 1
-                ball.reset()
+            left_score, right_score = handle_score(ball, left_score, right_score)
 
         if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
             winner = "Left Player Won!" if left_score > right_score else "Right Player Won!"
