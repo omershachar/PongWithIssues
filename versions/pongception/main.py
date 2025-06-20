@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from pong.constants import *
 from pong.paddle import Paddle
 from pong.ball import Ball
-from pong.utilities import draw
+from pong.utilities import draw, reset
 from pong.helpers import handle_ball_collision, handle_paddle_movement
 
 # pygame setup
@@ -24,6 +24,7 @@ pygame.display.set_caption("Pongception")
 def main():
     clock = pygame.time.Clock()
     run = True
+    paused = False
 
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
@@ -44,13 +45,19 @@ def main():
         WIN.blit(vel_text, (10, 60))
         WIN.blit(spin_text, (10, 85))
 
+        if paused:
+            pause_text = FONT_BIG_DIGITAL.render("PAUSED", True, PURPLE)
+            resume_text = FONT_SMALL_DIGITAL.render("Press [SPACE] to resume", True, GREY)
+            WIN.blit(pause_text, (WIDTH // 2 - pause_text.get_width() // 2, HEIGHT // 2 - pause_text.get_height()))
+            WIN.blit(resume_text, (WIDTH // 2 - resume_text.get_width() // 2, HEIGHT // 2 + 10))
+
 
         # Top-left mode label
         mode_text = FONT_SMALL_DIGITAL.render("MODE: PHYSICS", True, GREY)
         WIN.blit(mode_text, (10, 10))
 
         # Bottom footer instructions
-        footer = FONT_SMALL_DIGITAL.render("Press [M] to return | [ESC] to quit", True, GREY)
+        footer = FONT_SMALL_DIGITAL.render("Press [SPACE] to pause | [M] to return | [ESC] to quit", True, GREY)
         WIN.blit(footer, (WIDTH // 2 - footer.get_width() // 2, HEIGHT - 30))
 
         pygame.display.update()
@@ -66,22 +73,25 @@ def main():
                 if event.key == pygame.K_m:
                     run = False
                     break
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
 
         keys = pygame.key.get_pressed()
-        handle_paddle_movement(keys, left_paddle, right_paddle)
+        if not paused:
+            handle_paddle_movement(keys, left_paddle, right_paddle)
 
-        left_paddle.update()
-        right_paddle.update()
-        ball.update()
+            left_paddle.update()
+            right_paddle.update()
+            ball.update()
 
-        handle_ball_collision(ball, left_paddle, right_paddle)
+            handle_ball_collision(ball, left_paddle, right_paddle)
 
-        if ball.pos[0] < 0:
-            right_score += 1
-            ball.reset()
-        elif ball.pos[0] > WIDTH:
-            left_score += 1
-            ball.reset()
+            if ball.pos[0] < 0:
+                right_score += 1
+                ball.reset()
+            elif ball.pos[0] > WIDTH:
+                left_score += 1
+                ball.reset()
 
         if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
             winner = "Left Player Won!" if left_score > right_score else "Right Player Won!"
@@ -90,11 +100,7 @@ def main():
             pygame.display.update()
             pygame.time.delay(3000)
 
-            left_score = right_score = 0
-            left_paddle.reset()
-            right_paddle.reset()
-            ball.reset()
-
+            left_score, right_score = reset(ball, left_paddle, right_paddle)
     return
 
 if __name__ == '__main__':
