@@ -48,14 +48,18 @@
 
 ### 🎮 Controls
 
-| Action            | Key         |
-|-------------------|-------------|
-| Left Paddle Up    | `W`         |
-| Left Paddle Down  | `S`         |
-| Right Paddle Up   | `↑`         |
-| Right Paddle Down | `↓`         |
-| Open Menu         | `M`         |
-| Exit Game         | `ESC`       |
+| Action              | Key         |
+|---------------------|-------------|
+| Left Paddle Up      | `W`         |
+| Left Paddle Down    | `S`         |
+| Right Paddle Up     | `↑`         |
+| Right Paddle Down   | `↓`         |
+| Open Menu           | `M`         |
+| Pause/Resume        | `SPACE`     |
+| Restart Game        | `R`         |
+| Toggle Instructions | `H`         |
+| Exit Game           | `ESC`       |
+
 
 ---
 
