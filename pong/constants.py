@@ -10,17 +10,21 @@ pygame.font.init()
 
 # Digital fonts (custom)
 FONT_SMALL_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 20)
+FONT_MEDIUM_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 30)
 FONT_DEFAULT_DIGITAL = pygame.font.Font("pong/FONTS/digital-7.ttf", 35)
 FONT_LARGE_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 45)
 FONT_BIG_DIGITAL    = pygame.font.Font("pong/FONTS/digital-7.ttf", 65)
 FONT_TITLE_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 80)
+ASCII_FONT = pygame.font.Font("pong/FONTS/LiberationMono-Bold.ttf", 24)
 
 # Fallback system fonts (name + size tuples)
-FONT_SMALL   = ("comicsans", 25)
-FONT_DEFAULT = ("comicsans", 40)
-FONT_LARGE   = ("comicsans", 50)
-FONT_BIG     = ("comicsans", 65)
-FONT_TITLE   = ("comicsans", 90)
+FONT_SMALL      = ("comicsans", 25)
+FONT_DEFAULT    = ("comicsans", 40)
+FONT_LARGE      = ("comicsans", 50)
+FONT_BIG        = ("comicsans", 65)
+FONT_TITLE      = ("comicsans", 90)
+FONT_DATA       = ("consolas", 20)
+FONT_DATA_LARGE = ("consolas", 30)
 
 # -------------------- ASCII Title --------------------
 
@@ -57,10 +61,13 @@ YELLOW       = (255, 255, 0)
 # -------------------- Screen & Coordinates --------------------
 
 WIDTH, HEIGHT = 800, 800
-WIDTH_LAUNCHER, HEIGHT_LAUNCHER = 600, 400
-MARGIN = 10
-
+GAME_MARGIN_X = 10
+GAME_FOOTER = np.array([WIDTH // 2, HEIGHT - 30], dtype=int)
 MIDDLE_BOARD = np.array([WIDTH // 2, HEIGHT // 2], dtype=int)
+
+MENU_MARGIN_Y = 45
+MENU_SUBTITLES_Y = MENU_MARGIN_Y + 300
+MENU_FOOTER = HEIGHT - MENU_MARGIN_Y
 
 # -------------------- Paddle Settings --------------------
 
@@ -68,8 +75,8 @@ PADDLE_WIDTH = 15
 PADDLE_HEIGHT = 85
 PADDLE_SIZE = np.array([PADDLE_WIDTH, PADDLE_HEIGHT], dtype=int)
 
-ORIGINAL_LEFT_PADDLE_POS = np.array([MARGIN, HEIGHT // 2 - PADDLE_HEIGHT // 2], dtype=int)
-ORIGINAL_RIGHT_PADDLE_POS = np.array([WIDTH - MARGIN - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2], dtype=int)
+ORIGINAL_LEFT_PADDLE_POS = np.array([GAME_MARGIN_X, HEIGHT // 2 - PADDLE_HEIGHT // 2], dtype=int)
+ORIGINAL_RIGHT_PADDLE_POS = np.array([WIDTH - GAME_MARGIN_X - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2], dtype=int)
 
 PADDLE_DEFAULT_VEL = 4
 PADDLE_MAX_VEL = 8
