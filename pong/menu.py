@@ -2,14 +2,6 @@ import pygame
 from pong.constants import *
 from pong.ball import BallClassic as Ball
 
-def bounce_box(self, width, height):
-    if self.x - self.radius <= 0 or self.x + self.radius >= width:
-        self.vel_x *= -1
-    if self.y - self.radius <= 0 or self.y + self.radius >= height:
-        self.vel_y *= -1
-    self.x += self.vel_x
-    self.y += self.vel_y
-
 def draw(self, win):
     pygame.draw.circle(win, self.color, (int(self.x), int(self.y)), self.radius)
 
