@@ -48,15 +48,39 @@ PONG_ASCII_3D = """
 
 # -------------------- Colors (RGB) --------------------
 
-BLACK        = (0, 0, 0)
-DARK_GREY    = (64, 64, 64)
-GREY         = (128, 128, 128)
-LIGHT_GREY   = (224, 224, 224)
-WHITE        = (255, 255, 255)
-PURPLE       = (122, 118, 229)
-LIGHT_PURPLE = (185, 183, 232)
-RED          = (255, 0, 0)
-YELLOW       = (255, 255, 0)
+BLACK         = (0, 0, 0)
+DARK_GREY     = (64, 64, 64)
+GREY          = (128, 128, 128)
+LIGHT_GREY    = (224, 224, 224)
+WHITE         = (255, 255, 255)
+PURPLE        = (122, 118, 229)
+LIGHT_PURPLE  = (185, 183, 232)
+LIGHT_RED     = (255, 204, 203) 
+RED           = (255, 0, 0)
+DARK_RED      = (139, 0, 0)
+YELLOW        = (255, 255, 0)
+
+# ----- Fire Colors -----
+DARK_ORANGE      = (170, 65, 0)
+ORANGE           = (255, 140, 0)
+LIGHT_ORANGE     = (255, 180, 50)
+GOLD             = (255, 215, 0)
+DARK_YELLOW      = (200, 180, 20)
+BRIGHT_YELLOW    = (255, 255, 100)
+FIERY_RED        = (255, 40, 0)
+SCARLET          = (255, 36, 0)
+CRIMSON          = (220, 20, 60)
+CHERRY           = (255, 70, 70)
+AMBER            = (255, 191, 0)
+FLAME            = (255, 87, 34)
+TANGERINE        = (255, 120, 0)
+
+# ---- Transition colors for smoother fire gradients ----
+ORANGE_RED       = (255, 69, 0)
+TOMATO           = (255, 99, 71)
+DARK_GOLD        = (218, 165, 32)
+MELLOW_YELLOW    = (255, 239, 120)
+PEACH            = (255, 229, 180)
 
 # -------------------- Screen & Coordinates --------------------
 
