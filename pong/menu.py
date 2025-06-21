@@ -22,8 +22,11 @@ def draw_menu(WIN, selected_mode):
     # Show mode selection
     if selected_mode == 0:
         mode_text = FONT_DEFAULT_DIGITAL.render(f"Mode: {'Classic'}", True, LIGHT_PURPLE)
+        ball_menu.color = WHITE
     elif selected_mode == 1:
         mode_text = FONT_DEFAULT_DIGITAL.render(f"Mode: {'Pongception'}", True, RED)
+        ball_menu.color = RED
+
     WIN.blit(mode_text, (WIDTH // 2 - mode_text.get_width() // 2, MENU_FOOTER - MENU_MARGIN_Y * 2))
 
     prompt = FONT_DEFAULT_DIGITAL.render("Press [SPACE] to start", True, PURPLE)
