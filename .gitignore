@@ -1,6 +1,7 @@
 # Ignore personal tracking files
 TODO.txt
 backup/
+assests/
 
 # Python junk
 __pycache__/
