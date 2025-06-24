@@ -49,7 +49,7 @@ class Ball(PhysicsObject):
         color_cycle_len = len(ALL_FIRE_COLORS)
 
         speed = self.speed
-        max_speed = 18
+        max_speed = 30
         acc_magnitude = np.linalg.norm(self.acc)
         t = min(acc_magnitude / 15, 1)  # 0 (idle) to 1 (max fire)
         color_idx = int(t * (len(FIRE_COLORS) - 1))
@@ -71,7 +71,7 @@ class Ball(PhysicsObject):
             win.blit(surface, (pos[0] - radius, pos[1] - radius))
 
         # --- 2. Glowing "aura" if fast ---
-        if speed > 7:
+        if speed > 6:
             for layer in range(3, 0, -1):
                 aura_r = int(self.radius * (1.2 + 0.25 * layer))
                 aura_alpha = 25 * layer + int(min(50, speed * 2))
@@ -81,10 +81,9 @@ class Ball(PhysicsObject):
                 win.blit(surf, (int(self.pos[0]) - aura_r, int(self.pos[1]) - aura_r))
 
         # --- 3. Over-the-top, animated, color-cycling, growing arc if spinning fast ---
-        if abs(self.spin) > 2:
+        if abs(self.spin) > 4:
             direction = 0 if self.spin > 0 else math.pi
-            arc_rect = pygame.Rect(int(self.pos[0] - self.radius), int(self.pos[1] - self.radius),
-                                self.radius * 2, self.radius * 2)
+            arc_rect = pygame.Rect(int(self.pos[0] - self.radius), int(self.pos[1] - self.radius),self.radius * 2, self.radius * 2)
             # The arc's parameters
             arc_len = math.pi + min(math.pi * 0.8, (speed / max_speed) * math.pi * 0.8)
             base_thick = int(5 + min(18, (speed / max_speed) * 22))  # 5 to 23 px
@@ -97,20 +96,14 @@ class Ball(PhysicsObject):
                 thick = base_thick + j * 2
                 arc_surf = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
                 pygame.draw.arc(arc_surf, (*arc_color, min(255, arc_alpha)),
-                                pygame.Rect(0, 0, self.radius * 2, self.radius * 2),
-                                direction, direction + arc_len, thick)
+                                pygame.Rect(0, 0, self.radius * 2, self.radius * 2),direction, direction + arc_len, thick)
                 win.blit(arc_surf, (int(self.pos[0]) - self.radius, int(self.pos[1]) - self.radius), special_flags=pygame.BLEND_ADD)
 
         # --- 4. Main ball (core) ---
         # Flicker/brighten a little if super fast
-        if speed > 12:
+        if speed > 21:
             for k in range(2):
-                pygame.draw.circle(
-                    win, WHITE if k else core_color,
-                    (int(self.pos[0]), int(self.pos[1])),
-                    self.radius - k,
-                    0
-                )
+                pygame.draw.circle(win, WHITE if k else core_color,(int(self.pos[0]), int(self.pos[1])),self.radius - k,0)
         else:
             pygame.draw.circle(win, core_color, (int(self.pos[0]), int(self.pos[1])), self.radius)
 

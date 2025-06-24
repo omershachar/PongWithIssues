@@ -103,19 +103,19 @@ ORIGINAL_LEFT_PADDLE_POS = np.array([GAME_MARGIN_X, HEIGHT // 2 - PADDLE_HEIGHT 
 ORIGINAL_RIGHT_PADDLE_POS = np.array([WIDTH - GAME_MARGIN_X - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2], dtype=int)
 
 PADDLE_DEFAULT_VEL = 4.5
-PADDLE_MAX_VEL = 8
-PADDLE_DEFAULT_ACC = np.array([0, 1.5], dtype=float)
+PADDLE_MAX_VEL = 9
+PADDLE_DEFAULT_ACC = np.array([0, 3], dtype=float)
 
 # -------------------- Ball Settings --------------------
 
 BALL_RADIUS = 7
-BALL_DEFAULT_VEL = np.array([5, 0], dtype=float)
+BALL_DEFAULT_VEL = np.array([6, 0], dtype=float)
 
 # -------------------- Physics Constants --------------------
 
 GRAVITY = 9.81
-SPIN_FACTOR = 0.3                # Multiplier for paddle spin effect
-MAX_DEFLECTION_SPEED = 5         # Max vertical speed after deflection
+SPIN_FACTOR = 0.5                # Multiplier for paddle spin effect
+MAX_DEFLECTION_SPEED = 7         # Max vertical speed after deflection
 FRICTION_COEFFICIENT = 0.4       # Not currently used, placeholder
 
 # -------------------- Game Settings --------------------
