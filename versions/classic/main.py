@@ -9,9 +9,12 @@ import pygame
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from pong.constants import *
-from pong.paddle import PaddleClassic as Paddle
+# from pong.paddle import PaddleClassic as Paddle
+from pong.paddle import Paddle
 from pong.ball import BallClassic as Ball
-from pong.utilities import draw as draw_game, reset, handle_ball_collision, handle_paddle_movement
+# from pong.utilities import draw as draw_game, reset, handle_ball_collision, handle_paddle_movement
+from pong.utilities import draw as draw_game, reset, handle_ball_collision
+from pong.helpers import handle_paddle_movement
 
 pygame.init()
 pygame.display.set_caption("Pong!")  # Window title
@@ -23,8 +26,11 @@ def main():
     paused = False
     show_instructions = False
 
-    left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
-    right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
+    left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
+    right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
+
+    # left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
+    # right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
     ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, LIGHT_PURPLE, *BALL_DEFAULT_VEL)
 
     left_score = 0
@@ -67,7 +73,7 @@ def main():
 
         # Bottom footer instructions
         if show_instructions:
-                footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
+            footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
         else:
             footer_text = "Press [H] for help"
         footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
@@ -75,16 +81,21 @@ def main():
 
         pygame.display.update()
 
-        if not paused:
-            ball.move()
-            handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
-            handle_paddle_movement(keys, left_paddle, right_paddle, HEIGHT)
-
         if state == PLAYING and keys[pygame.K_m]:
             state = MENU
-            left_score, right_score = reset(ball, left_paddle, right_paddle)
+            left_score, right_score = reset(ball, left_paddle, right_paddle) # Resetting scores and game objects
 
         if not paused:
+            handle_paddle_movement(keys, left_paddle, right_paddle)
+            left_paddle.update()
+            right_paddle.update()
+
+            left_paddle.vel[1] /= 1.75
+            right_paddle.vel[1] /= 1.75
+
+            ball.move()
+            handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
+
             # Update score
             if ball.pos[0] - ball.radius < 0:
                 right_score += 1
