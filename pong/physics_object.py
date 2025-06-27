@@ -117,17 +117,17 @@ class PhysicsObject:
         if speed > max_speed:
             self.vel = self.vel / speed * max_speed
 
-    def clamp_to_board(self, buffer=(0, 0)):
+    def clamp_to_board(self, buffer=(0, 0), board=(WIDTH, HEIGHT), board_origin=(0,0)):
         """
-        Constrains the object to stay within the visible board.
+        Constrains the object to stay within the visible given board.
 
         Args:
-            buffer (tuple): (x_buffer, y_buffer) padding from edges
+            buffer (tuple): (x_buffer, y_buffer) padding from edges (object dimensions usually)
+            board (tuple): (x_board, y_board) board sizes (the default is the width and height in constants.py)
+            board origin (tuple): (board_origin_x, board_origin_y) the start location of the board (default is 0,0)
         """
-        min_x, min_y = 0, 0
-        max_x, max_y = WIDTH, HEIGHT
-        self.pos[0] = np.clip(self.pos[0], min_x + buffer[0], max_x - buffer[0])
-        self.pos[1] = np.clip(self.pos[1], min_y + buffer[1], max_y - buffer[1])
+        self.pos[0] = np.clip(self.pos[0], board_origin[0] + buffer[0], board[0] - buffer[0])
+        self.pos[1] = np.clip(self.pos[1], board_origin[1] + buffer[1], board[1] - buffer[1])
 
     # --- Reference Physics Formulas ---
     """
