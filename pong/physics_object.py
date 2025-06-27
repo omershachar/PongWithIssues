@@ -3,12 +3,12 @@ Base class for physical objects with position, mass, and velocity.
 Used by Ball, Paddle, and any future physics-driven game objects.
 """
 
-import pygame
+from abc import ABC, abstractmethod
 import numpy as np
 import math
 from pong.constants import *
 
-class PhysicsObject:
+class PhysicsObject(ABC):
     """
     A base class for all physical game objects with mass, position, and velocity.
     Handles motion using Newtonian physics and time-based integration.
@@ -129,14 +129,44 @@ class PhysicsObject:
         self.pos[0] = np.clip(self.pos[0], board_origin[0] + buffer[0], board[0] - buffer[0])
         self.pos[1] = np.clip(self.pos[1], board_origin[1] + buffer[1], board[1] - buffer[1])
 
+    # @abstractmethod
+    # def objects_collision(self, other):
+    #     """Method must be implemented by all subclasses"""
+    #     return self.pos[:] == other.pos[:]
+
+    # @abstractmethod
+    # def resolve_collision(self, other):
+    #     """
+    #     Resolve physics objects collision using Newton's Third Law:
+    #     Newton 3: For every action there is an equal and opposite reaction
+    #      """
+    #     if self.object_collision(self):
+    #         # Newton's Third Law: exchange impulses
+    #         normal = self.pos - other.pos
+    #         normal /= np.linalg.norm(normal)
+
+    #         relative_velocity = self.vel - other.vel
+    #         impulse_magnitude = -2 * np.dot(relative_velocity, normal) / (1/self.mass + 1/other.mass)
+    #         impulse = impulse_magnitude * normal
+
+    #         self.apply_impulse(impulse)
+    #         other.apply_impulse(-impulse)
+
     # --- Reference Physics Formulas ---
     """
     s = v₀t + ½at²       (position update)
     v = v₀ + at          (velocity update)
-    a = dv/dt            (acceleration)
+    a = dv/dt = Δv/Δt    (acceleration)
     P = mv               (momentum)
-    J = FΔt = ΔP         (impulse)
+    J = FΔt = ΔP = mΔv   (impulse)
     F = ma = dP/dt       (force)
 
     v² = v₀² + 2as       (used for some collision detection)
+
+    J = ΔP  = J
+    Newton 1 (inertia): Object maintain their state (rest/constant velocity), unless acted on by an external force. ⇒ Sigma(F) = 0 = a
+    Newton 2: Force equal the change in Momentum by the change in time. ⇒ F = ma = ΔP/Δt = mΔv/Δt
+    Newton 3: For every action there is an equal and opposite reaction. ⇒ F1 = -F2
+
+    Inertia: The tendency of an object to resist changes in his motion is called inertia.
     """
