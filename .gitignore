@@ -1,22 +1,22 @@
-# Ignore personal tracking files
-TODO.txt
-backup/
-assests/
-notes.txt
+# Dependency directories
+node_modules/
 
-# Python junk
+# Build artifacts (keep dist/ because it ships compiled JS)
+*.log
+*.map
+
+# Editor settings
+.vscode/
+.DS_Store
+.idea/
+
+# Old python artifacts (kept for reference but no longer generated)
 __pycache__/
 *.pyc
 *.pyo
-*.log
 
-# Pygame executable (if you build one later)
-dist/
-build/
-*.exe
-
-# VSCode settings
-.vscode/
-
-# Virtual environments
-venv/
+# Misc project scratch space
+TODO.txt
+backup/
+assets/
+notes.txt
