@@ -1,0 +1,19 @@
+{
+  "name": "pong-with-issues",
+  "version": "1.0.0",
+  "description": "A Pong game with two modes: Classic and Physics-based Pongception",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "serve": "python3 -m http.server 8000",
+    "start": "npm run build && npm run serve"
+  },
+  "keywords": ["pong", "game", "typescript", "canvas", "physics"],
+  "author": "PongWithIssues",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
