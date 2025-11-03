@@ -1,4 +1,5 @@
 # PongWithIssues
+
             _____     _____    _   _    ____     _ 
            |  __ \   / ___ \  | \ | |  / ___|   | |
            | |__| | | /   \ | |  \| | | |  _    | |
@@ -11,14 +12,10 @@
                       It compiles. That's enough.
 ---
 
-### 💡 About the Project
-
 > **PongWithIssues** is a game of Pong that you can play Pong in it.
 [Click here for further explanations](https://en.wikipedia.org/wiki/Pong)
 
----
-
-### 📦 Requirements
+## 📦 Requirements
 
 - Python 3.10 or higher (3.13 supported)
 - pygame==2.6.1
@@ -28,18 +25,26 @@
 
 ### 🚀 How to Play
 
-1. Clone the repo  
+1. Clone the repo
+
    ```bash
    git clone https://github.com/omershachar/PongWithIssues.git
+   ```
+
 2. Install dependencies  
+
    ```bash
    pip install -r ./PongWithIssues/requirements.txt
-3. Run it
-   ```bash 
-   python ./PongWithIssues/launcher.py    # Windows
-   python3 ./PongWithIssues/launcher.py   # Linux/WSL
+   ```
 
-> Or download the `.exe` version from the [Releases](#) tab (coming soon).
+3. Run it
+
+   ```bash
+   python3 ./PongWithIssues/launcher.py   # Linux/WSL
+   python ./PongWithIssues/launcher.py    # Windows
+   ```
+
+> Or download the `.exe` version from the [Releases](https://www.google.com/search?q=Not+yet+...) tab (coming soon).
 
 ---
 
@@ -56,7 +61,6 @@
 | Restart Game        | `R`         |
 | Toggle Instructions | `H`         |
 | Exit Game           | `ESC`       |
-
 
 ---
 
@@ -75,16 +79,16 @@ Coming soon (maybe) via GitHub Pages — for now this is [good enough](https://w
 
 ---
 
-
 ### 🚷 Disclaimer
 
 - I have no idea what I'm doing.
 - If this crashes your PC, it's your fault for trusting anything named `PongWithIssues`.
-- For any serious fatal problems please contact our team for further support [Here](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+- For any serious fatal problems please contact our team for further support [here](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 ---
 
 ### ⚠️ WSL / Windows 11 Users – READ THIS
+
 - Windows 11 (WSL2):
 You do NOT need an X server (VcXsrv/Xming).
 Just make sure your system is up-to-date and fully RESTART Windows if the game window doesn’t appear.
@@ -94,13 +98,14 @@ You MUST install and run an X server (like VcXsrv) on Windows for any game windo
 
 - If you’re using WSL and the window won’t show up:
 
-   - Fully restart Windows.
+  - Fully restart Windows.
 
-   - Try again in a fresh terminal.
+  - Try again in a fresh terminal.
 
-   - Still stuck? Check your Windows version and WSLg setup.
+  - Still stuck? Check your Windows version and WSLg setup.
 
 ---
-   
+
 ### License
+
 > Under the [MIT License](LICENSE)
