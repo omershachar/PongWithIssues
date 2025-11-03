@@ -5,7 +5,7 @@ Used by Ball, Paddle, and any future physics-driven game objects.
 
 import numpy as np
 import math
-from pong.constants import GRAVITY
+from pong_BETA.constants import GRAVITY
 
 class PhysicsObject:
     """A base class for all physical game objects with mass, position, and velocity."""

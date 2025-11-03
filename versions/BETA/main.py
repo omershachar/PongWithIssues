@@ -1,8 +1,15 @@
+import os
+import sys
 import pygame
-from pong.ball import Ball
-from pong.paddle import Paddle
-from pong.constants import WHITE, BLACK, HEIGHT, WIDTH, PADDLE_WIDTH, PADDLE_HEIGHT, BALL_RADIUS, WINNING_SCORE, FPS
-from pong.helpers import handle_ball_collision, handle_paddle_movement, draw
+
+# Add the project root to sys.path so "pong" can be found
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+            
+from pong_BETA.ball import Ball
+from pong_BETA.paddle import Paddle
+from pong_BETA.constants import *
+from pong_BETA.helpers import *
+from pong_BETA.utilities import *
 
 pygame.init()
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)

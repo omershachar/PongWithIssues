@@ -1,4 +1,4 @@
-from pong.physics_object import PhysicsObject
+from pong_BETA.physics_object import PhysicsObject
 import numpy as np
 import pygame
 

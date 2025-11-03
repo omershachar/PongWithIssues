@@ -8,7 +8,8 @@ pygame.init()
 from pong.constants import *
 from pong.menu import draw_menu
 from versions.classic.main import main as run_classic
-from versions.pongception.main import main as run_physics
+from versions.pongception.main import main as run_pongception
+from versions.BETA.main import main as run_BETA
 
 FONT_MENU = pygame.font.SysFont(*FONT_DEFAULT)
 FONT_MENU_SMALL = pygame.font.SysFont(*FONT_SMALL)
@@ -33,10 +34,10 @@ def launcher():
                         run_classic()
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
                     elif selected_mode == 1:
-                        run_physics()
+                        run_pongception()
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
                     elif selected_mode == 2:
-                        # run_settings()
+                        run_BETA()
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
                 elif event.key in [pygame.K_RIGHT]:
