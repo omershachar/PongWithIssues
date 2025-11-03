@@ -26,6 +26,9 @@ def draw_menu(WIN, selected_mode):
     elif selected_mode == 1:
         mode_text = FONT_DEFAULT_DIGITAL.render(f"Mode: {'Pongception'}", True, RED)
         ball_menu.color = RED
+    elif selected_mode == 2:
+        mode_text = FONT_DEFAULT_DIGITAL.render(f"Mode: {'Settings'}", True, GREY)
+        ball_menu.color = DARK_GREY
 
     WIN.blit(mode_text, (WIDTH // 2 - mode_text.get_width() // 2, MENU_FOOTER - MENU_MARGIN_Y * 2))
 

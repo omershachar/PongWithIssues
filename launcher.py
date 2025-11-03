@@ -18,7 +18,7 @@ def launcher():
     pygame.display.set_caption("PongWithIssues")
     clock = pygame.time.Clock()
 
-    selected_mode = 0  # 0 = Classic, 1 = Pongception
+    selected_mode = 0  # Classic = 0, Pongception = 1, Setting = 2
     running = True
 
     while running:
@@ -32,11 +32,18 @@ def launcher():
                     if selected_mode == 0:
                         run_classic()
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-                    else:
+                    elif selected_mode == 1:
                         run_physics()
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-                elif event.key in [pygame.K_RIGHT, pygame.K_LEFT]:
-                    selected_mode ^= 1  # toggle mode (0 ↔ 1)
+                    elif selected_mode == 2:
+                        # run_settings()
+                        WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+
+                elif event.key in [pygame.K_RIGHT]:
+                    selected_mode = (selected_mode + 1) % 3
+                elif event.key in [pygame.K_LEFT]:
+                    selected_mode = (selected_mode - 1) % 3
+
                 elif event.key == pygame.K_ESCAPE:
                     running = False
         draw_menu(WIN, selected_mode)
