@@ -1,5 +1,5 @@
 """
-pongception.py -- Main game loop for PongWithIssues.
+Pongception -- Main game loop for PongWithIssues.
 Contains only the essentials and high-level orchestration.
 """
 

@@ -1,5 +1,5 @@
 """
-Base class for physical objects with position, mass, and velocity.
+physics_object.py -- Base class for physical objects with position, mass, and velocity.
 Used by Ball, Paddle, and any future physics-driven game objects.
 """
 

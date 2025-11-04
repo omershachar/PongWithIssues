@@ -1,5 +1,5 @@
 """
-classicPong.py -- Main file containing only essentials and activation commands.
+Classic Pong -- Main file containing only essentials and activation commands.
 """
 import sys
 import os
