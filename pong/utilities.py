@@ -108,19 +108,3 @@ def handle_ball_collision(ball, left_paddle, right_paddle, board_height):
                 y_vel = difference_in_y / reduction_factor
                 ball.vel[1] = -1 * y_vel
 # End of handle_ball_collision()
-
-# def handle_paddle_movement(Keys, left_paddle, right_paddle, board_height):
-#     # Checking if the 'w' key was pressed, and making sure the paddle won't go out of the board
-#     if Keys[pygame.K_w] and left_paddle.pos[1] - left_paddle.vel >= 0:
-#         left_paddle.move(up=True)
-#     # Checking if the 's' key was pressed, and making sure the paddle won't go out of the board
-#     if Keys[pygame.K_s] and left_paddle.pos[1] + left_paddle.vel + left_paddle.height <= board_height:
-#         left_paddle.move(up=False)
-
-#     # Checking if the 'UP' key was pressed, and making sure the paddle won't go out of the board
-#     if Keys[pygame.K_UP] and right_paddle.pos[1] - right_paddle.vel >= 0:
-#         right_paddle.move(up=True)
-#     # Checking if the 'DOWN' key was pressed, and making sure the paddle won't go out of the board
-#     if Keys[pygame.K_DOWN] and right_paddle.pos[1] + right_paddle.vel + right_paddle.height <= board_height:
-#         right_paddle.move(up=False)
-# End of handle_paddle_movement()

@@ -9,28 +9,23 @@ import pygame
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from pong.constants import *
-# from pong.paddle import PaddleClassic as Paddle
 from pong.paddle import Paddle
 from pong.ball import BallClassic as Ball
-# from pong.utilities import draw as draw_game, reset, handle_ball_collision, handle_paddle_movement
 from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
 
 pygame.init()
 pygame.display.set_caption("Pong!")  # Window title
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
 
 def main():
-    clock = pygame.time.Clock()
     state = MENU
     paused = False
     show_instructions = False
 
     left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
     right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
-
-    # left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
-    # right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, LIGHT_PURPLE, PADDLE_DEFAULT_VEL)
     ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, LIGHT_PURPLE, *BALL_DEFAULT_VEL)
 
     left_score = 0

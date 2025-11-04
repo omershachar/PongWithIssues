@@ -3,6 +3,7 @@ TODO.txt
 backup/
 assests/
 notes.txt
+testing/
 
 # Python junk
 __pycache__/
@@ -19,4 +20,4 @@ build/
 .vscode/
 
 # Virtual environments
-venv/
+.venv/
