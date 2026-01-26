@@ -143,6 +143,7 @@ Also update `TODO.md` when:
 | File | Purpose |
 |------|---------|
 | `CLAUDE.md` | Guidance for Claude Code (this file) |
+| `PRD.md` | Product Requirements Document - vision, features, milestones |
 | `progress.md` | Session-by-session progress tracker |
 | `TODO.md` | Master task list (prioritized) |
 | `docs/PROJECT_ANALYSIS.md` | Full codebase analysis with all methods |
