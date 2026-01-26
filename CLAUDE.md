@@ -89,6 +89,40 @@ versions/web-version/
 - Win condition: 3 points
 - Physics: SPIN_FACTOR=0.5, MAX_DEFLECTION_SPEED=7
 
+## Workflow: After Each Priority Phase
+
+**IMPORTANT**: After completing each priority phase from TODO.md:
+
+1. **Run Tests**
+   ```bash
+   # Python tests
+   python3 -c "
+   from pong.constants import *
+   from pong.physics_object import PhysicsObject
+   from pong.ball import Ball, BallClassic
+   from pong.paddle import Paddle, PaddleClassic
+   from pong.helpers import handle_ball_collision
+   from pong_BETA.physics_object import PhysicsObject as BetaPhysics
+   print('All imports OK')
+   "
+
+   # TypeScript check (in web-version/)
+   cd versions/web-version && npx tsc --noEmit
+   ```
+
+2. **If tests fail**: Go back and fix the issues before proceeding
+
+3. **If tests pass**: Commit and push changes
+   ```bash
+   git add -A
+   git commit -m "Complete Priority X: [description]"
+   git push origin main
+   ```
+
+4. **Update documentation**:
+   - Mark completed items in `TODO.md`
+   - Add session log to `progress.md`
+
 ## Progress Tracking
 
 **IMPORTANT**: After completing any task or mission, update `progress.md` with:
@@ -116,8 +150,9 @@ Also update `TODO.md` when:
 
 ## Known Issues
 
-See `TODO.md` Priority 1 for critical bugs that need fixing:
-- TypeScript paddle controls broken (BUG-001, BUG-002)
-- Python testing module crashes (BUG-003, BUG-004)
-- AI module has NameError (BUG-005)
-- BETA module bugs (BUG-006, BUG-007)
+All Priority 1 critical bugs have been **FIXED** (BUG-001 through BUG-007).
+
+See `TODO.md` for remaining work:
+- Priority 2: Minor code cleanup (partially complete)
+- Priority 3: Code consolidation/refactoring
+- Priority 4+: Feature development
