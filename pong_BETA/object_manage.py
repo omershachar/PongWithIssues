@@ -131,7 +131,5 @@ class ObjectsManage:
     def update(self, dt):
         for obj in self.objects:
             obj.integrate(dt)
-
-        for i in range(len(self.objects)):
-            for j in range(i + 1, len(self.objects)):
-                self.objects[i].resolve_collision(self.objects[j])
+        # TODO: Implement collision resolution between objects
+        # Currently disabled - needs resolve_collision method in PhysicsObject

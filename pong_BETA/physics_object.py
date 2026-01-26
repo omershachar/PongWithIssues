@@ -48,6 +48,10 @@ class PhysicsObject:
         theta = math.atan2(self.pos[1], self.pos[0])
         return (r, theta)
 
+    @property
+    def max_speed(self) -> float | None:
+        return self._limits.max_speed
+
     # --- External controls --------------------------------------------------
     def add_force(self, force) -> None:
         """Queue a force (Fx, Fy) for this step."""

@@ -5,26 +5,26 @@
 import { Ball, BallClassic } from '../game/ball.js';
 import { Paddle, PaddleClassic } from '../game/paddle.js';
 import { InputState } from '../types/index.js';
-import { PADDLE_DEFAULT_VEL } from '../game/constants.js';
+import { PADDLE_DEFAULT_VEL, WIDTH, HEIGHT } from '../game/constants.js';
 
 export class GameHelpers {
     /**
      * Handles paddle movement for physics-based mode
      */
     static handlePaddleMovement(input: InputState, leftPaddle: Paddle, rightPaddle: Paddle): void {
-        // Left paddle (W/S or Arrow Up/Down)
-        if (input.up) {
+        // Left paddle (W/S keys)
+        if (input.leftUp) {
             leftPaddle.accelerate(true);
         }
-        if (input.down) {
+        if (input.leftDown) {
             leftPaddle.accelerate(false);
         }
 
-        // Right paddle (Arrow Up/Down)
-        if (input.up) {
+        // Right paddle (Arrow Up/Down keys)
+        if (input.rightUp) {
             rightPaddle.accelerate(true);
         }
-        if (input.down) {
+        if (input.rightDown) {
             rightPaddle.accelerate(false);
         }
     }
@@ -33,19 +33,19 @@ export class GameHelpers {
      * Handles paddle movement for classic mode
      */
     static handlePaddleMovementClassic(input: InputState, leftPaddle: PaddleClassic, rightPaddle: PaddleClassic): void {
-        // Left paddle (W/S)
-        if (input.up) {
+        // Left paddle (W/S keys)
+        if (input.leftUp) {
             leftPaddle.move(true);
         }
-        if (input.down) {
+        if (input.leftDown) {
             leftPaddle.move(false);
         }
 
-        // Right paddle (Arrow Up/Down)
-        if (input.up) {
+        // Right paddle (Arrow Up/Down keys)
+        if (input.rightUp) {
             rightPaddle.move(true);
         }
-        if (input.down) {
+        if (input.rightDown) {
             rightPaddle.move(false);
         }
     }
@@ -56,7 +56,7 @@ export class GameHelpers {
     static handleScore(ball: Ball, leftScore: number, rightScore: number): [number, number] {
         if (ball.pos.x - ball.radius < 0) {
             return [leftScore, rightScore + 1];
-        } else if (ball.pos.x + ball.radius > 800) { // WIDTH constant
+        } else if (ball.pos.x + ball.radius > WIDTH) {
             return [leftScore + 1, rightScore];
         }
         return [leftScore, rightScore];
@@ -68,7 +68,7 @@ export class GameHelpers {
     static handleScoreClassic(ball: BallClassic, leftScore: number, rightScore: number): [number, number] {
         if (ball.pos.x - ball.radius < 0) {
             return [leftScore, rightScore + 1];
-        } else if (ball.pos.x + ball.radius > 800) { // WIDTH constant
+        } else if (ball.pos.x + ball.radius > WIDTH) {
             return [leftScore + 1, rightScore];
         }
         return [leftScore, rightScore];
@@ -107,15 +107,15 @@ export class GameHelpers {
     ): void {
         // Clear canvas
         ctx.fillStyle = 'rgb(0, 0, 0)';
-        ctx.fillRect(0, 0, 800, 800); // WIDTH, HEIGHT constants
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
         // Draw center line
         ctx.strokeStyle = 'rgb(128, 128, 128)';
         ctx.lineWidth = 2;
         ctx.setLineDash([10, 10]);
         ctx.beginPath();
-        ctx.moveTo(400, 0); // WIDTH / 2
-        ctx.lineTo(400, 800); // HEIGHT
+        ctx.moveTo(WIDTH / 2, 0);
+        ctx.lineTo(WIDTH / 2, HEIGHT);
         ctx.stroke();
         ctx.setLineDash([]);
 
@@ -129,7 +129,7 @@ export class GameHelpers {
         ctx.fillStyle = 'rgb(255, 255, 255)';
         ctx.font = font;
         ctx.textAlign = 'center';
-        ctx.fillText(leftScore.toString(), 200, 50); // WIDTH / 4
-        ctx.fillText(rightScore.toString(), 600, 50); // 3 * WIDTH / 4
+        ctx.fillText(leftScore.toString(), WIDTH / 4, 50);
+        ctx.fillText(rightScore.toString(), 3 * WIDTH / 4, 50);
     }
 }

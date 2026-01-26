@@ -129,29 +129,6 @@ class PhysicsObject(ABC):
         self.pos[0] = np.clip(self.pos[0], board_origin[0] + buffer[0], board[0] - buffer[0])
         self.pos[1] = np.clip(self.pos[1], board_origin[1] + buffer[1], board[1] - buffer[1])
 
-    # @abstractmethod
-    # def objects_collision(self, other):
-    #     """Method must be implemented by all subclasses"""
-    #     return self.pos[:] == other.pos[:]
-
-    # @abstractmethod
-    # def resolve_collision(self, other):
-    #     """
-    #     Resolve physics objects collision using Newton's Third Law:
-    #     Newton 3: For every action there is an equal and opposite reaction
-    #      """
-    #     if self.object_collision(self):
-    #         # Newton's Third Law: exchange impulses
-    #         normal = self.pos - other.pos
-    #         normal /= np.linalg.norm(normal)
-
-    #         relative_velocity = self.vel - other.vel
-    #         impulse_magnitude = -2 * np.dot(relative_velocity, normal) / (1/self.mass + 1/other.mass)
-    #         impulse = impulse_magnitude * normal
-
-    #         self.apply_impulse(impulse)
-    #         other.apply_impulse(-impulse)
-
     # --- Reference Physics Formulas ---
     """
     s = v₀t + ½at²       (position update)

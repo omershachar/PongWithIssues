@@ -39,10 +39,16 @@ export interface GameState {
 }
 
 export interface InputState {
-    up: boolean;
-    down: boolean;
+    // Left paddle controls (W/S keys)
+    leftUp: boolean;
+    leftDown: boolean;
+    // Right paddle controls (Arrow keys)
+    rightUp: boolean;
+    rightDown: boolean;
+    // Menu navigation
     left: boolean;
     right: boolean;
+    // Game controls
     space: boolean;
     escape: boolean;
     m: boolean;

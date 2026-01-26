@@ -6,10 +6,16 @@ import { InputState } from '../types/index.js';
 
 export class InputHandler {
     private inputState: InputState = {
-        up: false,
-        down: false,
+        // Left paddle (W/S)
+        leftUp: false,
+        leftDown: false,
+        // Right paddle (Arrow keys)
+        rightUp: false,
+        rightDown: false,
+        // Menu navigation
         left: false,
         right: false,
+        // Game controls
         space: false,
         escape: false,
         m: false,
@@ -18,14 +24,18 @@ export class InputHandler {
     };
 
     private keyMap: { [key: string]: keyof InputState } = {
-        'ArrowUp': 'up',
-        'KeyW': 'up',
-        'ArrowDown': 'down',
-        'KeyS': 'down',
+        // Left paddle controls
+        'KeyW': 'leftUp',
+        'KeyS': 'leftDown',
+        // Right paddle controls
+        'ArrowUp': 'rightUp',
+        'ArrowDown': 'rightDown',
+        // Menu navigation
         'ArrowLeft': 'left',
         'KeyA': 'left',
         'ArrowRight': 'right',
         'KeyD': 'right',
+        // Game controls
         'Space': 'space',
         'Escape': 'escape',
         'KeyM': 'm',

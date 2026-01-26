@@ -88,3 +88,36 @@ versions/web-version/
 - Ball: 7px radius, default velocity (6, 0)
 - Win condition: 3 points
 - Physics: SPIN_FACTOR=0.5, MAX_DEFLECTION_SPEED=7
+
+## Progress Tracking
+
+**IMPORTANT**: After completing any task or mission, update `progress.md` with:
+1. Date and session number
+2. Tasks completed (with checkmarks)
+3. Any bugs found or fixed (update the bug table)
+4. Files created/modified/deleted
+5. Notes about issues encountered
+6. Next steps
+
+Also update `TODO.md` when:
+- Completing tasks (move to "Completed Tasks Archive")
+- Discovering new bugs (add to Priority 1)
+- Identifying new features or improvements
+
+## Project Documentation
+
+| File | Purpose |
+|------|---------|
+| `CLAUDE.md` | Guidance for Claude Code (this file) |
+| `progress.md` | Session-by-session progress tracker |
+| `TODO.md` | Master task list (prioritized) |
+| `docs/PROJECT_ANALYSIS.md` | Full codebase analysis with all methods |
+| `docs/TODO.txt` | Original TODO (legacy, see TODO.md) |
+
+## Known Issues
+
+See `TODO.md` Priority 1 for critical bugs that need fixing:
+- TypeScript paddle controls broken (BUG-001, BUG-002)
+- Python testing module crashes (BUG-003, BUG-004)
+- AI module has NameError (BUG-005)
+- BETA module bugs (BUG-006, BUG-007)
