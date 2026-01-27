@@ -1,8 +1,29 @@
 import pygame
+import os
 from pong.constants import *
 from pong.ball import Ball
 
 ball_menu = Ball(*MIDDLE_BOARD, BALL_RADIUS, WHITE, mode='classic', vel=(BALL_DEFAULT_VEL[0], 4))
+
+# Developer info
+DEVELOPER = "omershachar"
+GITHUB_URL = "github.com/omershachar/PongWithIssues"
+VERSION = "v1.0.0"
+
+# Try to load fox logo if it exists
+FOX_LOGO = None
+_fox_paths = [
+    os.path.join(os.path.dirname(__file__), '..', 'assets', 'fox.png'),
+    os.path.join(os.path.dirname(__file__), '..', 'assets', 'fox_logo.png'),
+]
+for _path in _fox_paths:
+    if os.path.exists(_path):
+        try:
+            FOX_LOGO = pygame.image.load(_path)
+            FOX_LOGO = pygame.transform.scale(FOX_LOGO, (24, 24))
+            break
+        except pygame.error:
+            pass
 
 # Game modes configuration
 GAME_MODES = [
@@ -93,6 +114,18 @@ def draw_menu(WIN, selected_mode):
     # Start prompt
     prompt = FONT_DEFAULT_DIGITAL.render("Press [SPACE] to start", True, PURPLE)
     WIN.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, MENU_FOOTER - MENU_MARGIN_Y))
+
+    # Credits footer
+    credits_y = HEIGHT - 30
+    credits_text = FONT_TINY_DIGITAL.render(f"{VERSION} | {GITHUB_URL}", True, DARK_GREY)
+    credits_x = WIDTH - credits_text.get_width() - 10
+
+    # Draw fox logo if available
+    if FOX_LOGO:
+        WIN.blit(FOX_LOGO, (credits_x - 30, credits_y - 4))
+        credits_x -= 30
+
+    WIN.blit(credits_text, (credits_x, credits_y))
 
     # Draw bouncing ball
     ball_menu.draw(WIN)

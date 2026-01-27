@@ -17,9 +17,27 @@ FONT_MENU_SMALL = pygame.font.SysFont(*FONT_SMALL)
 
 NUM_MODES = len(GAME_MODES)
 
+
+def set_window_icon():
+    """Set the window icon if available."""
+    icon_paths = [
+        os.path.join(os.path.dirname(__file__), 'assets', 'icon_32x32.png'),
+        os.path.join(os.path.dirname(__file__), 'assets', 'icon.png'),
+    ]
+    for path in icon_paths:
+        if os.path.exists(path):
+            try:
+                icon = pygame.image.load(path)
+                pygame.display.set_icon(icon)
+                return
+            except pygame.error:
+                pass
+
+
 def launcher():
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("PongWithIssues")
+    set_window_icon()
     clock = pygame.time.Clock()
 
     selected_mode = 0  # Classic = 0, Pongception = 1, BETA = 2, Sandbox = 3

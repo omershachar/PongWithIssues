@@ -239,6 +239,36 @@ This file tracks Claude Code's progress on the PongWithIssues project.
 - `TODO.md` - Updated completed tasks
 - `progress.md` - Session log
 
+**Priority 4 - Build System & Branding (continued):**
+- [x] **Created build system for easy distribution**
+  - `scripts/build.py` - PyInstaller build script with options
+  - `scripts/generate_icon.py` - Programmatic icon generation
+  - Supports `--onefile` and `--console` flags
+- [x] **Generated game icons**
+  - PNG icons at 16, 32, 48, 64, 128, 256px sizes
+  - ICO file for Windows
+  - Favicon for web version
+- [x] **Added window icon to launcher**
+  - Loads from `assets/icon_32x32.png` or `assets/icon.png`
+- [x] **Implemented fox logo and credits**
+  - Fox logo displayed in menu footer (24x24)
+  - Version number shown (v1.0.0)
+  - GitHub URL in credits
+  - Auto-loads custom `assets/fox.png` when provided
+
+#### Additional Files Created
+- `scripts/build.py` - PyInstaller build script
+- `scripts/generate_icon.py` - Icon generator
+- `assets/icon.png` - Main game icon (256x256)
+- `assets/icon.ico` - Windows icon
+- `assets/icon_*.png` - Various icon sizes
+- `assets/favicon.png` - Web favicon
+- `assets/fox.png` - Fox logo (placeholder)
+
+#### Additional Files Modified
+- `launcher.py` - Added window icon support
+- `pong/menu.py` - Added credits footer, fox logo, version
+
 ---
 
 ## Statistics
@@ -248,16 +278,16 @@ This file tracks Claude Code's progress on the PongWithIssues project.
 | Sessions | 4 |
 | Bugs Found | 7 |
 | Bugs Fixed | 7 |
-| Files Created | 7 |
-| Files Modified | 20 |
+| Files Created | 15 |
+| Files Modified | 22 |
 | Files Deleted | 6+ directories |
-| Commits | 4 |
+| Commits | 5 |
 
 ---
 
 ## Next Steps
-1. Make an easy download version with icon (Priority 4)
-2. Implement omershachar github fox (Priority 4)
-3. Merge AI/testing files (Priority 3 - optional)
-4. Reconcile physics_object implementations (Priority 3 - optional)
-5. Priority 5+ features (customization, AI opponent, etc.)
+1. Priority 5: Customization features (ball/paddle size, colors)
+2. Priority 6: AI opponent implementation
+3. Priority 7: Audio & visual polish
+4. Optional: Merge AI/testing files (Priority 3)
+5. Optional: Reconcile physics_object implementations (Priority 3)

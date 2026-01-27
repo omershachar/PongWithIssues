@@ -93,8 +93,15 @@
   - Added visual mode selection grid in menu
   - Added Sandbox mode with debug overlay
   - 4 modes: Classic, Pongception, BETA, Sandbox
-- [ ] Make an easy download version with an icon
-- [ ] Implement omershachar github fox somewhere
+- [x] Make an easy download version with an icon
+  - Created `scripts/build.py` for PyInstaller builds
+  - Created `scripts/generate_icon.py` for icon generation
+  - Generated icons in multiple sizes (16x16 to 256x256)
+  - Window icon set in launcher
+- [x] Implement omershachar github fox somewhere
+  - Fox logo displayed in menu footer
+  - Version and GitHub URL shown in credits
+  - Auto-loads `assets/fox.png` when present
 
 ---
 
@@ -263,6 +270,11 @@
 - [x] Created Sandbox mode (`versions/sandbox/main.py`)
 - [x] Added GREEN color and FONT_TINY_DIGITAL to constants
 - [x] Updated launcher to support 4 modes
+- [x] Created build system (`scripts/build.py`, `scripts/generate_icon.py`)
+- [x] Generated game icons (PNG and ICO formats)
+- [x] Added window icon support to launcher
+- [x] Added fox logo and credits to menu footer
+- [x] Added version number (v1.0.0) to menu
 
 ---
 
