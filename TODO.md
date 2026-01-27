@@ -124,7 +124,8 @@
 
 ### Board Customization
 - [ ] Change board shape (circle mode?)
-- [ ] Change board background color
+- [x] Change board background color
+  - 6 options: Black, Dark Grey, Dark Blue, Dark Green, Dark Red, Dark Purple
 - [ ] Custom background images (Nick Cage background!)
 - [ ] Upload custom photo for background
 

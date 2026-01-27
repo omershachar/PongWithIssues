@@ -67,6 +67,16 @@ COLOR_OPTIONS = {
     'Grey': GREY,
 }
 
+# Background color options (darker colors work best)
+BACKGROUND_OPTIONS = {
+    'Black': BLACK,
+    'Dark Grey': DARK_GREY,
+    'Dark Blue': (0, 0, 40),
+    'Dark Green': (0, 30, 0),
+    'Dark Red': (40, 0, 0),
+    'Dark Purple': (30, 0, 40),
+}
+
 # Setting ranges
 SETTING_RANGES = {
     'ball_radius': {'min': 3, 'max': 20, 'step': 1, 'label': 'Ball Size'},
@@ -85,8 +95,11 @@ class SettingsMenu:
     def __init__(self, settings: GameSettings):
         self.settings = settings
         self.selected_option = 0
-        self.options = list(SETTING_RANGES.keys()) + ['left_paddle_color', 'right_paddle_color', 'Reset Defaults']
+        self.options = list(SETTING_RANGES.keys()) + [
+            'left_paddle_color', 'right_paddle_color', 'background_color', 'Reset Defaults'
+        ]
         self.color_keys = list(COLOR_OPTIONS.keys())
+        self.bg_color_keys = list(BACKGROUND_OPTIONS.keys())
         self.editing = False
 
     def handle_input(self, event):
@@ -124,25 +137,35 @@ class SettingsMenu:
             setattr(self.settings, option, new_value)
 
         elif option == 'left_paddle_color':
-            self._cycle_color('left_paddle_color', direction)
+            self._cycle_color('left_paddle_color', direction, COLOR_OPTIONS)
         elif option == 'right_paddle_color':
-            self._cycle_color('right_paddle_color', direction)
+            self._cycle_color('right_paddle_color', direction, COLOR_OPTIONS)
+        elif option == 'background_color':
+            self._cycle_color('background_color', direction, BACKGROUND_OPTIONS)
 
-    def _cycle_color(self, attr, direction):
+    def _cycle_color(self, attr, direction, color_dict=None):
         """Cycle through color options."""
+        if color_dict is None:
+            color_dict = COLOR_OPTIONS
         current_color = getattr(self.settings, attr)
         current_idx = 0
-        for i, (name, color) in enumerate(COLOR_OPTIONS.items()):
+        for i, (name, color) in enumerate(color_dict.items()):
             if color == current_color:
                 current_idx = i
                 break
-        new_idx = (current_idx + direction) % len(COLOR_OPTIONS)
-        new_color = list(COLOR_OPTIONS.values())[new_idx]
+        new_idx = (current_idx + direction) % len(color_dict)
+        new_color = list(color_dict.values())[new_idx]
         setattr(self.settings, attr, new_color)
 
-    def _get_color_name(self, color):
+    def _get_color_name(self, color, color_dict=None):
         """Get the name of a color."""
-        for name, c in COLOR_OPTIONS.items():
+        if color_dict is None:
+            color_dict = COLOR_OPTIONS
+        for name, c in color_dict.items():
+            if c == color:
+                return name
+        # Check background colors too
+        for name, c in BACKGROUND_OPTIONS.items():
             if c == color:
                 return name
         return 'Custom'
@@ -185,6 +208,9 @@ class SettingsMenu:
             elif option == 'right_paddle_color':
                 label = "Right Paddle Color"
                 value_display = f"< {self._get_color_name(self.settings.right_paddle_color)} >"
+            elif option == 'background_color':
+                label = "Background Color"
+                value_display = f"< {self._get_color_name(self.settings.background_color, BACKGROUND_OPTIONS)} >"
             elif option == 'Reset Defaults':
                 label = "Reset Defaults"
                 value_display = "[ENTER]"
@@ -202,8 +228,8 @@ class SettingsMenu:
             value_text = FONT_SMALL_DIGITAL.render(value_display, True, value_color)
             win.blit(value_text, (WIDTH - value_text.get_width() - 80, y))
 
-            # Draw color preview for paddle colors
-            if option in ['left_paddle_color', 'right_paddle_color']:
+            # Draw color preview for color options
+            if option in ['left_paddle_color', 'right_paddle_color', 'background_color']:
                 color = getattr(self.settings, option)
                 preview_rect = (WIDTH - 60, y + 2, 30, 20)
                 pygame.draw.rect(win, color, preview_rect)
