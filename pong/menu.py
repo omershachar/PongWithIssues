@@ -108,7 +108,7 @@ def draw_menu(WIN, selected_mode):
         ball_menu.color = GAME_MODES[selected_mode]['ball_color']
 
     # Navigation hint
-    nav_text = FONT_TINY_DIGITAL.render("[LEFT/RIGHT] Select mode", True, DARK_GREY)
+    nav_text = FONT_TINY_DIGITAL.render("[LEFT/RIGHT] Select mode  |  [S] Settings", True, DARK_GREY)
     WIN.blit(nav_text, (WIDTH // 2 - nav_text.get_width() // 2, mode_start_y + mode_box_height + 20))
 
     # Start prompt

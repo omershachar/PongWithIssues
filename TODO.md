@@ -108,12 +108,19 @@
 ## Priority 5: Customization Features
 
 ### Ball & Paddle Customization
-- [ ] Add function for changing size and speed of ball and paddles
+- [x] Add function for changing size and speed of ball and paddles
+  - Created `pong/settings.py` with GameSettings class
+  - Settings menu accessible via [S] key from main menu
 - [ ] Option to choose key settings or play with mouse
-- [ ] Change paddle colors (left and right separately)
-- [ ] Resize paddles (affect mass?)
-- [ ] Adjust ball velocity/acceleration/spin/friction
-- [ ] Adjust paddle velocity/acceleration/spin/friction
+- [x] Change paddle colors (left and right separately)
+  - 8 color options: White, Purple, Light Purple, Red, Yellow, Green, Orange, Grey
+- [x] Resize paddles (affect mass?)
+  - Paddle height adjustable 40-200px
+- [x] Adjust ball velocity/acceleration/spin/friction
+  - Ball speed adjustable 2-15
+  - Ball radius adjustable 3-20
+- [x] Adjust paddle velocity/acceleration/spin/friction
+  - Paddle speed adjustable 3-15
 
 ### Board Customization
 - [ ] Change board shape (circle mode?)
