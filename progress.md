@@ -285,9 +285,31 @@ This file tracks Claude Code's progress on the PongWithIssues project.
 
 ---
 
+**Priority 5 - Customization Features:**
+- [x] Created `pong/settings.py` with GameSettings and SettingsMenu classes
+- [x] Settings menu accessible via [S] key from main menu
+- [x] Adjustable settings:
+  - Ball size (3-20px)
+  - Ball speed (2-15)
+  - Paddle height (40-200px)
+  - Paddle speed (3-15)
+  - Left/Right paddle colors (8 options)
+  - Background color (6 dark theme options)
+  - Winning score (1-21)
+- [x] Live preview in settings menu
+- [x] Reset to defaults option
+
+#### Commits This Session
+- `b956888` - Consolidate Ball/Paddle classes and add Sandbox mode
+- `97bd4c0` - Add build system, icons, and credits (Priority 4 complete)
+- `3117a61` - Add settings menu for game customization (Priority 5)
+- `d957ba8` - Add background color customization to settings
+
+---
+
 ## Next Steps
-1. Priority 5: Customization features (ball/paddle size, colors)
-2. Priority 6: AI opponent implementation
-3. Priority 7: Audio & visual polish
+1. Priority 6: AI opponent implementation
+2. Priority 7: Audio & visual polish
+3. Priority 5 remaining: Mouse controls, custom images
 4. Optional: Merge AI/testing files (Priority 3)
 5. Optional: Reconcile physics_object implementations (Priority 3)
