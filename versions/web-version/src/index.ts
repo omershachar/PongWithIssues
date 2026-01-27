@@ -20,10 +20,11 @@ class PongGame {
             throw new Error('Canvas element not found');
         }
 
-        this.ctx = this.canvas.getContext('2d');
-        if (!this.ctx) {
+        const ctx = this.canvas.getContext('2d');
+        if (!ctx) {
             throw new Error('Could not get 2D context');
         }
+        this.ctx = ctx;
 
         this.gameManager = new GameManager();
         this.inputHandler = new InputHandler();

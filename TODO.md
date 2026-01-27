@@ -51,12 +51,12 @@
 - [x] Delete `testing/pygame_example.py` (unused example)
 
 ### Remove Duplicate Code
-- [ ] Remove `handle_ball_collision()` from `pong/utilities.py` (NOT a duplicate - classic vs physics mode)
+- [x] Remove `handle_ball_collision()` from `pong/utilities.py` (NOT a duplicate - classic vs physics mode, keeping both)
 - [x] Remove commented code block in `versions/BETA/main.py:121-193`
 - [x] Remove commented code block in `pong/physics_object.py:132-153`
 
 ### Fix Hardcoded Values
-- [ ] Replace hardcoded `800` with `WIDTH` constant in `collision-detection.ts`
+- [x] Replace hardcoded `800` with `WIDTH` constant in `collision-detection.ts` (already uses HEIGHT from constants)
 - [x] Replace hardcoded values in `game-helpers.ts` with constants
 
 ---
@@ -64,8 +64,8 @@
 ## Priority 3: Code Consolidation (Refactoring)
 
 ### Merge Similar Classes
-- [ ] Combine `Ball` and `BallClassic` into single class with mode parameter
-- [ ] Combine `Paddle` and `PaddleClassic` into single class with mode parameter
+- [x] Combine `Ball` and `BallClassic` into single class with mode parameter (Python & TypeScript)
+- [x] Combine `Paddle` and `PaddleClassic` into single class with mode parameter (Python & TypeScript)
 - [ ] Merge `AI/testing/main.py` and `AI/testing/tutorial.py` (90% duplicate)
 
 ### Unify Physics Implementations
@@ -89,7 +89,10 @@
 - [x] Start, Pause and Reset buttons
 - [x] Add a requirements file
 - [x] Add a LICENSE file (MIT)
-- [ ] Change mode selection (classic, pongception, BETA/WTF, SandBox/Debug)
+- [x] Change mode selection (classic, pongception, BETA/WTF, SandBox/Debug)
+  - Added visual mode selection grid in menu
+  - Added Sandbox mode with debug overlay
+  - 4 modes: Classic, Pongception, BETA, Sandbox
 - [ ] Make an easy download version with an icon
 - [ ] Implement omershachar github fox somewhere
 
@@ -247,6 +250,20 @@
 - [x] Removed commented code in physics_object.py
 - [x] Fixed hardcoded values in game-helpers.ts
 
+### Code Consolidation (Session 4)
+- [x] Combined Ball/BallClassic into single class (Python: `pong/ball.py`)
+- [x] Combined Ball/BallClassic into single class (TypeScript: `src/game/ball.ts`)
+- [x] Combined Paddle/PaddleClassic into single class (Python: `pong/paddle.py`)
+- [x] Combined Paddle/PaddleClassic into single class (TypeScript: `src/game/paddle.ts`)
+- [x] Fixed TypeScript null check error in `src/index.ts`
+
+### Priority 4 Features (Session 4)
+- [x] Enhanced mode selection with visual grid
+- [x] Added GAME_MODES configuration in `pong/menu.py`
+- [x] Created Sandbox mode (`versions/sandbox/main.py`)
+- [x] Added GREEN color and FONT_TINY_DIGITAL to constants
+- [x] Updated launcher to support 4 modes
+
 ---
 
-*Last updated: 2026-01-26*
+*Last updated: 2026-01-27*

@@ -9,6 +9,7 @@ pygame.font.init()
 # -------------------- Fonts --------------------
 
 # Digital fonts (custom)
+FONT_TINY_DIGITAL   = pygame.font.Font("pong/FONTS/digital-7.ttf", 14)
 FONT_SMALL_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 20)
 FONT_MEDIUM_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 30)
 FONT_DEFAULT_DIGITAL = pygame.font.Font("pong/FONTS/digital-7.ttf", 35)
@@ -59,6 +60,8 @@ LIGHT_RED     = (255, 204, 203)
 RED           = (255, 0, 0)
 DARK_RED      = (139, 0, 0)
 YELLOW        = (255, 255, 0)
+GREEN         = (0, 200, 80)
+LIGHT_GREEN   = (144, 238, 144)
 
 # ----- Fire Colors -----
 DARK_ORANGE      = (170, 65, 0)

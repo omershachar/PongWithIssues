@@ -157,8 +157,107 @@ This file tracks Claude Code's progress on the PongWithIssues project.
 
 ---
 
+### Session 4 - 2026-01-27
+
+#### Completed Tasks
+
+**Priority 2 - Completed:**
+- [x] Verified `collision-detection.ts` already uses `HEIGHT` from constants (marked complete)
+- [x] Marked `handle_ball_collision()` as intentionally separate (classic vs physics mode)
+
+**Priority 3 - Code Consolidation:**
+- [x] **Combined Ball/BallClassic classes (Python)**
+  - Added `mode` parameter ('classic' or 'physics')
+  - Physics mode: fire trail, aura, spin effects, Magnus effect
+  - Classic mode: simple circle drawing, direct movement
+  - `BallClassic` now a legacy alias extending `Ball` with `mode='classic'`
+- [x] **Combined Ball/BallClassic classes (TypeScript)**
+  - Same pattern as Python with mode parameter
+  - `BallClassic` is deprecated alias
+- [x] **Combined Paddle/PaddleClassic classes (Python)**
+  - Added `mode` parameter ('classic' or 'physics')
+  - Physics mode: acceleration-based with friction
+  - Classic mode: direct velocity movement
+  - Added backwards-compatible `x`, `y` properties
+  - `PaddleClassic` now a legacy alias
+- [x] **Combined Paddle/PaddleClassic classes (TypeScript)** (was already done)
+  - Same pattern with mode parameter and deprecated alias
+- [x] **Fixed TypeScript null check error in `index.ts`**
+  - Changed `this.ctx = canvas.getContext('2d')` to use intermediate variable with proper null check
+
+#### Files Modified
+- `pong/ball.py` - Unified Ball class with mode parameter
+- `pong/paddle.py` - Unified Paddle class with mode parameter
+- `versions/web-version/src/game/ball.ts` - Already had unified Ball
+- `versions/web-version/src/game/paddle.ts` - Already had unified Paddle
+- `versions/web-version/src/index.ts` - Fixed null check error
+- `TODO.md` - Updated completed tasks
+- `progress.md` - Added session log
+
+#### Testing
+- Python imports: All modules import successfully
+- Ball/Paddle mode parameter: Working correctly
+- BallClassic/PaddleClassic aliases: Backwards compatible
+- TypeScript build: Compiles without errors
+
+#### Notes
+- AI/testing files (`main.py` vs `tutorial.py`) have different purposes:
+  - `main.py`: Full NEAT training with duration-based fitness
+  - `tutorial.py`: Simpler test interface
+  - Merging should be done carefully to preserve both use cases
+- Physics object files (`pong/` vs `pong_BETA/`) have significant differences:
+  - `pong/physics_object.py`: Standard Euler, ABC-based, GRAVITY constant
+  - `pong_BETA/physics_object.py`: Symplectic Euler, configurable gravity/damping/max_speed
+  - BETA version is more configurable but reconciling requires careful refactoring
+
+**Priority 4 - Mode Selection (continued):**
+- [x] **Enhanced menu with visual mode selection grid**
+  - Added `GAME_MODES` configuration in `pong/menu.py`
+  - Shows 4 modes as selectable boxes with descriptions
+  - Ball color changes based on selected mode
+- [x] **Created Sandbox mode**
+  - New mode at `versions/sandbox/main.py`
+  - Debug overlay shows: ball position, velocity, speed, spin, paddle velocities
+  - Ball bounces off all walls (no scoring)
+  - Hit counter instead of score
+  - Press [D] to toggle debug info
+- [x] **Added constants**
+  - `GREEN` and `LIGHT_GREEN` colors
+  - `FONT_TINY_DIGITAL` for small debug text
+- [x] **Updated launcher**
+  - Supports 4 modes dynamically from `GAME_MODES`
+  - Imports sandbox mode
+
+#### Files Created
+- `versions/sandbox/main.py` - Sandbox mode implementation
+- `versions/sandbox/__init__.py` - Module init
+
+#### Files Modified
+- `pong/constants.py` - Added FONT_TINY_DIGITAL, GREEN, LIGHT_GREEN
+- `pong/menu.py` - Enhanced with GAME_MODES config and visual grid
+- `launcher.py` - Updated to support 4 modes
+- `TODO.md` - Updated completed tasks
+- `progress.md` - Session log
+
+---
+
+## Statistics
+
+| Metric | Count |
+|--------|-------|
+| Sessions | 4 |
+| Bugs Found | 7 |
+| Bugs Fixed | 7 |
+| Files Created | 7 |
+| Files Modified | 20 |
+| Files Deleted | 6+ directories |
+| Commits | 4 |
+
+---
+
 ## Next Steps
-1. Fix pre-existing TypeScript strict null check errors (ball.ts, index.ts)
-2. Continue with Priority 3 - Code Consolidation (merge similar classes)
-3. Add unit tests for physics calculations
-4. Implement features from Priority 4+
+1. Make an easy download version with icon (Priority 4)
+2. Implement omershachar github fox (Priority 4)
+3. Merge AI/testing files (Priority 3 - optional)
+4. Reconcile physics_object implementations (Priority 3 - optional)
+5. Priority 5+ features (customization, AI opponent, etc.)
