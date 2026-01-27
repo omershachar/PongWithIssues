@@ -89,6 +89,14 @@ versions/web-version/
 - Win condition: 3 points
 - Physics: SPIN_FACTOR=0.5, MAX_DEFLECTION_SPEED=7
 
+## Feature Approval Policy
+
+**IMPORTANT**: A feature is NOT considered finished until the user explicitly approves it. After implementing a feature:
+1. Inform the user what was implemented
+2. Wait for user to test and approve
+3. Only mark as complete in TODO.md after user approval
+4. Do not proceed to the next priority until current features are approved
+
 ## Workflow: After Each Priority Phase
 
 **IMPORTANT**: After completing each priority phase from TODO.md:

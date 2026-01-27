@@ -287,3 +287,5 @@
 ---
 
 *Last updated: 2026-01-27*
+
+**Note**: Items marked [x] in Session 4 are PENDING USER APPROVAL. Features are not considered complete until user tests and approves them.
