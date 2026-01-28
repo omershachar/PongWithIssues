@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), './')
 pygame.init()
 
 from pong.constants import *
-from pong.menu import draw_menu, GAME_MODES
+from pong.menu import draw_menu, handle_menu_click, GAME_MODES
 from pong.settings import GameSettings, SettingsMenu
 from versions.classic.main import main as run_classic
 from versions.pongception.main import main as run_pongception
@@ -67,6 +67,7 @@ def launcher():
                 if event.type == pygame.QUIT:
                     running = False
                     return
+                handle_menu_click(event)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         if selected_mode == 0:

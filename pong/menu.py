@@ -1,5 +1,5 @@
 import pygame
-import os
+import webbrowser
 from pong.constants import *
 from pong.ball import Ball
 
@@ -8,22 +8,201 @@ ball_menu = Ball(*MIDDLE_BOARD, BALL_RADIUS, WHITE, mode='classic', vel=(BALL_DE
 # Developer info
 DEVELOPER = "omershachar"
 GITHUB_URL = "github.com/omershachar/PongWithIssues"
+GITHUB_FULL_URL = "https://github.com/omershachar/PongWithIssues"
 VERSION = "v1.0.0"
 
-# Try to load fox logo if it exists
-FOX_LOGO = None
-_fox_paths = [
-    os.path.join(os.path.dirname(__file__), '..', 'assets', 'fox.png'),
-    os.path.join(os.path.dirname(__file__), '..', 'assets', 'fox_logo.png'),
-]
-for _path in _fox_paths:
-    if os.path.exists(_path):
-        try:
-            FOX_LOGO = pygame.image.load(_path)
-            FOX_LOGO = pygame.transform.scale(FOX_LOGO, (24, 24))
-            break
-        except pygame.error:
-            pass
+# Clickable link rect (set during draw, checked during event handling)
+_github_link_rect = None
+
+
+def handle_menu_click(event):
+    """Handle mouse clicks in the menu. Call from the event loop.
+    Returns True if a click was consumed."""
+    global _github_link_rect
+    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if _github_link_rect and _github_link_rect.collidepoint(event.pos):
+            webbrowser.open(GITHUB_FULL_URL)
+            return True
+    return False
+
+
+def draw_fox_logo(surface, x, y, size=64):
+    """Draw a fox-with-laptop icon matching the GitHub profile picture.
+    Multi-toned grey fox sitting with a laptop, curled tail.
+    """
+    s = size / 24.0
+
+    # Fox palette
+    BODY_DARKEST = (55, 55, 60)
+    BODY_DARK = (80, 82, 88)
+    BODY_MID = (115, 118, 125)
+    BODY_LIGHT = (155, 158, 165)
+    BODY_HIGHLIGHT = (185, 188, 195)
+    SNOUT_WHITE = (220, 222, 228)
+    EYE_COLOR = (240, 245, 255)
+    NOSE_COLOR = (40, 40, 45)
+
+    # Laptop palette
+    LAPTOP_DARK = (50, 52, 58)
+    LAPTOP_FRAME = (85, 88, 95)
+    LAPTOP_BEZEL = (70, 72, 78)
+    SCREEN_BG = (140, 165, 190)
+    SCREEN_GLOW = (170, 200, 225)
+    KEYBOARD_KEYS = (95, 98, 105)
+
+    # --- Tail (drawn first, behind body) ---
+    tail = [
+        (x + 14*s, y + 18*s),
+        (x + 17*s, y + 15.5*s),
+        (x + 20.5*s, y + 14*s),
+        (x + 23*s, y + 15.5*s),
+        (x + 23.5*s, y + 18*s),
+        (x + 22*s, y + 21.5*s),
+        (x + 18*s, y + 23*s),
+        (x + 14*s, y + 22.5*s),
+        (x + 11*s, y + 21*s),
+    ]
+    pygame.draw.polygon(surface, BODY_MID, tail)
+    # Tail tip (lighter)
+    tail_tip = [
+        (x + 22.5*s, y + 16.5*s),
+        (x + 23.5*s, y + 18*s),
+        (x + 22*s, y + 21.5*s),
+        (x + 19*s, y + 23*s),
+        (x + 20*s, y + 20.5*s),
+        (x + 21.5*s, y + 18.5*s),
+    ]
+    pygame.draw.polygon(surface, BODY_HIGHLIGHT, tail_tip)
+
+    # --- Body ---
+    body = [
+        (x + 10*s, y + 9*s),
+        (x + 8*s,  y + 13*s),
+        (x + 7*s,  y + 18*s),
+        (x + 9*s,  y + 22*s),
+        (x + 14*s, y + 22*s),
+        (x + 16*s, y + 18*s),
+        (x + 15*s, y + 13*s),
+        (x + 14*s, y + 9*s),
+    ]
+    pygame.draw.polygon(surface, BODY_DARK, body)
+
+    # Back shadow (darker stripe along the back/right side)
+    back_shadow = [
+        (x + 14*s, y + 10*s),
+        (x + 16*s, y + 18*s),
+        (x + 14*s, y + 22*s),
+        (x + 13*s, y + 18*s),
+        (x + 13.5*s, y + 13*s),
+    ]
+    pygame.draw.polygon(surface, BODY_DARKEST, back_shadow)
+
+    # Chest/belly highlight
+    chest = [
+        (x + 9*s,  y + 12*s),
+        (x + 8*s,  y + 16*s),
+        (x + 9*s,  y + 20*s),
+        (x + 11*s, y + 20*s),
+        (x + 11*s, y + 15*s),
+        (x + 10*s, y + 11*s),
+    ]
+    pygame.draw.polygon(surface, BODY_MID, chest)
+
+    # --- Head ---
+    head = [
+        (x + 8*s,  y + 9*s),
+        (x + 9*s,  y + 6*s),
+        (x + 12*s, y + 7.5*s),
+        (x + 15*s, y + 6*s),
+        (x + 16*s, y + 9*s),
+        (x + 14*s, y + 12*s),
+        (x + 10*s, y + 12*s),
+    ]
+    pygame.draw.polygon(surface, BODY_MID, head)
+
+    # Forehead highlight
+    forehead = [
+        (x + 10*s, y + 7*s),
+        (x + 12*s, y + 8*s),
+        (x + 14*s, y + 7*s),
+        (x + 12*s, y + 6.5*s),
+    ]
+    pygame.draw.polygon(surface, BODY_LIGHT, forehead)
+
+    # --- Ears (shorter) ---
+    # Left ear outer
+    pygame.draw.polygon(surface, BODY_DARK, [
+        (x + 8.5*s, y + 7.5*s), (x + 7.5*s, y + 3*s), (x + 11*s, y + 6.5*s)])
+    # Left ear inner
+    pygame.draw.polygon(surface, BODY_LIGHT, [
+        (x + 9*s, y + 7*s), (x + 8.2*s, y + 4.5*s), (x + 10.5*s, y + 6.5*s)])
+
+    # Right ear outer
+    pygame.draw.polygon(surface, BODY_DARK, [
+        (x + 13*s, y + 6.5*s), (x + 16.5*s, y + 3*s), (x + 15.5*s, y + 7.5*s)])
+    # Right ear inner
+    pygame.draw.polygon(surface, BODY_LIGHT, [
+        (x + 13.5*s, y + 6.5*s), (x + 15.8*s, y + 4.5*s), (x + 15*s, y + 7*s)])
+
+    # --- Face details ---
+    # Snout V-shape
+    snout = [
+        (x + 10*s, y + 8.5*s),
+        (x + 12*s, y + 11.5*s),
+        (x + 14*s, y + 8.5*s),
+        (x + 12*s, y + 9.5*s),
+    ]
+    pygame.draw.polygon(surface, SNOUT_WHITE, snout)
+
+    # Cheek highlight (left side)
+    cheek = [
+        (x + 9*s,  y + 9.5*s),
+        (x + 10*s, y + 8.5*s),
+        (x + 10.5*s, y + 10.5*s),
+        (x + 10*s, y + 11.5*s),
+    ]
+    pygame.draw.polygon(surface, BODY_HIGHLIGHT, cheek)
+
+    # Nose
+    pygame.draw.circle(surface, NOSE_COLOR,
+                       (int(x + 12*s), int(y + 11*s)), max(1, int(0.7*s)))
+
+    # Eye (with pupil)
+    eye_x, eye_y = int(x + 13.5*s), int(y + 8.5*s)
+    eye_r = max(1, int(0.9*s))
+    pygame.draw.circle(surface, EYE_COLOR, (eye_x, eye_y), eye_r)
+    pygame.draw.circle(surface, NOSE_COLOR, (eye_x, eye_y), max(1, int(0.4*s)))
+
+    # --- Laptop (more distinct) ---
+    # Laptop screen outer frame
+    pygame.draw.polygon(surface, LAPTOP_DARK, [
+        (x + 0.5*s, y + 10.5*s), (x + 8.5*s, y + 10.5*s),
+        (x + 9*s, y + 18.5*s), (x + 0*s, y + 18.5*s)])
+    # Laptop screen bezel
+    pygame.draw.polygon(surface, LAPTOP_BEZEL, [
+        (x + 1*s, y + 11*s), (x + 8*s, y + 11*s),
+        (x + 8.5*s, y + 18*s), (x + 0.5*s, y + 18*s)])
+    # Screen background
+    pygame.draw.polygon(surface, SCREEN_BG, [
+        (x + 1.8*s, y + 12*s), (x + 7.5*s, y + 12*s),
+        (x + 7.8*s, y + 17*s), (x + 1.2*s, y + 17*s)])
+    # Screen glow/reflection
+    pygame.draw.polygon(surface, SCREEN_GLOW, [
+        (x + 2*s, y + 12.5*s), (x + 5*s, y + 12.5*s),
+        (x + 4.5*s, y + 14.5*s), (x + 2*s, y + 14.5*s)])
+
+    # Laptop base/keyboard
+    pygame.draw.polygon(surface, LAPTOP_FRAME, [
+        (x - 0.5*s, y + 18.5*s), (x + 9.5*s, y + 18.5*s),
+        (x + 10*s, y + 20.5*s), (x - 1*s, y + 20.5*s)])
+    # Keyboard detail lines
+    pygame.draw.polygon(surface, KEYBOARD_KEYS, [
+        (x + 0.5*s, y + 19*s), (x + 9*s, y + 19*s),
+        (x + 9.2*s, y + 19.8*s), (x + 0.2*s, y + 19.8*s)])
+    # Trackpad hint
+    pygame.draw.polygon(surface, LAPTOP_BEZEL, [
+        (x + 3.5*s, y + 19.8*s), (x + 6*s, y + 19.8*s),
+        (x + 6.2*s, y + 20.3*s), (x + 3.3*s, y + 20.3*s)])
 
 # Game modes configuration
 GAME_MODES = [
@@ -113,19 +292,31 @@ def draw_menu(WIN, selected_mode):
 
     # Start prompt
     prompt = FONT_DEFAULT_DIGITAL.render("Press [SPACE] to start", True, PURPLE)
-    WIN.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, MENU_FOOTER - MENU_MARGIN_Y))
+    WIN.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, HEIGHT - 160))
 
-    # Credits footer
-    credits_y = HEIGHT - 30
-    credits_text = FONT_TINY_DIGITAL.render(f"{VERSION} | {GITHUB_URL}", True, DARK_GREY)
-    credits_x = WIDTH - credits_text.get_width() - 10
+    # Version in top-left corner
+    version_text = FONT_TINY_DIGITAL.render(VERSION, True, DARK_GREY)
+    WIN.blit(version_text, (10, 10))
 
-    # Draw fox logo if available
-    if FOX_LOGO:
-        WIN.blit(FOX_LOGO, (credits_x - 30, credits_y - 4))
-        credits_x -= 30
+    # Fox logo + GitHub link in bottom-left corner
+    global _github_link_rect
+    logo_size = 64
 
-    WIN.blit(credits_text, (credits_x, credits_y))
+    # Fox logo
+    logo_x = 12
+    logo_y = HEIGHT - logo_size - 30
+    draw_fox_logo(WIN, logo_x, logo_y, size=logo_size)
+
+    # GitHub link below the fox
+    link_text = FONT_SMALL_DIGITAL.render(GITHUB_URL, True, LIGHT_PURPLE)
+    link_x = 12
+    link_y = HEIGHT - 22
+    WIN.blit(link_text, (link_x, link_y))
+    pygame.draw.line(WIN, LIGHT_PURPLE,
+                     (link_x, link_y + link_text.get_height()),
+                     (link_x + link_text.get_width(), link_y + link_text.get_height()), 1)
+    _github_link_rect = pygame.Rect(link_x, link_y,
+                                    link_text.get_width(), link_text.get_height() + 2)
 
     # Draw bouncing ball
     ball_menu.draw(WIN)
