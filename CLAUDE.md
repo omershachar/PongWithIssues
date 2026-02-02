@@ -46,12 +46,14 @@ pong/                    # Shared core library
 ├── paddle.py            # Paddle with acceleration-based movement
 ├── helpers.py           # Collision detection, paddle movement logic
 ├── utilities.py         # Rendering functions, game state helpers
-└── menu.py              # Main menu UI
+├── menu.py              # Main menu UI with mode selection grid
+└── settings.py          # GameSettings and SettingsMenu classes
 
 versions/                # Game mode implementations
 ├── classic/main.py      # Standard Pong
 ├── pongception/main.py  # Physics-enhanced mode (spin, momentum, recoil)
-└── BETA/main.py         # Experimental features
+├── BETA/main.py         # Experimental features
+└── sandbox/main.py      # Debug mode with overlay
 ```
 
 ### Web Structure
@@ -80,6 +82,7 @@ versions/web-version/
 - **Classic**: Basic Pong with standard collision physics
 - **Pongception**: Advanced physics with spin (Magnus effect), paddle recoil, and momentum transfer
 - **BETA**: Testing ground for new features
+- **Sandbox**: Debug mode with overlay (ball stats, hit counter, no scoring)
 
 ## Key Constants (pong/constants.py)
 
@@ -107,9 +110,10 @@ versions/web-version/
    python3 -c "
    from pong.constants import *
    from pong.physics_object import PhysicsObject
-   from pong.ball import Ball, BallClassic
-   from pong.paddle import Paddle, PaddleClassic
+   from pong.ball import Ball
+   from pong.paddle import Paddle
    from pong.helpers import handle_ball_collision
+   from pong.settings import GameSettings
    from pong_BETA.physics_object import PhysicsObject as BetaPhysics
    print('All imports OK')
    "
@@ -162,6 +166,8 @@ Also update `TODO.md` when:
 All Priority 1 critical bugs have been **FIXED** (BUG-001 through BUG-007).
 
 See `TODO.md` for remaining work:
-- Priority 2: Minor code cleanup (partially complete)
-- Priority 3: Code consolidation/refactoring
-- Priority 4+: Feature development
+- Priority 2: Code cleanup (complete)
+- Priority 3: Code consolidation (partially complete - Ball/Paddle merged, AI/physics merges remaining)
+- Priority 4: Essential features (complete - modes, build system, branding)
+- Priority 5: Customization (partially complete - settings menu done, mouse controls remaining)
+- Priority 6+: AI opponent, audio, web/mobile, power-ups

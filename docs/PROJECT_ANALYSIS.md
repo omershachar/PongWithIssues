@@ -8,18 +8,22 @@ PongWithIssues/
 ├── README.md                       # Project documentation
 ├── CLAUDE.md                       # Claude Code guidance
 ├── LICENSE                         # MIT License
-├── requirements.txt                # Python dependencies
+├── requirements.txt                # Python dependencies (pip install)
+├── PRD.md                          # Product Requirements Document
+├── TODO.md                         # Master task list (prioritized)
+├── progress.md                     # Session-by-session progress tracker
 ├── .gitignore
 │
 ├── pong/                           # SHARED CORE LIBRARY (Python)
 │   ├── __init__.py
 │   ├── constants.py                # Game config: colors, sizes, physics constants
-│   ├── physics_object.py           # Base physics class (172 lines)
-│   ├── ball.py                     # Ball + BallClassic classes (169 lines)
-│   ├── paddle.py                   # Paddle + PaddleClassic classes (109 lines)
-│   ├── helpers.py                  # Collision detection, paddle movement (83 lines)
-│   ├── utilities.py                # Rendering, score handling (110 lines)
-│   ├── menu.py                     # Main menu UI (41 lines)
+│   ├── physics_object.py           # Base physics class (ABC with Newtonian mechanics)
+│   ├── ball.py                     # Unified Ball class with mode parameter
+│   ├── paddle.py                   # Unified Paddle class with mode parameter
+│   ├── helpers.py                  # Collision detection, paddle movement
+│   ├── utilities.py                # Rendering, score handling
+│   ├── menu.py                     # Main menu UI with mode selection grid
+│   ├── settings.py                 # GameSettings and SettingsMenu classes
 │   └── FONTS/
 │       ├── digital-7.ttf
 │       ├── LiberationMono-Bold.ttf
@@ -27,9 +31,8 @@ PongWithIssues/
 │
 ├── pong_BETA/                      # BETA PHYSICS MODULE (Alternative implementation)
 │   ├── __init__.py
-│   ├── helpers.py                  # EMPTY - no functions
 │   ├── physics_object.py           # Alternative physics with symplectic Euler
-│   └── object_manage.py            # Box class, ObjectsManage (BROKEN)
+│   └── object_manage.py            # Box class, ObjectsManage, grid/info helpers
 │
 ├── versions/                       # GAME MODE IMPLEMENTATIONS
 │   ├── classic/
@@ -38,6 +41,9 @@ PongWithIssues/
 │   │   └── main.py                 # Physics-enhanced mode (spin, momentum)
 │   ├── BETA/
 │   │   └── main.py                 # Physics sandbox environment
+│   ├── sandbox/
+│   │   ├── __init__.py
+│   │   └── main.py                 # Debug mode with overlay, no scoring
 │   └── web-version/                # WEB VERSION (TypeScript)
 │       ├── src/
 │       │   ├── index.ts            # Entry point, PongGame class
@@ -46,14 +52,14 @@ PongWithIssues/
 │       │   ├── game/
 │       │   │   ├── constants.ts    # Game constants (mirrors Python)
 │       │   │   ├── physics-object.ts
-│       │   │   ├── ball.ts
-│       │   │   ├── paddle.ts
+│       │   │   ├── ball.ts         # Unified Ball class with mode parameter
+│       │   │   ├── paddle.ts       # Unified Paddle class with mode parameter
 │       │   │   ├── menu.ts
 │       │   │   ├── classic-game.ts
 │       │   │   ├── physics-game.ts
 │       │   │   └── game-manager.ts
 │       │   └── utils/
-│       │       ├── game-helpers.ts     # BUGGY - paddle control broken
+│       │       ├── game-helpers.ts
 │       │       ├── collision-detection.ts
 │       │       └── input-handler.ts
 │       ├── dist/                   # Compiled JavaScript output
@@ -67,18 +73,28 @@ PongWithIssues/
 ├── AI/                             # AI TRAINING (NEAT)
 │   └── testing/
 │       ├── main.py                 # NEAT trainer
-│       ├── tutorial.py             # NEAT tutorial (BROKEN)
+│       ├── tutorial.py             # NEAT tutorial
 │       └── config.txt              # NEAT configuration
 │
-├── testing/                        # TEST FILES (BROKEN)
-│   ├── testing.py                  # Test harness (crashes)
-│   └── pygame_example.py           # Basic pygame example (unused)
+├── testing/                        # TEST FILES
+│   └── testing.py                  # Test harness
+│
+├── scripts/                        # BUILD & TOOLING
+│   ├── build.py                    # PyInstaller build script
+│   └── generate_icon.py            # Programmatic icon generation
+│
+├── assets/                         # GAME ASSETS
+│   ├── icon.png                    # Main game icon (256x256)
+│   ├── icon.ico                    # Windows icon
+│   ├── icon_*.png                  # Various icon sizes (16-256px)
+│   ├── favicon.png                 # Web favicon
+│   ├── fox.png                     # Fox logo variants
+│   └── omer logo.*                 # SVG/PDF logo files
 │
 ├── docs/
-│   ├── TODO.txt                    # Feature roadmap
-│   ├── notes.txt
-│   ├── CLAUDE_TASKS.txt
-│   └── requirements.txt            # Detailed dependencies
+│   ├── PROJECT_ANALYSIS.md         # This file
+│   ├── requirements.txt            # Detailed dependency documentation
+│   └── notes.txt
 │
 └── .vscode/                        # VS Code settings
 ```
@@ -89,7 +105,7 @@ PongWithIssues/
 
 ### Python Core Library (`pong/`)
 
-#### `pong/physics_object.py` - PhysicsObject (Base Class)
+#### `pong/physics_object.py` - PhysicsObject (Base Class, ABC)
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
@@ -107,49 +123,41 @@ PongWithIssues/
 
 #### `pong/ball.py` - Ball (extends PhysicsObject)
 
+Unified class with `mode` parameter ('physics' or 'classic').
+
 | Method | Signature | Description |
 |--------|-----------|-------------|
-| `__init__` | `(x, y, radius, color, mass, vel)` | Initialize ball |
-| `draw` | `(win)` | Draw ball with fire trail, aura, spin effects |
-| `move` | `()` | Update velocity with Magnus effect, update position |
+| `__init__` | `(x, y, radius, color, mass, vel, mode='physics')` | Initialize ball |
+| `draw` | `(win)` | Physics: fire trail + aura + spin. Classic: simple circle |
+| `move` | `()` | Physics: Magnus effect. Classic: direct position update |
 | `update` | `()` | Add position to trail, call move() |
 | `reset` | `()` | Reset to original position/velocity, clear trail |
 | `speed` | `@property` | Return velocity magnitude |
+| `bounce_box` | `(width, height)` | Classic mode: move and bounce off walls |
 
-#### `pong/ball.py` - BallClassic
-
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `__init__` | `(x, y, radius, color, vel_x, vel_y)` | Initialize classic ball |
-| `draw` | `(win)` | Draw simple circle |
-| `move` | `()` | Update position by velocity |
-| `bounce_box` | `(width, height)` | Move and bounce off walls |
-| `reset` | `()` | Reset to original position |
+`BallClassic` is a deprecated alias that extends `Ball` with `mode='classic'`.
 
 #### `pong/paddle.py` - Paddle (extends PhysicsObject)
 
+Unified class with `mode` parameter ('physics' or 'classic').
+
 | Method | Signature | Description |
 |--------|-----------|-------------|
-| `__init__` | `(x, y, width, height, color)` | Initialize paddle |
+| `__init__` | `(x, y, width, height, color, mode='physics', fixed_vel)` | Initialize paddle |
 | `draw` | `(win)` | Draw rectangle |
-| `accelerate` | `(up=True)` | Apply vertical acceleration |
+| `accelerate` | `(up=True)` | Physics mode: apply vertical acceleration |
+| `move` | `(up=True)` | Classic mode: move by fixed velocity |
 | `update` | `()` | Update velocity/position, apply friction, clamp |
 | `reset` | `()` | Reset to original position |
+| `x`, `y` | `@property` | Backward-compatible position accessors |
 
-#### `pong/paddle.py` - PaddleClassic
-
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `__init__` | `(x, y, width, height, color, vel)` | Initialize classic paddle |
-| `draw` | `(win)` | Draw rectangle |
-| `move` | `(up=True)` | Move by fixed velocity |
-| `reset` | `()` | Reset to original position |
+`PaddleClassic` is a deprecated alias that extends `Paddle` with `mode='classic'`.
 
 #### `pong/helpers.py`
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `handle_ball_collision` | `(ball, left_paddle, right_paddle)` | Resolve ball-wall and ball-paddle collisions with physics |
+| `handle_ball_collision` | `(ball, left_paddle, right_paddle)` | Physics mode: resolve ball-wall and ball-paddle collisions with impulse/spin |
 | `handle_paddle_movement` | `(keys, left_paddle, right_paddle)` | Process keyboard input (W/S, Up/Down) |
 
 #### `pong/utilities.py`
@@ -159,13 +167,23 @@ PongWithIssues/
 | `draw` | `(win, paddles, ball, left_score, right_score, score_font)` | Render game state |
 | `reset` | `(ball, left_paddle, right_paddle)` | Reset all objects |
 | `handle_score` | `(ball, left_score, right_score)` | Update scores on ball exit |
-| `handle_ball_collision` | `(ball, left_paddle, right_paddle, board_height)` | **DUPLICATE** of helpers.py |
+| `handle_ball_collision` | `(ball, left_paddle, right_paddle, board_height)` | Classic mode: simple velocity-based collisions |
+
+Note: `utilities.py` and `helpers.py` each have their own `handle_ball_collision` — they serve different game modes (classic vs physics).
 
 #### `pong/menu.py`
 
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `draw_menu` | `(WIN, selected_mode)` | Draw menu with ASCII art and mode selection |
+| Function/Data | Description |
+|---------------|-------------|
+| `GAME_MODES` | List of 4 mode configs (Classic, Pongception, BETA, Sandbox) |
+| `draw_menu` | `(WIN, selected_mode)` | Draw menu with ASCII art, mode grid, fox logo, credits |
+
+#### `pong/settings.py`
+
+| Class | Description |
+|-------|-------------|
+| `GameSettings` | Stores customizable game settings (ball size/speed, paddle height/speed, colors, background, win score) |
+| `SettingsMenu` | Interactive settings UI with live preview and reset-to-defaults |
 
 ---
 
@@ -175,7 +193,7 @@ PongWithIssues/
 
 | Function | Description |
 |----------|-------------|
-| `main()` | Classic Pong game loop with PaddleClassic/BallClassic |
+| `main()` | Classic Pong game loop using Ball/Paddle in classic mode |
 
 #### `versions/pongception/main.py`
 
@@ -189,6 +207,12 @@ PongWithIssues/
 |----------|-------------|
 | `main()` | Physics sandbox with interactive controls (forces, gravity toggle) |
 
+#### `versions/sandbox/main.py`
+
+| Function | Description |
+|----------|-------------|
+| `main()` | Debug mode: overlay with ball stats, hit counter, no scoring, [D] toggles debug |
+
 ---
 
 ### Python BETA Module (`pong_BETA/`)
@@ -200,6 +224,7 @@ PongWithIssues/
 | `__init__` | `(pos, vel, mass, color, gravity, max_speed, damping)` | Initialize with damping |
 | `momentum` | `@property` | Returns mass * velocity |
 | `polar` | `@property` | Returns (r, theta) |
+| `max_speed` | `@property` | Returns speed cap |
 | `add_force` | `(force)` | Queue force for integration |
 | `apply_impulse` | `(J)` | Instant velocity change |
 | `set_gravity` | `(g)` | Set gravity vector |
@@ -225,7 +250,7 @@ PongWithIssues/
 | `__init__` | `()` | Initialize empty list |
 | `add` | `(obj)` | Add object |
 | `remove` | `(obj)` | Remove object |
-| `update` | `(dt)` | Integrate all objects (**BROKEN** - calls undefined method) |
+| `update` | `(dt)` | Integrate all objects |
 
 #### `pong_BETA/object_manage.py` - Helper Functions
 
@@ -256,27 +281,14 @@ PongWithIssues/
 | `run_neat` | `(config)` | Run NEAT evolution |
 | `test_best_network` | `(config)` | Test saved network |
 
-#### `AI/testing/tutorial.py` - PongGame (**BROKEN**)
+#### `AI/testing/tutorial.py` - PongGame
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
 | `__init__` | `(window, width, height)` | Initialize game |
 | `test_ai` | `(genome, config)` | Test single AI |
-| `train_ai` | `(genome1, genome2, config)` | Train two AIs (**BUG: undefined `game`**) |
+| `train_ai` | `(genome1, genome2, config)` | Train two AIs |
 | `calculate_fitness` | `(genome1, genome2, game_info)` | Update fitness |
-
----
-
-### Python Testing (`testing/`)
-
-#### `testing/testing.py` (**BROKEN**)
-
-| Class/Function | Description |
-|----------------|-------------|
-| `BallTesting` | Copy of BallClassic |
-| `main()` | Test harness (**BUG: undefined variables**) |
-| `printObj(obj1)` | Debug printer |
-| `draw_ASCII_art(WIN)` | Draw ASCII art |
 
 ---
 
@@ -312,42 +324,29 @@ PongWithIssues/
 
 #### `src/game/ball.ts` - Ball (extends PhysicsObject)
 
+Unified class with `mode` parameter ('physics' or 'classic'). `BallClassic` is a deprecated alias.
+
 | Method | Signature | Description |
 |--------|-----------|-------------|
-| `constructor` | `(x, y, radius, color, mass, vel)` | Initialize |
-| `draw` | `(ctx)` | Draw with trail/aura |
-| `move` | `()` | Apply Magnus effect |
+| `constructor` | `(x, y, radius, color, mass, vel, mode)` | Initialize |
+| `draw` | `(ctx)` | Draw with trail/aura (physics) or simple circle (classic) |
+| `move` | `()` | Apply Magnus effect (physics) or direct move (classic) |
 | `update` | `()` | Add trail, call move |
 | `reset` | `()` | Reset position/velocity |
 | `speed` | `getter` | Return velocity magnitude |
-
-#### `src/game/ball.ts` - BallClassic
-
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `constructor` | `(x, y, radius, color, velX, velY)` | Initialize |
-| `draw` | `(ctx)` | Draw circle |
-| `move` | `()` | Update position |
-| `bounceBox` | `(width, height)` | Move and bounce |
-| `reset` | `()` | Reset position |
+| `bounceBox` | `(width, height)` | Classic: move and bounce |
 
 #### `src/game/paddle.ts` - Paddle (extends PhysicsObject)
 
+Unified class with `mode` parameter. `PaddleClassic` is a deprecated alias.
+
 | Method | Signature | Description |
 |--------|-----------|-------------|
-| `constructor` | `(x, y, width, height, color)` | Initialize |
+| `constructor` | `(x, y, width, height, color, mode)` | Initialize |
 | `draw` | `(ctx)` | Draw rectangle |
-| `accelerate` | `(up)` | Apply acceleration |
+| `accelerate` | `(up)` | Physics: apply acceleration |
+| `move` | `(up)` | Classic: move by velocity |
 | `update` | `()` | Update, friction, clamp |
-| `reset` | `()` | Reset position |
-
-#### `src/game/paddle.ts` - PaddleClassic
-
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `constructor` | `(x, y, width, height, color, vel)` | Initialize |
-| `draw` | `(ctx)` | Draw rectangle |
-| `move` | `(up)` | Move by velocity |
 | `reset` | `()` | Reset position |
 
 #### `src/game/menu.ts` - Menu
@@ -397,8 +396,8 @@ PongWithIssues/
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
-| `handlePaddleMovement` | `(input, left, right)` | **BUGGY** - both paddles same input |
-| `handlePaddleMovementClassic` | `(input, left, right)` | **BUGGY** - both paddles same input |
+| `handlePaddleMovement` | `(input, left, right)` | Route left/right paddle inputs separately |
+| `handlePaddleMovementClassic` | `(input, left, right)` | Classic mode paddle movement |
 | `handleScore` | `(ball, leftScore, rightScore)` | Check ball position |
 | `handleScoreClassic` | `(ball, leftScore, rightScore)` | Check ball position |
 | `reset` | `(ball, left, right)` | Reset all objects |
@@ -422,154 +421,50 @@ PongWithIssues/
 |--------|-----------|-------------|
 | `constructor` | `()` | Setup event listeners |
 | `setupEventListeners` | `()` | Register keydown/keyup |
-| `getInputState` | `()` | Return input state copy |
+| `getInputState` | `()` | Return input state (leftUp/leftDown/rightUp/rightDown) |
 | `isKeyPressed` | `(key)` | Check specific key |
 | `isAnyKeyPressed` | `()` | Check any key |
 | `reset` | `()` | Clear input state |
 
 ---
 
-## 3. Bug Fixes Plan
+## 3. Bug Fix History
 
-### Critical Bugs (Must Fix)
+All critical bugs have been fixed.
 
-#### Bug 1: TypeScript Paddle Control (CRITICAL)
-**File:** `versions/web-version/src/utils/game-helpers.ts`
-**Lines:** 14-50
-**Problem:** Both left AND right paddles respond to the same input (input.up/input.down)
-**Fix:**
-```typescript
-// Before (broken):
-if (input.up) { leftPaddle.accelerate(true); }
-if (input.down) { leftPaddle.accelerate(false); }
-if (input.up) { rightPaddle.accelerate(true); }  // Same keys!
-
-// After (fixed):
-// Need separate keys: W/S for left, ArrowUp/ArrowDown for right
-// Requires changes to InputHandler to track separate keys
-```
-**Action:** Modify InputHandler to track `leftUp`, `leftDown`, `rightUp`, `rightDown` separately. Update game-helpers.ts to use correct keys.
-
-#### Bug 2: TypeScript InputHandler Key Mapping
-**File:** `versions/web-version/src/utils/input-handler.ts`
-**Lines:** 20-34
-**Problem:** Single InputState cannot distinguish left vs right paddle
-**Fix:** Add separate key tracking:
-```typescript
-inputState = {
-  leftUp: false,    // W key
-  leftDown: false,  // S key
-  rightUp: false,   // ArrowUp
-  rightDown: false, // ArrowDown
-  // ... other keys
-}
-```
-
-#### Bug 3: testing.py Undefined Variable
-**File:** `testing/testing.py`
-**Line:** 75
-**Problem:** `draw_ASCII_art` called without WIN argument
-**Fix:** Change to `draw_ASCII_art(WIN)`
-
-#### Bug 4: testing.py Undefined Class
-**File:** `testing/testing.py`
-**Lines:** 31-32
-**Problem:** Uses `BallTesting` class that's defined later in file but not imported properly
-**Fix:** Move class definition before use or restructure imports
-
-#### Bug 5: AI tutorial.py NameError
-**File:** `AI/testing/tutorial.py`
-**Line:** 82
-**Problem:** `game_info = game.loop()` should be `game_info = self.game.loop()`
-**Fix:** Add `self.` prefix
-
-#### Bug 6: BETA main.py Property vs Method
-**File:** `versions/BETA/main.py`
-**Line:** 109
-**Problem:** `box.set_max_speed` is a method, not a property
-**Fix:** Change to `box.max_speed` (need to add property to PhysicsObject)
-
-#### Bug 7: ObjectsManage Undefined Method
-**File:** `pong_BETA/object_manage.py`
-**Line:** 137
-**Problem:** Calls `resolve_collision()` which doesn't exist
-**Fix:** Either implement `resolve_collision()` in PhysicsObject or remove the call
+| ID | File | Description | Status |
+|----|------|-------------|--------|
+| BUG-001 | `game-helpers.ts` | Both paddles used same input keys | **FIXED** |
+| BUG-002 | `input-handler.ts` | Could not distinguish left/right paddle | **FIXED** |
+| BUG-003 | `testing/testing.py` | Undefined variable `draw_ASCII_art` | **FIXED** |
+| BUG-004 | `testing/testing.py` | `BallTesting` used before definition | **FIXED** |
+| BUG-005 | `AI/testing/tutorial.py` | `game.loop()` → `self.game.loop()` | **FIXED** |
+| BUG-006 | `versions/BETA/main.py` | `box.set_max_speed` method vs property | **FIXED** |
+| BUG-007 | `pong_BETA/object_manage.py` | Called undefined `resolve_collision()` | **FIXED** |
 
 ---
 
-### High Priority (Should Fix)
-
-#### Issue 1: Duplicate Collision Detection
-**Files:** `pong/helpers.py` and `pong/utilities.py`
-**Problem:** Both have `handle_ball_collision()` with nearly identical code
-**Fix:** Remove from utilities.py, import from helpers.py
-
-#### Issue 2: Empty Helper File
-**File:** `pong_BETA/helpers.py`
-**Problem:** File only has imports, no functions
-**Fix:** Either add helper functions or delete file
-
-#### Issue 3: Hardcoded Values in TypeScript
-**Files:** `collision-detection.ts`, `game-helpers.ts`
-**Problem:** WIDTH=800, HEIGHT=800 hardcoded instead of using constants
-**Fix:** Import from constants.ts
-
----
-
-## 4. Redundant Files Cleanup Plan
-
-### Files to Delete
-
-| File | Reason | Action |
-|------|--------|--------|
-| `pong_BETA/helpers.py` | Empty file, no functions | DELETE |
-| `testing/pygame_example.py` | Unused basic example | DELETE |
-| Commented code in `versions/BETA/main.py` (lines 121-193) | Dead code | REMOVE comments |
-| Commented code in `pong/physics_object.py` (lines 132-153) | Dead code | REMOVE comments |
+## 4. Remaining Technical Debt
 
 ### Code to Consolidate
 
-| Current | Issue | Action |
-|---------|-------|--------|
-| `pong/utilities.py::handle_ball_collision()` | Duplicate of helpers.py | DELETE, import from helpers |
-| `Ball` + `BallClassic` in ball.py | Two similar classes | Consider merging with mode flag |
-| `Paddle` + `PaddleClassic` in paddle.py | Two similar classes | Consider merging with mode flag |
-| `AI/testing/main.py` + `tutorial.py` | 90% similar code | Merge into one file |
+| Current | Issue | Priority |
+|---------|-------|----------|
+| `AI/testing/main.py` + `tutorial.py` | 90% similar code | P3 |
+| `pong/physics_object.py` + `pong_BETA/physics_object.py` | Two physics implementations | P3 |
 
-### Recommended Directory Cleanup
+### Files Cleaned Up (Already Done)
 
-```bash
-# Delete empty/unused files
-rm pong_BETA/helpers.py
-rm testing/pygame_example.py
-
-# Clean up commented code blocks
-# - versions/BETA/main.py: remove lines 121-193
-# - pong/physics_object.py: remove lines 132-153
-```
+| File | Action Taken |
+|------|-------------|
+| `pong_BETA/helpers.py` | Deleted (was empty) |
+| `testing/pygame_example.py` | Deleted (unused) |
+| `versions/BETA/main.py` commented code | Removed |
+| `pong/physics_object.py` commented code | Removed |
+| Hardcoded values in TS files | Replaced with constants |
+| `Ball`/`BallClassic` duplication | Merged into unified class with mode parameter |
+| `Paddle`/`PaddleClassic` duplication | Merged into unified class with mode parameter |
 
 ---
 
-## 5. Implementation Priority
-
-### Phase 1: Critical Bug Fixes
-1. Fix TypeScript paddle control (game-helpers.ts + input-handler.ts)
-2. Fix testing.py undefined variables
-3. Fix AI tutorial.py NameError
-4. Fix BETA main.py property access
-
-### Phase 2: Code Cleanup
-1. Remove duplicate `handle_ball_collision()` from utilities.py
-2. Delete empty `pong_BETA/helpers.py`
-3. Delete unused `testing/pygame_example.py`
-4. Remove commented-out code blocks
-
-### Phase 3: Code Consolidation
-1. Merge AI/testing files
-2. Consider merging Classic/Physics class variants
-3. Extract hardcoded values to constants
-
-### Phase 4: Testing
-1. Fix and complete testing/testing.py
-2. Add actual unit tests for physics calculations
-3. Add integration tests for game modes
+*Last updated: 2026-02-02*
