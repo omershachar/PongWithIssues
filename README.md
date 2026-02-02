@@ -1,16 +1,18 @@
 # PongWithIssues
 
-            _____     _____    _   _    ____     _
-           |  __ \   / ___ \  | \ | |  / ___|   | |
-           | |__| | | /   \ | |  \| | | |  _    | |
-           |  ___/  | \___/ | | |\  | | |_| |   |_|
-           |_|       \_____/  |_| \_|  \____|   (_)
+```
+    ██████╗   ██████╗  ███╗   ██╗  ██████╗   ██╗
+    ██╔══██╗ ██╔═══██╗ ████╗  ██║ ██╔════╝   ██║
+    ██████╔╝ ██║   ██║ ██╔██╗ ██║ ██║  ███╗  ██║
+    ██╔═══╝  ██║   ██║ ██║╚██╗██║ ██║   ██║  ╚═╝
+    ██║      ╚██████╔╝ ██║ ╚████║ ╚██████╔╝  ██╗
+    ╚═╝       ╚═════╝  ╚═╝  ╚═══╝  ╚═════╝   ╚═╝
 
-    Barely functional Pong made by a barely functional dev.
+Barely functional Pong made by a barely functional dev.
 
-       A project that probably works. Sometimes. Maybe.
-                      It compiles. That's enough.
----
+   A project that probably works. Sometimes. Maybe.
+                  It compiles. That's enough.
+```
 
 > **PongWithIssues** is a game of Pong that you can play Pong in it.
 [Click here for further explanations](https://en.wikipedia.org/wiki/Pong)
