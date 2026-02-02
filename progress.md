@@ -378,6 +378,17 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 8 - 2026-02-03
+
+#### Bug Fix
+
+- [x] **Fixed Sandbox mode crash** — was importing `handle_ball_collision` from `pong.helpers` (3-arg physics version) but calling it with 4 args. Switched to `pong.utilities.handle_ball_collision` (4-arg classic version) which matches the call site. Also consolidated duplicate `pong.utilities` imports.
+
+#### Files Modified
+- `versions/sandbox/main.py` — fixed import
+
+---
+
 ## Next Steps
 1. Priority 5 remaining: Mouse controls, custom images
 2. Priority 6 remaining: AI difficulty levels, special modes

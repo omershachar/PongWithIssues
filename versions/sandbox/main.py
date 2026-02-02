@@ -11,8 +11,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from pong.constants import *
 from pong.paddle import Paddle
 from pong.ball import Ball
-from pong.utilities import draw as draw_game, reset
-from pong.helpers import handle_paddle_movement, handle_ball_collision
+from pong.utilities import draw as draw_game, reset, handle_ball_collision
+from pong.helpers import handle_paddle_movement
 
 pygame.init()
 pygame.display.set_caption("Pong - Sandbox")
