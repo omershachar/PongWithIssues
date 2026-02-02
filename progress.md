@@ -389,7 +389,40 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 9 - 2026-02-03
+
+#### Code Review & Bug Fixes
+
+**Full code review** of all Python game modes and web version. Found 8 Python bugs and 8 web version bugs.
+
+**Python Bug Fixes:**
+- [x] **BUG-011/012**: Classic mode used physics-mode paddles with conflicting manual damping — switched paddles to `mode='classic'` and removed manual `vel /= 1.75` damping. This was the root cause of sluggish AI in classic vs AI mode.
+- [x] **BUG-013**: Removed dead `state = MENU`/`state == PLAYING` code in classic mode — variables were set but never transitioned, leaving dead branches.
+- [x] **BUG-014**: Added `MAX_DEFLECTION_SPEED` clamping to Y-velocity in classic `handle_ball_collision` (`pong/utilities.py`) — previously unbounded.
+- [x] **BUG-015**: Pongception inline reset replaced with `reset()` from utilities for consistency with classic mode.
+
+**Web Version Bugs Logged (BUG-W01 through BUG-W08):**
+- TypeScript build output never loaded by index.html
+- Missing PWA icons
+- Canvas size mismatch (800x800 vs 800x600)
+- No input debouncing in TS version
+- Flawed frame rate limiting in TS version
+- Canvas never sized in TS version
+- Constants mismatches between TS and standalone JS
+
+#### Files Modified
+- `versions/classic/main.py` — classic paddles, removed damping, removed dead state code
+- `pong/utilities.py` — added velocity clamping in classic collision
+- `versions/pongception/main.py` — use `reset()` utility
+- `TODO.md` — logged all new bugs, marked fixed ones
+
+#### Testing
+- All Python imports verified working
+
+---
+
 ## Next Steps
-1. Priority 5 remaining: Mouse controls, custom images
-2. Priority 6 remaining: AI difficulty levels, special modes
-3. Priority 7: Audio & visual polish
+1. Fix web version bugs (BUG-W01 through BUG-W08)
+2. Priority 5 remaining: Mouse controls, custom images
+3. Priority 6 remaining: AI difficulty levels, special modes
+4. Priority 7: Audio & visual polish

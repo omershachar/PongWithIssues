@@ -90,7 +90,7 @@ def handle_ball_collision(ball, left_paddle, right_paddle, board_height):
                 difference_in_y = middle_y - ball.pos[1]
                 reduction_factor = (left_paddle.height / 2) / abs(ball.vel[0]) # !!
                 y_vel = difference_in_y / reduction_factor
-                ball.vel[1] = -1 * y_vel
+                ball.vel[1] = max(-MAX_DEFLECTION_SPEED, min(MAX_DEFLECTION_SPEED, -1 * y_vel))
 
     # Ball is moving to the right
     if ball.vel[0] > 0:
@@ -106,5 +106,5 @@ def handle_ball_collision(ball, left_paddle, right_paddle, board_height):
                 difference_in_y = middle_y - ball.pos[1]
                 reduction_factor = (right_paddle.height / 2) / abs(ball.vel[0]) # !!
                 y_vel = difference_in_y / reduction_factor
-                ball.vel[1] = -1 * y_vel
+                ball.vel[1] = max(-MAX_DEFLECTION_SPEED, min(MAX_DEFLECTION_SPEED, -1 * y_vel))
 # End of handle_ball_collision()

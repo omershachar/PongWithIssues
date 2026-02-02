@@ -21,12 +21,11 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
 def main(vs_ai=False):
-    state = MENU
     paused = False
     show_instructions = False
 
-    left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE)
-    right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE)
+    left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, mode='classic')
+    right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, mode='classic')
     ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, LIGHT_PURPLE, *BALL_DEFAULT_VEL)
 
     left_score = 0
@@ -49,11 +48,6 @@ def main(vs_ai=False):
                     paused = False
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions
-
-            if state == MENU:
-                # Top text
-                mode_text = FONT_SMALL_DIGITAL.render("MODE: CLASSIC", True, GREY)
-                WIN.blit(mode_text, (10, 10))
 
         draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
 
@@ -78,19 +72,12 @@ def main(vs_ai=False):
 
         pygame.display.update()
 
-        if state == PLAYING and keys[pygame.K_m]:
-            state = MENU
-            left_score, right_score = reset(ball, left_paddle, right_paddle) # Resetting scores and game objects
-
         if not paused:
             handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai)
             if vs_ai:
                 ai_move_paddle(right_paddle, ball)
             left_paddle.update()
             right_paddle.update()
-
-            left_paddle.vel[1] /= 1.75
-            right_paddle.vel[1] /= 1.75
 
             ball.move()
             handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
@@ -111,7 +98,6 @@ def main(vs_ai=False):
             pygame.display.update()
             pygame.time.delay(3000)
             left_score, right_score = reset(ball, left_paddle, right_paddle)
-            state = MENU
 
 if __name__ == '__main__':
     main()

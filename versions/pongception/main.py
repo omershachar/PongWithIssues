@@ -81,11 +81,8 @@ def main(vs_ai=False):
                     break
                 if event.key == pygame.K_SPACE:
                     paused = not paused
-                if event.key == pygame.K_r: # Fix through utilities
-                    left_score = right_score = 0
-                    left_paddle.reset()
-                    right_paddle.reset()
-                    ball.reset()
+                if event.key == pygame.K_r:
+                    left_score, right_score = reset(ball, left_paddle, right_paddle)
                     paused = False
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions

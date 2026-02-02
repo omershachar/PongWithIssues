@@ -11,6 +11,22 @@
 - [x] **BUG-007**: Fix undefined method in object_manage.py (**FIXED**)
 - [x] **BUG-008**: Fix broken import in `AI/testing/main.py` - `from pong import Game` fails (**FIXED**: created Game class in `pong/__init__.py`)
 - [x] **BUG-009**: Fix broken import in `AI/testing/tutorial.py` - same issue (**FIXED**: same fix)
+- [x] **BUG-010**: Fix sandbox crash - wrong `handle_ball_collision` import (3-arg vs 4-arg) (**FIXED**)
+- [x] **BUG-011**: Classic mode AI paddle double-dampened — physics friction (0.85x) + manual damping (1.75x) makes AI sluggish (**FIXED**: switched to `mode='classic'` paddles)
+- [x] **BUG-012**: Classic mode uses physics-mode paddles but applies conflicting manual damping (`vel /= 1.75`) (**FIXED**: removed manual damping, use classic mode)
+- [x] **BUG-013**: Dead `state = MENU` / `state == PLAYING` code in `versions/classic/main.py` — never transitions, dead branches (**FIXED**: removed dead code)
+- [x] **BUG-014**: No Y-velocity clamping in classic `handle_ball_collision` (`pong/utilities.py`) — can grow unbounded (**FIXED**: clamped to MAX_DEFLECTION_SPEED)
+- [x] **BUG-015**: Inconsistent reset — classic uses `utilities.reset()`, pongception does it manually inline (**FIXED**: pongception now uses `reset()`)
+
+### Web Version Bugs
+- [ ] **BUG-W01**: TypeScript build output (`dist/`) never loaded — `index.html` loads `pong-game.js` instead
+- [ ] **BUG-W02**: Missing PWA icons — `manifest.json` references `icons/icon-192.png` and `icons/icon-512.png` that don't exist
+- [ ] **BUG-W03**: Canvas size mismatch — TS uses 800x800, standalone JS uses 800x600
+- [ ] **BUG-W04**: TS input handler has no key debouncing — pause/restart toggle rapidly when held
+- [ ] **BUG-W05**: TS game loop uses flawed frame rate limiting — no fixed timestep accumulator
+- [ ] **BUG-W06**: TS version never sets canvas width/height — defaults to 300x150
+- [ ] **BUG-W07**: Winning score mismatch — TS/Python use 3, standalone JS uses 5
+- [ ] **BUG-W08**: Constants mismatch — standalone JS has different paddle vel (5 vs 4.5), ball radius (8 vs 7)
 
 ---
 
