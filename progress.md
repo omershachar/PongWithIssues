@@ -316,9 +316,34 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 6 - 2026-02-03
+
+#### Completed Tasks
+
+**Priority 3 - Code Consolidation (COMPLETE):**
+- [x] **Merged AI/testing files** — deleted `AI/testing/tutorial.py` (`main.py` is a strict superset)
+- [x] **Unified PhysicsObject** — merged `pong/physics_object.py` and `pong_BETA/physics_object.py` into single class
+  - Added BETA features to main class: `gravity`, `damping`, `max_speed` (with property setter), symplectic Euler `integrate()`, `bounce_in_rect()`, `clamp_to_rect()`, `set_gravity/damping/max_speed()`, `reset_motion()`
+  - Kept original features: `acc` field, `update()`, `weight`, `clamp_to_board()`, `clamp_velocity()`, `apply_force()`
+  - Removed ABC (no abstract methods existed)
+  - `pong_BETA/physics_object.py` now re-exports from `pong.physics_object`
+
+#### Files Modified
+- `pong/physics_object.py` — unified PhysicsObject with all features
+- `pong_BETA/physics_object.py` — replaced with re-export
+- `TODO.md` — marked Priority 3 complete
+- `progress.md` — session log
+
+#### Files Deleted
+- `AI/testing/tutorial.py` — redundant (subset of `main.py`)
+
+#### Testing
+- All Python imports verified working
+- `PhysicsObject is BetaPhysics` confirmed True (single class)
+
+---
+
 ## Next Steps
-1. Priority 6: AI opponent implementation
-2. Priority 7: Audio & visual polish
-3. Priority 5 remaining: Mouse controls, custom images
-4. Optional: Merge AI/testing files (Priority 3)
-5. Optional: Reconcile physics_object implementations (Priority 3)
+1. Priority 5 remaining: Mouse controls, custom images
+2. Priority 6: AI opponent implementation
+3. Priority 7: Audio & visual polish
