@@ -24,19 +24,20 @@ const COLORS = {
 };
 
 const GAME_WIDTH = 800;
-const GAME_HEIGHT = 600;
+const GAME_HEIGHT = 800;
 const FPS = 60;
 const FRAME_TIME = 1000 / FPS;
-const WINNING_SCORE = 5;
+const WINNING_SCORE = 3;
+const GAME_MARGIN_X = 10;
 
 const PADDLE_WIDTH = 15;
-const PADDLE_HEIGHT = 90;
-const PADDLE_DEFAULT_VEL = 5;
+const PADDLE_HEIGHT = 85;
+const PADDLE_DEFAULT_VEL = 4.5;
 const PADDLE_MAX_VEL = 9;
 const PADDLE_DEFAULT_ACC = 3;
 
-const BALL_RADIUS = 8;
-const BALL_DEFAULT_VEL = 5;
+const BALL_RADIUS = 7;
+const BALL_DEFAULT_VEL = 6;
 const MAX_DEFLECTION_SPEED = 7;
 const SPIN_FACTOR = 0.5;
 
@@ -436,7 +437,7 @@ class SimpleAI {
 class Menu {
     constructor(isMobile) {
         this.ball = new Ball(GAME_WIDTH / 2, GAME_HEIGHT / 2, BALL_RADIUS, COLORS.WHITE, 4, 3);
-        this.selectedMode = 0; // 0=Classic, 1=Physics
+        this.selectedMode = 0; // 0=Classic, 1=Physics, 2=BETA, 3=Sandbox
         this.selectedPlayers = 0; // 0=2P, 1=vs AI
         this.activeRow = 0; // 0=mode, 1=players
         this.isMobile = isMobile;
@@ -451,33 +452,35 @@ class Menu {
 
         // Title
         ctx.fillStyle = `rgb(${COLORS.PURPLE[0]},${COLORS.PURPLE[1]},${COLORS.PURPLE[2]})`;
-        ctx.font = 'bold 42px monospace';
+        ctx.font = 'bold 42px "digital-7", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('PONG WITH ISSUES', GAME_WIDTH / 2, 100);
+        ctx.fillText('PONG WITH ISSUES', GAME_WIDTH / 2, 120);
 
         // Subtitle
         ctx.fillStyle = `rgb(${COLORS.GREY[0]},${COLORS.GREY[1]},${COLORS.GREY[2]})`;
         ctx.font = '14px monospace';
-        ctx.fillText("A project that probably works. Sometimes. Maybe.", GAME_WIDTH / 2, 135);
+        ctx.fillText("A project that probably works. Sometimes. Maybe.", GAME_WIDTH / 2, 160);
 
         // Mode selection
-        const modeY = 220;
+        const modeY = 280;
         const modeHighlight = this.activeRow === 0;
         ctx.fillStyle = modeHighlight ? `rgb(${COLORS.LIGHT_PURPLE[0]},${COLORS.LIGHT_PURPLE[1]},${COLORS.LIGHT_PURPLE[2]})` : `rgb(${COLORS.GREY[0]},${COLORS.GREY[1]},${COLORS.GREY[2]})`;
         ctx.font = '16px monospace';
         ctx.fillText('GAME MODE', GAME_WIDTH / 2, modeY - 25);
 
-        const modes = ['Classic', 'Physics'];
+        const modes = ['Classic', 'Physics', 'BETA', 'Sandbox'];
+        const modeSpacing = 150;
+        const modeStartX = GAME_WIDTH / 2 - (modes.length - 1) * modeSpacing / 2;
         for (let i = 0; i < modes.length; i++) {
-            const x = GAME_WIDTH / 2 + (i - 0.5) * 160;
+            const x = modeStartX + i * modeSpacing;
             const selected = this.selectedMode === i;
             if (selected && modeHighlight) {
                 ctx.fillStyle = `rgb(${COLORS.PURPLE[0]},${COLORS.PURPLE[1]},${COLORS.PURPLE[2]})`;
-                ctx.fillRect(x - 65, modeY - 15, 130, 30);
+                ctx.fillRect(x - 55, modeY - 15, 110, 30);
                 ctx.fillStyle = 'rgb(255,255,255)';
             } else if (selected) {
                 ctx.fillStyle = `rgb(${COLORS.DARK_GREY[0]},${COLORS.DARK_GREY[1]},${COLORS.DARK_GREY[2]})`;
-                ctx.fillRect(x - 65, modeY - 15, 130, 30);
+                ctx.fillRect(x - 55, modeY - 15, 110, 30);
                 ctx.fillStyle = 'rgb(200,200,200)';
             } else {
                 ctx.fillStyle = `rgb(${COLORS.GREY[0]},${COLORS.GREY[1]},${COLORS.GREY[2]})`;
@@ -486,8 +489,8 @@ class Menu {
             ctx.fillText(modes[i], x, modeY + 5);
         }
 
-        // Players selection
-        const playersY = 310;
+        // Players selection (not shown for Sandbox mode)
+        const playersY = 380;
         const playersHighlight = this.activeRow === 1;
         ctx.fillStyle = playersHighlight ? `rgb(${COLORS.LIGHT_PURPLE[0]},${COLORS.LIGHT_PURPLE[1]},${COLORS.LIGHT_PURPLE[2]})` : `rgb(${COLORS.GREY[0]},${COLORS.GREY[1]},${COLORS.GREY[2]})`;
         ctx.font = '16px monospace';
@@ -518,9 +521,9 @@ class Menu {
         ctx.fillStyle = `rgb(${COLORS.GREEN[0]},${COLORS.GREEN[1]},${COLORS.GREEN[2]})`;
         ctx.font = 'bold 20px monospace';
         if (this.isMobile) {
-            ctx.fillText('TAP HERE TO START', GAME_WIDTH / 2, 420);
+            ctx.fillText('TAP HERE TO START', GAME_WIDTH / 2, 500);
         } else {
-            ctx.fillText('Press [SPACE] to start', GAME_WIDTH / 2, 420);
+            ctx.fillText('Press [SPACE] to start', GAME_WIDTH / 2, 500);
         }
         ctx.globalAlpha = 1;
 
@@ -528,15 +531,16 @@ class Menu {
         ctx.fillStyle = `rgb(${COLORS.DARK_GREY[0]},${COLORS.DARK_GREY[1]},${COLORS.DARK_GREY[2]})`;
         ctx.font = '12px monospace';
         if (this.isMobile) {
-            ctx.fillText('Tap left/right options to change settings', GAME_WIDTH / 2, 470);
-            ctx.fillText('Touch left side = P1 | Touch right side = P2', GAME_WIDTH / 2, 490);
+            ctx.fillText('Tap left/right options to change settings', GAME_WIDTH / 2, 550);
+            ctx.fillText('Touch left side = P1 | Touch right side = P2', GAME_WIDTH / 2, 570);
         } else {
-            ctx.fillText('[UP/DOWN] switch row | [LEFT/RIGHT] change option | [SPACE] start', GAME_WIDTH / 2, 470);
-            ctx.fillText('P1: W/S keys | P2: Arrow keys', GAME_WIDTH / 2, 490);
+            ctx.fillText('[UP/DOWN] switch row | [LEFT/RIGHT] change option | [SPACE] start', GAME_WIDTH / 2, 550);
+            ctx.fillText('P1: W/S keys | P2: Arrow keys', GAME_WIDTH / 2, 570);
         }
 
         // Draw bouncing ball
-        this.ball.color = this.selectedMode === 0 ? COLORS.WHITE : COLORS.ORANGE;
+        const modeColors = [COLORS.LIGHT_PURPLE, COLORS.ORANGE, COLORS.YELLOW, COLORS.GREEN];
+        this.ball.color = modeColors[this.selectedMode] || COLORS.LIGHT_PURPLE;
         this.ball.draw(ctx);
         this.ball.bounceBox(GAME_WIDTH, GAME_HEIGHT);
     }
@@ -555,15 +559,22 @@ class Menu {
             const pos = input.menuTapPos;
 
             // Mode row tap detection
-            if (pos.y > 180 && pos.y < 260) {
-                if (pos.x < GAME_WIDTH / 2) this.selectedMode = 0;
-                else this.selectedMode = 1;
+            if (pos.y > 240 && pos.y < 310) {
+                const modeSpacing = 150;
+                const modeStartX = GAME_WIDTH / 2 - (4 - 1) * modeSpacing / 2;
+                for (let i = 0; i < 4; i++) {
+                    const mx = modeStartX + i * modeSpacing;
+                    if (pos.x > mx - 55 && pos.x < mx + 55) {
+                        this.selectedMode = i;
+                        break;
+                    }
+                }
                 this.activeRow = 0;
                 return false;
             }
 
             // Players row tap detection
-            if (pos.y > 270 && pos.y < 350) {
+            if (pos.y > 340 && pos.y < 420) {
                 if (pos.x < GAME_WIDTH / 2) this.selectedPlayers = 0;
                 else this.selectedPlayers = 1;
                 this.activeRow = 1;
@@ -571,7 +582,7 @@ class Menu {
             }
 
             // Start button tap
-            if (pos.y > 390 && pos.y < 450) {
+            if (pos.y > 470 && pos.y < 530) {
                 return true; // Start game
             }
         }
@@ -582,11 +593,11 @@ class Menu {
     // Returns true when user wants to start
     handleKeySelect(input) {
         if (input.isKeyDown('ArrowLeft') || input.isKeyDown('KeyA')) {
-            if (this.activeRow === 0) this.selectedMode = 0;
+            if (this.activeRow === 0) this.selectedMode = Math.max(0, this.selectedMode - 1);
             else this.selectedPlayers = 0;
         }
         if (input.isKeyDown('ArrowRight') || input.isKeyDown('KeyD')) {
-            if (this.activeRow === 0) this.selectedMode = 1;
+            if (this.activeRow === 0) this.selectedMode = Math.min(3, this.selectedMode + 1);
             else this.selectedPlayers = 1;
         }
         return false;
@@ -598,21 +609,26 @@ class Menu {
 // ============================================================
 class PongMatch {
     constructor(mode, vsAI, isMobile) {
-        this.mode = mode; // 'classic' or 'physics'
+        this.mode = mode; // 'classic', 'physics', 'beta', or 'sandbox'
         this.vsAI = vsAI;
         this.isMobile = isMobile;
 
-        const paddleOffset = 20;
         this.leftPaddle = new Paddle(
-            paddleOffset, GAME_HEIGHT / 2 - PADDLE_HEIGHT / 2,
+            GAME_MARGIN_X, GAME_HEIGHT / 2 - PADDLE_HEIGHT / 2,
             PADDLE_WIDTH, PADDLE_HEIGHT, COLORS.LIGHT_PURPLE
         );
         this.rightPaddle = new Paddle(
-            GAME_WIDTH - paddleOffset - PADDLE_WIDTH, GAME_HEIGHT / 2 - PADDLE_HEIGHT / 2,
+            GAME_WIDTH - GAME_MARGIN_X - PADDLE_WIDTH, GAME_HEIGHT / 2 - PADDLE_HEIGHT / 2,
             PADDLE_WIDTH, PADDLE_HEIGHT, COLORS.LIGHT_PURPLE
         );
 
-        const ballColor = mode === 'classic' ? COLORS.WHITE : COLORS.YELLOW;
+        const ballColorMap = {
+            classic: COLORS.LIGHT_PURPLE,
+            physics: COLORS.YELLOW,
+            beta: COLORS.YELLOW,
+            sandbox: COLORS.GREEN,
+        };
+        const ballColor = ballColorMap[mode] || COLORS.LIGHT_PURPLE;
         this.ball = new Ball(GAME_WIDTH / 2, GAME_HEIGHT / 2, BALL_RADIUS, ballColor, BALL_DEFAULT_VEL, 0);
 
         this.leftScore = 0;
@@ -621,13 +637,17 @@ class PongMatch {
         this.showHelp = false;
         this.serveDirection = Math.random() < 0.5;
 
+        // Sandbox-specific state
+        this.hitCount = 0;
+        this.showDebug = false;
+
         if (vsAI) {
             this.ai = new SimpleAI(0.65);
         }
 
         // Countdown timer for serve
         this.serveCountdown = 60; // 1 second at 60fps
-        this.serving = true;
+        this.serving = mode !== 'sandbox'; // Sandbox starts immediately
     }
 
     update(input) {
@@ -646,7 +666,12 @@ class PongMatch {
         }
         this._hWas = input.isKeyDown('KeyH');
 
-        if (this.leftScore >= WINNING_SCORE || this.rightScore >= WINNING_SCORE) {
+        if (input.isKeyDown('KeyD') && !this._dWas) {
+            this.showDebug = !this.showDebug;
+        }
+        this._dWas = input.isKeyDown('KeyD');
+
+        if (this.mode !== 'sandbox' && (this.leftScore >= WINNING_SCORE || this.rightScore >= WINNING_SCORE)) {
             return 'gameover';
         }
 
@@ -673,12 +698,13 @@ class PongMatch {
         if (this.isMobile && input.touches.left.active) {
             this.handleTouchPaddle(this.leftPaddle, input.touches.left);
         } else {
-            if (this.mode === 'classic') {
-                if (input.isKeyDown('KeyW')) this.leftPaddle.moveClassic(true);
-                else if (input.isKeyDown('KeyS')) this.leftPaddle.moveClassic(false);
-            } else {
+            const usePhysics = this.mode !== 'classic';
+            if (usePhysics) {
                 if (input.isKeyDown('KeyW')) this.leftPaddle.accelerate(true);
                 if (input.isKeyDown('KeyS')) this.leftPaddle.accelerate(false);
+            } else {
+                if (input.isKeyDown('KeyW')) this.leftPaddle.moveClassic(true);
+                else if (input.isKeyDown('KeyS')) this.leftPaddle.moveClassic(false);
             }
         }
 
@@ -688,12 +714,13 @@ class PongMatch {
         } else if (this.isMobile && input.touches.right.active) {
             this.handleTouchPaddle(this.rightPaddle, input.touches.right);
         } else {
-            if (this.mode === 'classic') {
-                if (input.isKeyDown('ArrowUp')) this.rightPaddle.moveClassic(true);
-                else if (input.isKeyDown('ArrowDown')) this.rightPaddle.moveClassic(false);
-            } else {
+            const usePhysics = this.mode !== 'classic';
+            if (usePhysics) {
                 if (input.isKeyDown('ArrowUp')) this.rightPaddle.accelerate(true);
                 if (input.isKeyDown('ArrowDown')) this.rightPaddle.accelerate(false);
+            } else {
+                if (input.isKeyDown('ArrowUp')) this.rightPaddle.moveClassic(true);
+                else if (input.isKeyDown('ArrowDown')) this.rightPaddle.moveClassic(false);
             }
         }
 
@@ -707,7 +734,12 @@ class PongMatch {
         }
 
         // Update ball
-        if (this.mode === 'classic') {
+        if (this.mode === 'sandbox') {
+            // Sandbox: ball bounces off all 4 walls
+            this.ball.trail.unshift({ x: this.ball.pos.x, y: this.ball.pos.y });
+            if (this.ball.trail.length > this.ball.maxTrail) this.ball.trail.pop();
+            this.ball.bounceBox(GAME_WIDTH, GAME_HEIGHT);
+        } else if (this.mode === 'classic') {
             this.ball.pos.x += this.ball.vel.x;
             this.ball.pos.y += this.ball.vel.y;
         } else {
@@ -715,22 +747,28 @@ class PongMatch {
         }
 
         // Collisions
-        CollisionDetection.handleWalls(this.ball);
+        if (this.mode !== 'sandbox') {
+            CollisionDetection.handleWalls(this.ball);
+        }
 
         if (CollisionDetection.checkBallPaddle(this.ball, this.leftPaddle)) {
             CollisionDetection.resolveBallPaddle(this.ball, this.leftPaddle, true);
+            this.hitCount++;
         }
         if (CollisionDetection.checkBallPaddle(this.ball, this.rightPaddle)) {
             CollisionDetection.resolveBallPaddle(this.ball, this.rightPaddle, false);
+            this.hitCount++;
         }
 
-        // Scoring
-        if (this.ball.pos.x - this.ball.radius < 0) {
-            this.rightScore++;
-            this.startServe(true);
-        } else if (this.ball.pos.x + this.ball.radius > GAME_WIDTH) {
-            this.leftScore++;
-            this.startServe(false);
+        // Scoring (not in sandbox)
+        if (this.mode !== 'sandbox') {
+            if (this.ball.pos.x - this.ball.radius < 0) {
+                this.rightScore++;
+                this.startServe(true);
+            } else if (this.ball.pos.x + this.ball.radius > GAME_WIDTH) {
+                this.leftScore++;
+                this.startServe(false);
+            }
         }
 
         return 'playing';
@@ -786,19 +824,28 @@ class PongMatch {
         }
 
         // Scores
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.font = 'bold 48px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(this.leftScore.toString(), GAME_WIDTH / 4, 55);
-        ctx.fillText(this.rightScore.toString(), 3 * GAME_WIDTH / 4, 55);
+        if (this.mode !== 'sandbox') {
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = 'bold 48px "digital-7", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.leftScore.toString(), GAME_WIDTH / 4, 55);
+            ctx.fillText(this.rightScore.toString(), 3 * GAME_WIDTH / 4, 55);
+        } else {
+            // Sandbox: show hit counter instead of scores
+            ctx.fillStyle = `rgb(${COLORS.GREEN[0]},${COLORS.GREEN[1]},${COLORS.GREEN[2]})`;
+            ctx.font = 'bold 24px "digital-7", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`HITS: ${this.hitCount}`, GAME_WIDTH / 2, 40);
+        }
 
-        // Mode label
+        // Mode label (top-left to match Python)
         ctx.fillStyle = 'rgba(128,128,128,0.6)';
         ctx.font = '12px monospace';
         ctx.textAlign = 'left';
-        const modeLabel = this.mode === 'classic' ? 'CLASSIC' : 'PHYSICS';
+        const modeLabels = { classic: 'CLASSIC', physics: 'PHYSICS', beta: 'BETA', sandbox: 'SANDBOX' };
+        const modeLabel = modeLabels[this.mode] || this.mode.toUpperCase();
         const playerLabel = this.vsAI ? 'vs AI' : '2P';
-        ctx.fillText(`${modeLabel} | ${playerLabel}`, 10, GAME_HEIGHT - 10);
+        ctx.fillText(`${modeLabel} | ${playerLabel}`, 10, 20);
 
         // Serve countdown
         if (this.serving && this.serveCountdown > 15) {
@@ -840,12 +887,18 @@ class PongMatch {
             }
         }
 
-        // Physics debug (physics mode only)
-        if (this.mode === 'physics' && !this.isMobile) {
+        // Debug overlay (physics/beta always, sandbox with [D] toggle)
+        const showPhysicsDebug = (this.mode === 'physics' || this.mode === 'beta') && !this.isMobile;
+        const showSandboxDebug = this.mode === 'sandbox' && this.showDebug;
+        if (showPhysicsDebug || showSandboxDebug) {
             ctx.fillStyle = 'rgba(128,128,128,0.4)';
             ctx.font = '10px monospace';
             ctx.textAlign = 'left';
-            ctx.fillText(`vel: [${this.ball.vel.x.toFixed(1)}, ${this.ball.vel.y.toFixed(1)}]  spin: ${this.ball.spin.toFixed(2)}`, 10, 20);
+            const debugY = this.mode === 'sandbox' ? 60 : 35;
+            ctx.fillText(`vel: [${this.ball.vel.x.toFixed(1)}, ${this.ball.vel.y.toFixed(1)}]  spin: ${this.ball.spin.toFixed(2)}  speed: ${this.ball.speed.toFixed(1)}`, 10, debugY);
+            if (showSandboxDebug) {
+                ctx.fillText(`pos: [${this.ball.pos.x.toFixed(0)}, ${this.ball.pos.y.toFixed(0)}]  hits: ${this.hitCount}`, 10, debugY + 15);
+            }
         }
     }
 
@@ -945,11 +998,11 @@ class GameManager {
         const spaceNow = input.isKeyDown('Space');
 
         if (leftNow && !this._leftWas) {
-            if (this.menu.activeRow === 0) this.menu.selectedMode = 0;
+            if (this.menu.activeRow === 0) this.menu.selectedMode = Math.max(0, this.menu.selectedMode - 1);
             else this.menu.selectedPlayers = 0;
         }
         if (rightNow && !this._rightWas) {
-            if (this.menu.activeRow === 0) this.menu.selectedMode = 1;
+            if (this.menu.activeRow === 0) this.menu.selectedMode = Math.min(3, this.menu.selectedMode + 1);
             else this.menu.selectedPlayers = 1;
         }
         if (upNow && !this._upWas) {
@@ -977,8 +1030,9 @@ class GameManager {
     }
 
     startGame() {
-        const mode = this.menu.selectedMode === 0 ? 'classic' : 'physics';
-        const vsAI = this.menu.selectedPlayers === 1;
+        const modeMap = ['classic', 'physics', 'beta', 'sandbox'];
+        const mode = modeMap[this.menu.selectedMode];
+        const vsAI = mode === 'sandbox' ? false : this.menu.selectedPlayers === 1;
         this.match = new PongMatch(mode, vsAI, this.isMobile);
         this.state = 'playing';
     }
