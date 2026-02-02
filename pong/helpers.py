@@ -64,7 +64,7 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
 
             ball.vel[0] = -abs(ball.vel[0])  # bounce left
 
-def handle_paddle_movement(keys, left_paddle, right_paddle):
+def handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=False):
     """
     Handles keyboard input and accelerates paddles accordingly.
 
@@ -77,7 +77,8 @@ def handle_paddle_movement(keys, left_paddle, right_paddle):
         left_paddle.accelerate(up=True)
     if keys[pygame.K_s]:
         left_paddle.accelerate(up=False)
-    if keys[pygame.K_UP]:
-        right_paddle.accelerate(up=True)
-    if keys[pygame.K_DOWN]:
-        right_paddle.accelerate(up=False)
+    if not ai_right:
+        if keys[pygame.K_UP]:
+            right_paddle.accelerate(up=True)
+        if keys[pygame.K_DOWN]:
+            right_paddle.accelerate(up=False)

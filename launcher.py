@@ -19,6 +19,20 @@ FONT_MENU_SMALL = pygame.font.SysFont(*FONT_SMALL)
 NUM_MODES = len(GAME_MODES)
 
 
+def draw_vs_menu(win):
+    """Draw the 'vs Friend / vs AI' sub-menu screen."""
+    win.fill(BLACK)
+    title = FONT_MENU.render("Choose Opponent", True, WHITE)
+    opt1 = FONT_MENU_SMALL.render("[1] vs Friend", True, GREY)
+    opt2 = FONT_MENU_SMALL.render("[2] vs AI", True, GREY)
+    back = FONT_MENU_SMALL.render("[ESC] Back", True, GREY)
+    win.blit(title, (WIDTH // 2 - title.get_width() // 2, HEIGHT // 2 - 80))
+    win.blit(opt1, (WIDTH // 2 - opt1.get_width() // 2, HEIGHT // 2 - 20))
+    win.blit(opt2, (WIDTH // 2 - opt2.get_width() // 2, HEIGHT // 2 + 20))
+    win.blit(back, (WIDTH // 2 - back.get_width() // 2, HEIGHT // 2 + 70))
+    pygame.display.update()
+
+
 def set_window_icon():
     """Set the window icon if available."""
     icon_paths = [
@@ -70,10 +84,31 @@ def launcher():
                 handle_menu_click(event)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        if selected_mode == 0:
-                            run_classic()
-                        elif selected_mode == 1:
-                            run_pongception()
+                        vs_ai = None
+                        if selected_mode in (0, 1):
+                            # Show vs Friend / vs AI sub-menu
+                            choosing = True
+                            while choosing:
+                                draw_vs_menu(WIN)
+                                for sub_event in pygame.event.get():
+                                    if sub_event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        return
+                                    if sub_event.type == pygame.KEYDOWN:
+                                        if sub_event.key == pygame.K_1:
+                                            vs_ai = False
+                                            choosing = False
+                                        elif sub_event.key == pygame.K_2:
+                                            vs_ai = True
+                                            choosing = False
+                                        elif sub_event.key == pygame.K_ESCAPE:
+                                            choosing = False
+                            if vs_ai is None:
+                                continue
+                            if selected_mode == 0:
+                                run_classic(vs_ai=vs_ai)
+                            else:
+                                run_pongception(vs_ai=vs_ai)
                         elif selected_mode == 2:
                             run_BETA()
                         elif selected_mode == 3:

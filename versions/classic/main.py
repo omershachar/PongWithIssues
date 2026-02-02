@@ -13,13 +13,14 @@ from pong.paddle import Paddle
 from pong.ball import BallClassic as Ball
 from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
+from pong.ai import ai_move_paddle
 
 pygame.init()
 pygame.display.set_caption("Pong!")  # Window title
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-def main():
+def main(vs_ai=False):
     state = MENU
     paused = False
     show_instructions = False
@@ -57,7 +58,8 @@ def main():
         draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
 
         # Display "MODE: CLASSIC" at top left
-        mode_text = FONT_SMALL_DIGITAL.render("MODE: CLASSIC", True, GREY)
+        mode_label = "MODE: CLASSIC vs AI" if vs_ai else "MODE: CLASSIC"
+        mode_text = FONT_SMALL_DIGITAL.render(mode_label, True, GREY)
         WIN.blit(mode_text, (10, 10))
 
         if paused:
@@ -81,7 +83,9 @@ def main():
             left_score, right_score = reset(ball, left_paddle, right_paddle) # Resetting scores and game objects
 
         if not paused:
-            handle_paddle_movement(keys, left_paddle, right_paddle)
+            handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai)
+            if vs_ai:
+                ai_move_paddle(right_paddle, ball)
             left_paddle.update()
             right_paddle.update()
 
@@ -100,7 +104,8 @@ def main():
                 ball.reset()
 
         if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
-            win_text = "Left Player Won!" if left_score > right_score else "Right Player Won!"
+            right_name = "AI" if vs_ai else "Right Player"
+            win_text = "Left Player Won!" if left_score > right_score else f"{right_name} Won!"
             text = FONT_BIG_DIGITAL.render(win_text, True, PURPLE)
             WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
             pygame.display.update()

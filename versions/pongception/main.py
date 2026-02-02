@@ -15,13 +15,14 @@ from pong.paddle import Paddle
 from pong.ball import Ball
 from pong.utilities import draw, reset, handle_score
 from pong.helpers import handle_ball_collision, handle_paddle_movement
+from pong.ai import ai_move_paddle
 
 # pygame setup
 pygame.init()
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pongception")
 
-def main():
+def main(vs_ai=False):
     clock = pygame.time.Clock()
     run = True
     paused = False
@@ -53,7 +54,8 @@ def main():
             WIN.blit(resume_text, (WIDTH // 2 - resume_text.get_width() // 2, HEIGHT // 2 + 10))
 
         # Top-left mode label
-        mode_text = FONT_SMALL_DIGITAL.render("MODE: PHYSICS", True, GREY)
+        mode_label = "MODE: PHYSICS vs AI" if vs_ai else "MODE: PHYSICS"
+        mode_text = FONT_SMALL_DIGITAL.render(mode_label, True, GREY)
         WIN.blit(mode_text, (10, 10))
 
         # Bottom footer instructions
@@ -90,7 +92,9 @@ def main():
 
         keys = pygame.key.get_pressed()
         if not paused:
-            handle_paddle_movement(keys, left_paddle, right_paddle)
+            handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai)
+            if vs_ai:
+                ai_move_paddle(right_paddle, ball)
 
             left_paddle.update()
             right_paddle.update()
@@ -100,7 +104,8 @@ def main():
             left_score, right_score = handle_score(ball, left_score, right_score)
 
         if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
-            winner = "Left Player Won!" if left_score > right_score else "Right Player Won!"
+            right_name = "AI" if vs_ai else "Right Player"
+            winner = "Left Player Won!" if left_score > right_score else f"{right_name} Won!"
             text = FONT_BIG_DIGITAL.render(winner, True, PURPLE)
             WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
             pygame.display.update()
