@@ -58,8 +58,8 @@
 ## Priority 6: Game Modes
 
 ### AI Opponent
-- [ ] Add game mode selection (Play with friend / Play against computer)
-- [ ] Add basic AI opponent
+- [x] Add game mode selection (Play with friend / Play against computer)
+- [x] Add basic AI opponent
 - [ ] AI difficulty levels
 
 ### Special Modes
@@ -174,4 +174,4 @@
 
 ---
 
-*Last updated: 2026-02-02*
+*Last updated: 2026-02-03*

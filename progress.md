@@ -275,13 +275,13 @@ This file tracks Claude Code's progress on the PongWithIssues project.
 
 | Metric | Count |
 |--------|-------|
-| Sessions | 4 |
+| Sessions | 7 |
 | Bugs Found | 7 |
 | Bugs Fixed | 7 |
-| Files Created | 15 |
-| Files Modified | 22 |
+| Files Created | 17 |
+| Files Modified | 27 |
 | Files Deleted | 6+ directories |
-| Commits | 5 |
+| Commits | 8+ |
 
 ---
 
@@ -343,7 +343,42 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 7 - 2026-02-03
+
+#### Completed Tasks
+
+**Priority 6 - AI Opponent:**
+- [x] **Created `pong/ai.py`** — simple ball-tracking AI module
+  - `ai_move_paddle(paddle, ball, difficulty=0.7)` tracks ball Y with dead-zone
+  - Drifts to center when ball moves away
+  - Difficulty parameter controls tracking tightness
+- [x] **Added vs Friend / vs AI sub-menu in launcher**
+  - After selecting Classic or Pongception, press [1] for Friend or [2] for AI
+  - BETA and Sandbox skip sub-menu
+- [x] **Updated Classic and Pongception modes**
+  - `main(vs_ai=False)` parameter
+  - AI controls right paddle when enabled
+  - Mode label shows "vs AI" suffix
+  - Win text shows "AI Won!" instead of "Right Player Won!"
+- [x] **Updated `pong/helpers.py`**
+  - `handle_paddle_movement` accepts `ai_right` flag to skip arrow keys for right paddle
+
+#### Files Created
+- `pong/ai.py` — AI paddle controller
+
+#### Files Modified
+- `versions/classic/main.py` — vs_ai support
+- `versions/pongception/main.py` — vs_ai support
+- `launcher.py` — vs Friend/AI sub-menu
+- `pong/helpers.py` — ai_right flag
+
+#### Testing
+- All Python imports verified working
+- User tested and approved
+
+---
+
 ## Next Steps
 1. Priority 5 remaining: Mouse controls, custom images
-2. Priority 6: AI opponent implementation
+2. Priority 6 remaining: AI difficulty levels, special modes
 3. Priority 7: Audio & visual polish
