@@ -21,12 +21,12 @@
 ### Web Version Bugs
 - [ ] **BUG-W01**: TypeScript build output (`dist/`) never loaded — `index.html` loads `pong-game.js` instead
 - [ ] **BUG-W02**: Missing PWA icons — `manifest.json` references `icons/icon-192.png` and `icons/icon-512.png` that don't exist
-- [ ] **BUG-W03**: Canvas size mismatch — TS uses 800x800, standalone JS uses 800x600
+- [x] **BUG-W03**: Canvas size mismatch — TS uses 800x800, standalone JS uses 800x600 (**FIXED**: JS now uses 800x800)
 - [ ] **BUG-W04**: TS input handler has no key debouncing — pause/restart toggle rapidly when held
 - [ ] **BUG-W05**: TS game loop uses flawed frame rate limiting — no fixed timestep accumulator
 - [ ] **BUG-W06**: TS version never sets canvas width/height — defaults to 300x150
-- [ ] **BUG-W07**: Winning score mismatch — TS/Python use 3, standalone JS uses 5
-- [ ] **BUG-W08**: Constants mismatch — standalone JS has different paddle vel (5 vs 4.5), ball radius (8 vs 7)
+- [x] **BUG-W07**: Winning score mismatch — TS/Python use 3, standalone JS uses 5 (**FIXED**: JS now uses 3)
+- [x] **BUG-W08**: Constants mismatch — standalone JS has different paddle vel (5 vs 4.5), ball radius (8 vs 7) (**FIXED**: all constants aligned)
 
 ---
 
@@ -190,4 +190,4 @@
 
 ---
 
-*Last updated: 2026-02-03*
+*Last updated: 2026-02-03 (Session 10)*

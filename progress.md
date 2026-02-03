@@ -422,8 +422,44 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 10 - 2026-02-03
+
+#### Completed Tasks
+
+**Web Version Alignment with Python:**
+- [x] **BUG-W03/W07/W08**: Fixed constants to match Python
+  - `GAME_HEIGHT`: 600 → 800
+  - `WINNING_SCORE`: 5 → 3
+  - `PADDLE_HEIGHT`: 90 → 85
+  - `PADDLE_DEFAULT_VEL`: 5 → 4.5
+  - `BALL_RADIUS`: 8 → 7
+  - `BALL_DEFAULT_VEL`: 5 → 6
+  - Paddle X offset: 20 → 10 (`GAME_MARGIN_X`)
+- [x] **Added 4 game modes** (matching Python): Classic, Physics, BETA, Sandbox
+  - BETA: same as Physics (experimental mode)
+  - Sandbox: ball bounces off all 4 walls, hit counter, no scoring, [D] debug overlay
+- [x] **Visual style matched to Python**:
+  - Added `digital-7` font (copied from `pong/FONTS/`)
+  - Classic ball color: `LIGHT_PURPLE` (was white)
+  - Mode label moved to top-left (Python style)
+  - Menu adjusted for 800px height with 4-mode row
+- [x] **Font integration**: Added `@font-face` in `index.html` for digital-7
+
+#### Files Copied
+- `pong/FONTS/digital-7.ttf` → `versions/web-version/fonts/digital-7.ttf`
+
+#### Files Modified
+- `versions/web-version/pong-game.js` — constants, modes, colors, labels, sandbox/beta logic
+- `versions/web-version/index.html` — added @font-face for digital-7 font
+
+#### Testing
+- JavaScript syntax check passed
+- Font file copied successfully
+
+---
+
 ## Next Steps
-1. Fix web version bugs (BUG-W01 through BUG-W08)
+1. User testing of web version changes
 2. Priority 5 remaining: Mouse controls, custom images
 3. Priority 6 remaining: AI difficulty levels, special modes
 4. Priority 7: Audio & visual polish
