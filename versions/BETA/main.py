@@ -4,6 +4,7 @@ main(BETA) -- Main file containing the essentials for a sandbox environment and 
 
 import sys
 import os
+import asyncio
 import pygame
 
 # Allow running from subdirectories
@@ -14,7 +15,7 @@ from pong.constants import *
 from pong_BETA.physics_object import *
 from pong_BETA.object_manage import Box, _draw_grid, _draw_info, PLAY_W, IMPULSE, FORCE_MAG, FIXED_DT, BG_INFO, BG_PLAY, REST_E, INFO_W
 
-def main():
+async def main():
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("PongWithIssues — BETA Sandbox")
 
@@ -113,6 +114,7 @@ def main():
 
         pygame.display.flip()
         clock.tick(FPS)
+        await asyncio.sleep(0)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -18,15 +18,8 @@
 - [x] **BUG-014**: No Y-velocity clamping in classic `handle_ball_collision` (`pong/utilities.py`) — can grow unbounded (**FIXED**: clamped to MAX_DEFLECTION_SPEED)
 - [x] **BUG-015**: Inconsistent reset — classic uses `utilities.reset()`, pongception does it manually inline (**FIXED**: pongception now uses `reset()`)
 
-### Web Version Bugs
-- [ ] **BUG-W01**: TypeScript build output (`dist/`) never loaded — `index.html` loads `pong-game.js` instead
-- [ ] **BUG-W02**: Missing PWA icons — `manifest.json` references `icons/icon-192.png` and `icons/icon-512.png` that don't exist
-- [x] **BUG-W03**: Canvas size mismatch — TS uses 800x800, standalone JS uses 800x600 (**FIXED**: JS now uses 800x800)
-- [ ] **BUG-W04**: TS input handler has no key debouncing — pause/restart toggle rapidly when held
-- [ ] **BUG-W05**: TS game loop uses flawed frame rate limiting — no fixed timestep accumulator
-- [ ] **BUG-W06**: TS version never sets canvas width/height — defaults to 300x150
-- [x] **BUG-W07**: Winning score mismatch — TS/Python use 3, standalone JS uses 5 (**FIXED**: JS now uses 3)
-- [x] **BUG-W08**: Constants mismatch — standalone JS has different paddle vel (5 vs 4.5), ball radius (8 vs 7) (**FIXED**: all constants aligned)
+### Web Version Bugs (OBSOLETE — JS/TS web version replaced by Pygbag)
+- [x] **BUG-W01 through BUG-W08**: No longer applicable — web version now uses Python via Pygbag (WebAssembly)
 
 ---
 
@@ -112,11 +105,12 @@
 
 ## Priority 8: Web & Mobile
 
-- [x] Set up GitHub Pages landing page (deployed in `docs/`)
+- [x] Set up GitHub Pages landing page
 - [x] Set up HTML webpage to host the game
 - [x] Connect game to web page
 - [x] Style game page with CSS
 - [x] Add GitHub Actions workflow for Pages deployment
+- [x] **Replaced JS/TS web version with Pygbag (Python → WebAssembly)** — single codebase for desktop and web
 - [ ] Add link for game page in GitHub README
 - [ ] Phone & Tablet touch controls
 
@@ -210,6 +204,13 @@
 ### Settings Overhaul (Session 12)
 - [x] Side-panel settings with live AI preview (PreviewGame class, compact panel layout)
 
+### Pygbag Migration (Session 13)
+- [x] Replaced JS/TS web version with Pygbag (Python → WebAssembly)
+- [x] Made all game loops async (`await asyncio.sleep(0)` each frame)
+- [x] Created `main.py` Pygbag entry point
+- [x] Updated GitHub Actions workflow for Pygbag build + deploy
+- [x] Deleted `versions/web-version/` and old `docs/` web files
+
 ---
 
-*Last updated: 2026-02-07 (Session 12)*
+*Last updated: 2026-02-07 (Session 13)*

@@ -553,9 +553,90 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 13 - 2026-02-07
+
+#### Completed Tasks
+
+**Pygbag Migration (Priority 8 — Web & Mobile):**
+- [x] **Replaced JS/TS web version with Pygbag (Python → WebAssembly)**
+  - Single Python codebase now serves both desktop and web
+  - All game features (settings menu, AI opponent, 4 game modes, live preview) automatically work on web
+  - No more manual sync between Python and JavaScript
+- [x] **Made all game loops async**
+  - `launcher.py` — `async def launcher()` with `await asyncio.sleep(0)` each frame
+  - `versions/classic/main.py` — `async def main()`
+  - `versions/pongception/main.py` — `async def main()`
+  - `versions/BETA/main.py` — `async def main()`
+  - `versions/sandbox/main.py` — `async def main()`
+  - Replaced `pygame.time.delay(3000)` with `await asyncio.sleep(3)` (non-blocking)
+  - All files use `asyncio.run()` for standalone execution
+- [x] **Created `main.py`** — Pygbag entry point (async wrapper calling launcher)
+- [x] **Created `favicon.png`** — copied from `assets/favicon.png` to root (required by Pygbag)
+- [x] **Updated `.github/workflows/deploy.yml`**
+  - Added Python 3.12 setup and Pygbag install steps
+  - Build with `python -m pygbag --build .`
+  - Deploy `build/web/` to GitHub Pages (same artifact pattern)
+- [x] **Deleted old web version files**
+  - Removed `versions/web-version/` (TypeScript source, JS, HTML, build tools)
+  - Removed `docs/pong-game.js`, `docs/index.html`, `docs/sw.js`, `docs/manifest.json`, `docs/requirements.txt`
+  - Removed `docs/fonts/`, `docs/icons/`
+  - Kept `docs/PROJECT_ANALYSIS.md`
+- [x] **Updated documentation**
+  - `CLAUDE.md` — updated architecture, commands, and design patterns for Pygbag
+  - `TODO.md` — marked web bugs obsolete, added Pygbag to completed archive
+  - `progress.md` — session log (this entry)
+
+#### Files Created
+- `main.py` — Pygbag entry point
+- `favicon.png` — root favicon for Pygbag
+
+#### Files Modified
+- `launcher.py` — async with `await asyncio.sleep(0)`
+- `versions/classic/main.py` — async, `await asyncio.sleep(3)` for win delay
+- `versions/pongception/main.py` — async, `await asyncio.sleep(3)` for win delay
+- `versions/BETA/main.py` — async
+- `versions/sandbox/main.py` — async
+- `.github/workflows/deploy.yml` — Pygbag build pipeline
+- `.gitignore` — removed stale `versions/web-version/dist/` entry
+- `CLAUDE.md` — Pygbag architecture
+- `TODO.md` — updated
+- `progress.md` — session log
+
+#### Files Deleted
+- `versions/web-version/` — entire directory (TypeScript/JS web version)
+- `docs/pong-game.js`, `docs/index.html`, `docs/sw.js`, `docs/manifest.json`, `docs/requirements.txt`
+- `docs/fonts/`, `docs/icons/`
+
+#### Testing
+- All Python imports: PASSED
+- All modified files: compile check PASSED (`py_compile`)
+
+#### Notes
+- Pygbag bundles CPython + SDL2 as WebAssembly (~20-40MB initial download, cached after)
+- `await asyncio.sleep(0)` is required by Pygbag to yield control to the browser event loop each frame
+- `pygame.time.delay()` is blocking and would freeze the browser — replaced with `await asyncio.sleep()`
+- Audio must use OGG format when added (Pygbag limitation)
+
+---
+
+## Statistics
+
+| Metric | Count |
+|--------|-------|
+| Sessions | 13 |
+| Bugs Found | 15 + 8 web (obsolete) |
+| Bugs Fixed | 15 + 3 web (obsolete) |
+| Files Created | 22+ |
+| Files Modified | 46+ |
+| Files Deleted | 7+ directories |
+| Commits | 17+ |
+
+---
+
 ## Next Steps
-1. Plan web version rewrite (Python-based vs JS)
-2. Priority 5 remaining: Mouse controls, custom images
-3. Priority 6 remaining: AI difficulty levels, special modes
-4. Priority 7: Audio & visual polish
-5. Priority 8 remaining: GitHub README link to Pages, touch controls
+1. Test Pygbag build locally (`python -m pygbag .`)
+2. Verify deployment on GitHub Pages after push
+3. Priority 5 remaining: Mouse controls, custom images
+4. Priority 6 remaining: AI difficulty levels, special modes
+5. Priority 7: Audio & visual polish (OGG format for Pygbag)
+6. Priority 8 remaining: GitHub README link to Pages, touch controls

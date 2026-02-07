@@ -5,6 +5,7 @@ Contains only the essentials and high-level orchestration.
 
 import sys
 import os
+import asyncio
 import pygame
 
 # Allow running from subdirectories
@@ -22,7 +23,7 @@ pygame.init()
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pongception")
 
-def main(vs_ai=False, settings=None):
+async def main(vs_ai=False, settings=None):
     clock = pygame.time.Clock()
     run = True
     paused = False
@@ -119,10 +120,12 @@ def main(vs_ai=False, settings=None):
             text = FONT_BIG_DIGITAL.render(winner, True, PURPLE)
             WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
             pygame.display.update()
-            pygame.time.delay(3000)
+            await asyncio.sleep(3)
 
             left_score, right_score = reset(ball, left_paddle, right_paddle)
+
+        await asyncio.sleep(0)
     return
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 import sys
 import os
@@ -49,7 +50,7 @@ def set_window_icon():
                 pass
 
 
-def launcher():
+async def launcher():
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("PongWithIssues")
     set_window_icon()
@@ -71,7 +72,7 @@ def launcher():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                    return
+                    break
                 if settings_menu.handle_input(event):
                     in_settings = False
             settings_menu.draw(WIN)
@@ -80,7 +81,7 @@ def launcher():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                    return
+                    break
                 handle_menu_click(event)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
@@ -103,16 +104,17 @@ def launcher():
                                             choosing = False
                                         elif sub_event.key == pygame.K_ESCAPE:
                                             choosing = False
+                                await asyncio.sleep(0)
                             if vs_ai is None:
                                 continue
                             if selected_mode == 0:
-                                run_classic(vs_ai=vs_ai, settings=settings)
+                                await run_classic(vs_ai=vs_ai, settings=settings)
                             else:
-                                run_pongception(vs_ai=vs_ai, settings=settings)
+                                await run_pongception(vs_ai=vs_ai, settings=settings)
                         elif selected_mode == 2:
-                            run_BETA()
+                            await run_BETA()
                         elif selected_mode == 3:
-                            run_sandbox(settings=settings)
+                            await run_sandbox(settings=settings)
                         # Reset display after returning from game
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
                         set_window_icon()
@@ -130,7 +132,9 @@ def launcher():
 
             draw_menu(WIN, selected_mode)
 
+        await asyncio.sleep(0)
+
     pygame.quit()
 
 if __name__ == '__main__':
-    launcher()
+    asyncio.run(launcher())

@@ -3,6 +3,7 @@ Sandbox Mode -- Debug/practice mode with no scoring and physics info display.
 """
 import sys
 import os
+import asyncio
 import pygame
 
 # Add the project root to sys.path so "pong" can be found
@@ -37,7 +38,7 @@ def draw_debug_info(win, ball, left_paddle, right_paddle):
         win.blit(text, (10, y_offset + i * 16))
 
 
-def main(settings=None):
+async def main(settings=None):
     paused = False
     show_debug = True
     show_instructions = False
@@ -147,6 +148,8 @@ def main(settings=None):
                 ball.vel[0] = -abs(ball.vel[0])
                 ball.pos[0] = WIDTH - ball.radius
 
+        await asyncio.sleep(0)
+
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

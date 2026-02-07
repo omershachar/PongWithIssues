@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PongWithIssues is a multi-platform Pong game with two implementations:
-- **Desktop**: Python + Pygame
-- **Web**: TypeScript + HTML5 Canvas (PWA-enabled)
+PongWithIssues is a multi-platform Pong game with a **single Python codebase**:
+- **Desktop**: Python + Pygame (native)
+- **Web**: Same Python code compiled to WebAssembly via [Pygbag](https://github.com/pygame-web/pygbag)
 
 ## Commands
 
@@ -25,14 +25,16 @@ python versions/pongception/main.py
 python versions/BETA/main.py
 ```
 
-### Web Version
+### Web Version (Pygbag)
 ```bash
-cd versions/web-version
+# Install Pygbag
+pip install pygbag
 
-npm run build    # Compile TypeScript
-npm run dev      # Watch mode for development
-npm run serve    # Start local server on port 8000
-npm run start    # Build and serve
+# Run locally (opens browser at localhost:8000)
+python -m pygbag .
+
+# Build for deployment (output in build/web/)
+python -m pygbag --build .
 ```
 
 ## Architecture
@@ -56,15 +58,12 @@ versions/                # Game mode implementations
 └── sandbox/main.py      # Debug mode with overlay
 ```
 
-### Web Structure
+### Web Deployment (Pygbag)
 ```
-versions/web-version/
-├── src/
-│   ├── index.ts         # Entry point
-│   ├── game/            # TypeScript game logic (mirrors Python structure)
-│   └── utils/           # Input handling, collision detection
-├── dist/                # Compiled output
-└── index.html           # Web app entry
+main.py              # Pygbag entry point (async wrapper around launcher)
+favicon.png          # Required by Pygbag for web build
+build/web/           # Pygbag output (auto-generated, gitignored)
+.github/workflows/deploy.yml  # CI: builds with Pygbag, deploys to GitHub Pages
 ```
 
 ### Key Design Patterns
@@ -75,7 +74,7 @@ versions/web-version/
 
 3. **Game modes as modules**: Each mode has its own `main.py` that imports from the shared `pong/` library. The launcher imports and calls these.
 
-4. **Web mirrors desktop**: TypeScript classes in `src/game/` follow the same architecture as Python classes in `pong/`.
+4. **Async game loops**: All game `main()` functions are `async` with `await asyncio.sleep(0)` each frame. This is required for Pygbag (WebAssembly) and is a no-op on desktop.
 
 ## Game Modes
 
@@ -118,8 +117,6 @@ versions/web-version/
    print('All imports OK')
    "
 
-   # TypeScript check (in web-version/)
-   cd versions/web-version && npx tsc --noEmit
    ```
 
 2. **If tests fail**: Go back and fix the issues before proceeding
@@ -159,7 +156,6 @@ Also update `TODO.md` when:
 | `progress.md` | Session-by-session progress tracker |
 | `TODO.md` | Master task list (prioritized) |
 | `docs/PROJECT_ANALYSIS.md` | Full codebase analysis with all methods |
-| `docs/TODO.txt` | Original TODO (legacy, see TODO.md) |
 
 ## Known Issues
 
@@ -172,4 +168,4 @@ See `TODO.md` for remaining work:
 - Priority 5: Customization (partially complete - settings menu done, mouse controls remaining)
 - Priority 6: AI opponent (basic AI done, difficulty levels remaining)
 - Priority 7: Audio & visual polish (pending)
-- Priority 8: Web & mobile (GitHub Pages deployed, touch controls remaining)
+- Priority 8: Web & mobile (Pygbag WebAssembly deployment, touch controls remaining)
