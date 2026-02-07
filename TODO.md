@@ -64,6 +64,7 @@
 ## Priority 5: Customization Features
 
 - [x] Settings menu (ball size/speed, paddle height/speed, colors, background, win score)
+- [x] Side-panel settings with live AI preview (two AI paddles play pong in real-time while adjusting settings)
 - [ ] Option to choose key settings or play with mouse
 - [ ] Change board shape (circle mode?)
 - [ ] Custom background images
@@ -206,6 +207,9 @@
 - [x] Replaced procedural fox logo with professional SVG-based logo
 - [x] Updated all documentation files (TODO.md, progress.md, PRD.md, CLAUDE.md)
 
+### Settings Overhaul (Session 12)
+- [x] Side-panel settings with live AI preview (PreviewGame class, compact panel layout)
+
 ---
 
-*Last updated: 2026-02-07 (Session 11)*
+*Last updated: 2026-02-07 (Session 12)*

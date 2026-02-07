@@ -20,13 +20,27 @@ pygame.display.set_caption("Pong!")  # Window title
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-def main(vs_ai=False):
+def main(vs_ai=False, settings=None):
     paused = False
     show_instructions = False
 
-    left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, mode='classic')
-    right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, mode='classic')
-    ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, LIGHT_PURPLE, *BALL_DEFAULT_VEL)
+    # Apply settings or use defaults
+    p_w = settings.paddle_width if settings else PADDLE_SIZE[0]
+    p_h = settings.paddle_height if settings else PADDLE_SIZE[1]
+    p_speed = settings.paddle_speed if settings else PADDLE_DEFAULT_VEL
+    b_radius = settings.ball_radius if settings else BALL_RADIUS
+    b_speed = settings.ball_speed if settings else BALL_DEFAULT_VEL[0]
+    b_color = LIGHT_PURPLE  # classic always uses this
+    l_color = settings.left_paddle_color if settings else LIGHT_PURPLE
+    r_color = settings.right_paddle_color if settings else LIGHT_PURPLE
+    bg_color = settings.background_color if settings else BLACK
+    win_score = settings.winning_score if settings else WINNING_SCORE
+
+    left_paddle = Paddle(ORIGINAL_LEFT_PADDLE_POS[0], ORIGINAL_LEFT_PADDLE_POS[1],
+                         p_w, p_h, color=l_color, mode='classic', fixed_vel=p_speed)
+    right_paddle = Paddle(ORIGINAL_RIGHT_PADDLE_POS[0], ORIGINAL_RIGHT_PADDLE_POS[1],
+                          p_w, p_h, color=r_color, mode='classic', fixed_vel=p_speed)
+    ball = Ball(*MIDDLE_BOARD, b_radius, b_color, b_speed, 0)
 
     left_score = 0
     right_score = 0
@@ -49,7 +63,7 @@ def main(vs_ai=False):
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions
 
-        draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL)
+        draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL, bg_color)
 
         # Display "MODE: CLASSIC" at top left
         mode_label = "MODE: CLASSIC vs AI" if vs_ai else "MODE: CLASSIC"
@@ -90,7 +104,7 @@ def main(vs_ai=False):
                 left_score += 1
                 ball.reset()
 
-        if left_score >= WINNING_SCORE or right_score >= WINNING_SCORE:
+        if left_score >= win_score or right_score >= win_score:
             right_name = "AI" if vs_ai else "Right Player"
             win_text = "Left Player Won!" if left_score > right_score else f"{right_name} Won!"
             text = FONT_BIG_DIGITAL.render(win_text, True, PURPLE)

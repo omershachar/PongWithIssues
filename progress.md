@@ -499,7 +499,7 @@ All features implemented in this session are awaiting user testing and approval:
 
 | Metric | Count |
 |--------|-------|
-| Sessions | 11 |
+| Sessions | 12 |
 | Bugs Found | 15 + 8 web |
 | Bugs Fixed | 15 + 3 web |
 | Files Created | 20+ |
@@ -509,8 +509,52 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 12 - 2026-02-07
+
+#### Completed Tasks
+
+**Priority 5 - Settings Menu Overhaul:**
+- [x] **Side-panel settings with live AI preview**
+  - Split settings screen into two regions: 500px live preview (left) + 298px settings panel (right) with 2px purple separator
+  - New `PreviewGame` class in `pong/settings.py` — encapsulates a mini pong game with two AI paddles
+  - Left AI paddle tracks ball moving left, right AI paddle uses existing `ai_move_paddle()`
+  - Ball auto-resets to center on score (no score tracking)
+  - Physics mode with fire trail, spin, and Magnus effect visible in preview
+  - `apply_settings()` updates preview objects in real-time: ball radius, paddle height/width/color/speed, right paddle x-position
+  - Background color changes apply immediately to preview area
+  - Compact settings panel: `FONT_TINY_DIGITAL` (14px), 35px row height, abbreviated labels ("Paddle Ht", "L. Paddle", "BG Color", etc.)
+  - Color swatches preserved next to color options
+  - Surface clipping prevents preview drawing from bleeding into panel
+
+#### Files Modified
+- `pong/settings.py` — Added `PreviewGame` class, rewrote `SettingsMenu` layout (imports: Ball, Paddle, ai_move_paddle, handle_ball_collision)
+
+#### Testing
+- All Python imports verified working
+- PreviewGame instantiation and 60-frame simulation passed
+- SettingsMenu creates preview correctly
+- apply_settings() updates objects in real-time
+- No circular import issues
+- Launcher import chain verified
+
+---
+
+## Statistics
+
+| Metric | Count |
+|--------|-------|
+| Sessions | 12 |
+| Bugs Found | 15 + 8 web |
+| Bugs Fixed | 15 + 3 web |
+| Files Created | 20+ |
+| Files Modified | 36+ |
+| Files Deleted | 6+ directories |
+| Commits | 16+ |
+
+---
+
 ## Next Steps
-1. User testing of new logo on menu screen
+1. Plan web version rewrite (Python-based vs JS)
 2. Priority 5 remaining: Mouse controls, custom images
 3. Priority 6 remaining: AI difficulty levels, special modes
 4. Priority 7: Audio & visual polish

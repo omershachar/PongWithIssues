@@ -106,13 +106,13 @@ def launcher():
                             if vs_ai is None:
                                 continue
                             if selected_mode == 0:
-                                run_classic(vs_ai=vs_ai)
+                                run_classic(vs_ai=vs_ai, settings=settings)
                             else:
-                                run_pongception(vs_ai=vs_ai)
+                                run_pongception(vs_ai=vs_ai, settings=settings)
                         elif selected_mode == 2:
                             run_BETA()
                         elif selected_mode == 3:
-                            run_sandbox()
+                            run_sandbox(settings=settings)
                         # Reset display after returning from game
                         WIN = pygame.display.set_mode((WIDTH, HEIGHT))
                         set_window_icon()

@@ -6,7 +6,7 @@ import pygame
 import numpy as np
 from pong.constants import *
 
-def draw(win, paddles, ball, left_score, right_score, score_font):
+def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK):
     """
     Renders all visual game elements to the window:
     - Background
@@ -22,8 +22,9 @@ def draw(win, paddles, ball, left_score, right_score, score_font):
         left_score (int): Left player's score.
         right_score (int): Right player's score.
         score_font (pygame.font.Font): Font used to render scores.
+        bg_color (tuple): RGB background color.
     """
-    win.fill(BLACK)
+    win.fill(bg_color)
 
     # Draw scores
     left_score_text = score_font.render(f"{left_score}", True, LIGHT_PURPLE)

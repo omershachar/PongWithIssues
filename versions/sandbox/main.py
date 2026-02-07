@@ -37,15 +37,27 @@ def draw_debug_info(win, ball, left_paddle, right_paddle):
         win.blit(text, (10, y_offset + i * 16))
 
 
-def main():
+def main(settings=None):
     paused = False
     show_debug = True
     show_instructions = False
 
+    # Apply settings or use defaults
+    p_w = settings.paddle_width if settings else PADDLE_SIZE[0]
+    p_h = settings.paddle_height if settings else PADDLE_SIZE[1]
+    p_speed = settings.paddle_speed if settings else PADDLE_DEFAULT_VEL
+    b_radius = settings.ball_radius if settings else BALL_RADIUS
+    b_speed = settings.ball_speed if settings else BALL_DEFAULT_VEL[0]
+    l_color = settings.left_paddle_color if settings else LIGHT_PURPLE
+    r_color = settings.right_paddle_color if settings else LIGHT_PURPLE
+    bg_color = settings.background_color if settings else BLACK
+
     # Use physics mode for sandbox
-    left_paddle = Paddle(*ORIGINAL_LEFT_PADDLE_POS, *PADDLE_SIZE, mode='physics')
-    right_paddle = Paddle(*ORIGINAL_RIGHT_PADDLE_POS, *PADDLE_SIZE, mode='physics')
-    ball = Ball(*MIDDLE_BOARD, BALL_RADIUS, GREEN, mode='physics', vel=BALL_DEFAULT_VEL)
+    left_paddle = Paddle(ORIGINAL_LEFT_PADDLE_POS[0], ORIGINAL_LEFT_PADDLE_POS[1],
+                         p_w, p_h, color=l_color, mode='physics', fixed_vel=p_speed)
+    right_paddle = Paddle(ORIGINAL_RIGHT_PADDLE_POS[0], ORIGINAL_RIGHT_PADDLE_POS[1],
+                          p_w, p_h, color=r_color, mode='physics', fixed_vel=p_speed)
+    ball = Ball(*MIDDLE_BOARD, b_radius, GREEN, mode='physics', vel=(b_speed, 0))
 
     # No scoring in sandbox - just hit counters
     left_hits = 0
@@ -79,7 +91,7 @@ def main():
                     show_debug = not show_debug
 
         # Draw game
-        draw_game(WIN, [left_paddle, right_paddle], ball, left_hits, right_hits, FONT_LARGE_DIGITAL)
+        draw_game(WIN, [left_paddle, right_paddle], ball, left_hits, right_hits, FONT_LARGE_DIGITAL, bg_color)
 
         # Mode label
         mode_text = FONT_SMALL_DIGITAL.render("MODE: SANDBOX", True, GREEN)
