@@ -458,8 +458,60 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 11 - 2026-02-07
+
+#### Completed Tasks
+
+**Documentation Updates:**
+- [x] **Updated TODO.md** — added GitHub Pages/Actions work to Priority 8, added completed tasks archive entries for Sessions 10-11, updated timestamp
+- [x] **Updated PRD.md** — AI Opponent marked ✅ Done, Game Modes marked ✅ 4/4, Settings Menu marked ✅ Done, milestones updated, version bumped to 1.1
+- [x] **Updated CLAUDE.md** — Priority 3 corrected to COMPLETE, added Priority 6-8 status breakdown, updated bug count
+- [x] **Updated progress.md** — added Session 11 log (this entry)
+
+**Logo Enhancement:**
+- [x] **Replaced procedural fox logo with professional SVG-based logo**
+  - Converted `omer logo.svg` (white version) to PNG at 64, 128, 256px sizes using cairosvg
+  - Auto-cropped SVG content, padded to square, anti-aliased with LANCZOS
+  - Updated `pong/menu.py` to load PNG image at module level with procedural fallback
+  - Logo now renders at 80px (up from 64px) using `smoothscale` for quality
+  - White logo on black background matches game aesthetic perfectly
+
+#### Files Created
+- `assets/omer_logo_64x64.png` — Logo PNG (small)
+- `assets/omer_logo_128x128.png` — Logo PNG (medium, loaded by menu)
+- `assets/omer_logo_256x256.png` — Logo PNG (large)
+
+#### Files Modified
+- `pong/menu.py` — image loading, logo rendering with fallback
+- `TODO.md` — updated priorities and archive
+- `PRD.md` — updated feature statuses and milestones
+- `CLAUDE.md` — updated Known Issues section
+- `progress.md` — session log
+
+#### Testing
+- Python imports: All modules import successfully
+- Logo image: Loads correctly (128x128 RGBA)
+- Menu rendering: Logo blits with smoothscale at 80px
+
+---
+
+## Statistics
+
+| Metric | Count |
+|--------|-------|
+| Sessions | 11 |
+| Bugs Found | 15 + 8 web |
+| Bugs Fixed | 15 + 3 web |
+| Files Created | 20+ |
+| Files Modified | 35+ |
+| Files Deleted | 6+ directories |
+| Commits | 15+ |
+
+---
+
 ## Next Steps
-1. User testing of web version changes
+1. User testing of new logo on menu screen
 2. Priority 5 remaining: Mouse controls, custom images
 3. Priority 6 remaining: AI difficulty levels, special modes
 4. Priority 7: Audio & visual polish
+5. Priority 8 remaining: GitHub README link to Pages, touch controls

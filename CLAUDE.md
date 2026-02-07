@@ -163,11 +163,13 @@ Also update `TODO.md` when:
 
 ## Known Issues
 
-All Priority 1 critical bugs have been **FIXED** (BUG-001 through BUG-007).
+All Priority 1 critical bugs have been **FIXED** (BUG-001 through BUG-015, plus web BUG-W03/W07/W08).
 
 See `TODO.md` for remaining work:
 - Priority 2: Code cleanup (complete)
-- Priority 3: Code consolidation (partially complete - Ball/Paddle merged, AI/physics merges remaining)
+- Priority 3: Code consolidation (complete - Ball/Paddle merged, PhysicsObject unified, AI files merged)
 - Priority 4: Essential features (complete - modes, build system, branding)
 - Priority 5: Customization (partially complete - settings menu done, mouse controls remaining)
-- Priority 6+: AI opponent, audio, web/mobile, power-ups
+- Priority 6: AI opponent (basic AI done, difficulty levels remaining)
+- Priority 7: Audio & visual polish (pending)
+- Priority 8: Web & mobile (GitHub Pages deployed, touch controls remaining)

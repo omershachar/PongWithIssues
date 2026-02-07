@@ -55,9 +55,9 @@
 | Feature | Description | Status |
 |---------|-------------|--------|
 | **Local Multiplayer** | Two players on same device (W/S vs Arrows) | ✅ Done |
-| **AI Opponent** | Computer-controlled paddle for single player | 🔲 Planned |
-| **Working Web Version** | Fully playable in browser | 🟡 Partial |
-| **Multiple Game Modes** | Classic, Physics (Pongception), + special modes | 🟡 2 of 4+ |
+| **AI Opponent** | Computer-controlled paddle for single player | ✅ Done |
+| **Working Web Version** | Fully playable in browser | ✅ Done (GitHub Pages) |
+| **Multiple Game Modes** | Classic, Physics (Pongception), + special modes | ✅ 4 of 4 |
 | **Scoring System** | First to 3 points wins | ✅ Done |
 | **Pause/Resume** | Space to pause, M for menu | ✅ Done |
 
@@ -68,7 +68,7 @@
 | **AI Difficulty Levels** | Easy, Medium, Hard (or humorous names) | High |
 | **Mobile Touch Controls** | Swipe/drag to control paddles | High |
 | **Sound Effects** | Ball hit, score, win/lose sounds | Medium |
-| **Settings Menu** | Volume, controls, display options | Medium |
+| **Settings Menu** | Volume, controls, display options | ✅ Done |
 | **Fullscreen Mode** | Desktop and web fullscreen support | Medium |
 
 ### 4.3 Could-Have (Enhanced Experience)
@@ -229,14 +229,15 @@
 - [ ] Improve mobile web experience
 
 ### Phase 2: AI Opponent
+- [x] Basic AI opponent with ball-tracking
+- [x] Add AI vs Human mode to launcher menu
+- [ ] Create difficulty presets (Easy/Medium/Hard)
 - [ ] Integrate NEAT training into main game
-- [ ] Create difficulty presets
-- [ ] Add AI vs Human mode to menu
 
 ### Phase 3: Additional Modes
+- [x] Add mode selection to web version (4 modes)
 - [ ] Implement Crazy Mode
 - [ ] Implement Peaceful Mode
-- [ ] Add mode selection to web version
 
 ### Phase 4: Power-Ups
 - [ ] Design power-up spawn system
@@ -269,5 +270,5 @@
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: 2026-01-26*
+*Document Version: 1.1*
+*Last Updated: 2026-02-07*

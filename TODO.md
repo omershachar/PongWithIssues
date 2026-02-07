@@ -111,12 +111,13 @@
 
 ## Priority 8: Web & Mobile
 
-- [?] Set up GitHub Pages landing page
-- [?] Set up HTML webpage to host the game
-- [?] Connect game to web page
-- [?] Style game page with CSS
-- [?] Add link for game page in GitHub
-- [?] Phone & Tablet touch controls
+- [x] Set up GitHub Pages landing page (deployed in `docs/`)
+- [x] Set up HTML webpage to host the game
+- [x] Connect game to web page
+- [x] Style game page with CSS
+- [x] Add GitHub Actions workflow for Pages deployment
+- [ ] Add link for game page in GitHub README
+- [ ] Phone & Tablet touch controls
 
 ### User System
 - [ ] Sign in with name and password
@@ -190,4 +191,21 @@
 
 ---
 
-*Last updated: 2026-02-03 (Session 10)*
+### Web Version Enhancements (Session 10)
+- [x] Aligned constants with Python (canvas size, paddle, ball, scoring)
+- [x] Added 4 game modes to web version (Classic, Physics, BETA, Sandbox)
+- [x] Integrated digital-7 font for consistent visual style
+- [x] Fixed web version bugs (BUG-W03, BUG-W07, BUG-W08)
+
+### GitHub Pages Deployment (Session 11)
+- [x] GitHub Pages deployment in `docs/`
+- [x] GitHub Actions workflow for automated deployment
+- [x] Web version bug fixes
+
+### Logo & Documentation Updates (Session 11)
+- [x] Replaced procedural fox logo with professional SVG-based logo
+- [x] Updated all documentation files (TODO.md, progress.md, PRD.md, CLAUDE.md)
+
+---
+
+*Last updated: 2026-02-07 (Session 11)*

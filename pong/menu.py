@@ -1,5 +1,6 @@
 import pygame
 import webbrowser
+import os
 from pong.constants import *
 from pong.ball import Ball
 
@@ -13,6 +14,10 @@ VERSION = "v1.0.0"
 
 # Clickable link rect (set during draw, checked during event handling)
 _github_link_rect = None
+
+# Logo loaded lazily on first draw (needs display to be initialized for convert_alpha)
+_logo_image = None
+_logo_loaded = False
 
 
 def handle_menu_click(event):
@@ -298,19 +303,36 @@ def draw_menu(WIN, selected_mode):
     version_text = FONT_TINY_DIGITAL.render(VERSION, True, DARK_GREY)
     WIN.blit(version_text, (10, 10))
 
-    # Fox logo + GitHub link in bottom-left corner
-    global _github_link_rect
-    logo_size = 64
+    # Logo + GitHub link in bottom-left corner
+    global _github_link_rect, _logo_image, _logo_loaded
+    logo_size = 80
 
-    # Fox logo
+    # Lazy-load logo image (needs display initialized for convert_alpha)
+    if not _logo_loaded:
+        _logo_loaded = True
+        assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets')
+        for name in ('omer_logo_128x128.png', 'omer_logo_256x256.png'):
+            path = os.path.join(assets_dir, name)
+            if os.path.exists(path):
+                try:
+                    _logo_image = pygame.image.load(path).convert_alpha()
+                    break
+                except Exception:
+                    pass
+
+    # Draw logo (image if available, procedural fallback)
     logo_x = 12
-    logo_y = HEIGHT - logo_size - 30
-    draw_fox_logo(WIN, logo_x, logo_y, size=logo_size)
+    logo_y = HEIGHT - logo_size - 35
+    if _logo_image is not None:
+        scaled = pygame.transform.smoothscale(_logo_image, (logo_size, logo_size))
+        WIN.blit(scaled, (logo_x, logo_y))
+    else:
+        draw_fox_logo(WIN, logo_x, logo_y, size=logo_size)
 
-    # GitHub link below the fox
-    link_text = FONT_SMALL_DIGITAL.render(GITHUB_URL, True, LIGHT_PURPLE)
+    # GitHub link below the logo
+    link_text = FONT_MEDIUM_DIGITAL.render(DEVELOPER, True, LIGHT_PURPLE)
     link_x = 12
-    link_y = HEIGHT - 22
+    link_y = HEIGHT - 30
     WIN.blit(link_text, (link_x, link_y))
     pygame.draw.line(WIN, LIGHT_PURPLE,
                      (link_x, link_y + link_text.get_height()),
