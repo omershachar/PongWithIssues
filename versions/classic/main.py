@@ -14,7 +14,7 @@ from pong.paddle import Paddle
 from pong.ball import BallClassic as Ball
 from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
-from pong.ai import ai_move_paddle
+from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
 
 pygame.init()
 pygame.display.set_caption("Pong!")  # Window title
@@ -36,6 +36,8 @@ async def main(vs_ai=False, settings=None):
     r_color = settings.right_paddle_color if settings else LIGHT_PURPLE
     bg_color = settings.background_color if settings else BLACK
     win_score = settings.winning_score if settings else WINNING_SCORE
+
+    ai_diff = settings.ai_difficulty if settings else 5
 
     left_paddle = Paddle(ORIGINAL_LEFT_PADDLE_POS[0], ORIGINAL_LEFT_PADDLE_POS[1],
                          p_w, p_h, color=l_color, mode='classic', fixed_vel=p_speed)
@@ -67,7 +69,11 @@ async def main(vs_ai=False, settings=None):
         draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL, bg_color)
 
         # Display "MODE: CLASSIC" at top left
-        mode_label = "MODE: CLASSIC vs AI" if vs_ai else "MODE: CLASSIC"
+        if vs_ai:
+            diff_name = DIFFICULTY_NAMES.get(ai_diff, "")
+            mode_label = f"MODE: CLASSIC vs AI ({diff_name})"
+        else:
+            mode_label = "MODE: CLASSIC"
         mode_text = FONT_SMALL_DIGITAL.render(mode_label, True, GREY)
         WIN.blit(mode_text, (10, 10))
 
@@ -90,7 +96,7 @@ async def main(vs_ai=False, settings=None):
         if not paused:
             handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai)
             if vs_ai:
-                ai_move_paddle(right_paddle, ball)
+                ai_move_paddle(right_paddle, ball, difficulty=ai_diff)
             left_paddle.update()
             right_paddle.update()
 

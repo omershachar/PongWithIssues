@@ -16,7 +16,7 @@ from pong.paddle import Paddle
 from pong.ball import Ball
 from pong.utilities import draw, reset, handle_score
 from pong.helpers import handle_ball_collision, handle_paddle_movement
-from pong.ai import ai_move_paddle
+from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
 
 # pygame setup
 pygame.init()
@@ -39,6 +39,8 @@ async def main(vs_ai=False, settings=None):
     r_color = settings.right_paddle_color if settings else LIGHT_PURPLE
     bg_color = settings.background_color if settings else BLACK
     win_score = settings.winning_score if settings else WINNING_SCORE
+
+    ai_diff = settings.ai_difficulty if settings else 5
 
     left_paddle = Paddle(ORIGINAL_LEFT_PADDLE_POS[0], ORIGINAL_LEFT_PADDLE_POS[1],
                          p_w, p_h, color=l_color, mode='physics', fixed_vel=p_speed)
@@ -68,7 +70,11 @@ async def main(vs_ai=False, settings=None):
             WIN.blit(resume_text, (WIDTH // 2 - resume_text.get_width() // 2, HEIGHT // 2 + 10))
 
         # Top-left mode label
-        mode_label = "MODE: PHYSICS vs AI" if vs_ai else "MODE: PHYSICS"
+        if vs_ai:
+            diff_name = DIFFICULTY_NAMES.get(ai_diff, "")
+            mode_label = f"MODE: PHYSICS vs AI ({diff_name})"
+        else:
+            mode_label = "MODE: PHYSICS"
         mode_text = FONT_SMALL_DIGITAL.render(mode_label, True, GREY)
         WIN.blit(mode_text, (10, 10))
 
@@ -105,7 +111,7 @@ async def main(vs_ai=False, settings=None):
         if not paused:
             handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai)
             if vs_ai:
-                ai_move_paddle(right_paddle, ball)
+                ai_move_paddle(right_paddle, ball, difficulty=ai_diff)
 
             left_paddle.update()
             right_paddle.update()

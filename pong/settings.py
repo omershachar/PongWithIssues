@@ -7,7 +7,7 @@ import numpy as np
 from pong.constants import *
 from pong.ball import Ball
 from pong.paddle import Paddle
-from pong.ai import ai_move_paddle
+from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
 from pong.helpers import handle_ball_collision
 
 
@@ -34,6 +34,9 @@ class GameSettings:
         self.background_color = BLACK
         self.winning_score = WINNING_SCORE
 
+        # AI settings
+        self.ai_difficulty = 5  # 1 (Beginner) to 10 (Impossible)
+
         # Control settings
         self.left_up_key = pygame.K_w
         self.left_down_key = pygame.K_s
@@ -57,6 +60,7 @@ class GameSettings:
             'right_paddle_color': self.right_paddle_color,
             'background_color': self.background_color,
             'winning_score': self.winning_score,
+            'ai_difficulty': self.ai_difficulty,
         }
 
 
@@ -89,6 +93,7 @@ SETTING_RANGES = {
     'paddle_height': {'min': 40, 'max': 200, 'step': 10, 'label': 'Paddle Height'},
     'paddle_speed': {'min': 3, 'max': 15, 'step': 1, 'label': 'Paddle Speed'},
     'winning_score': {'min': 1, 'max': 21, 'step': 1, 'label': 'Winning Score'},
+    'ai_difficulty': {'min': 1, 'max': 10, 'step': 1, 'label': 'AI Difficulty'},
 }
 
 
@@ -158,7 +163,7 @@ class PreviewGame:
     def update(self):
         """Run one frame of AI pong."""
         # AI drives both paddles
-        ai_move_paddle(self.right_paddle, self.ball, difficulty=0.6)
+        ai_move_paddle(self.right_paddle, self.ball, difficulty=6)
         self._ai_move_left(self.left_paddle, self.ball)
 
         # Physics update
@@ -357,6 +362,7 @@ class SettingsMenu:
             'left_paddle_color': 'L. Paddle',
             'right_paddle_color': 'R. Paddle',
             'background_color': 'BG Color',
+            'ai_difficulty': 'AI Level',
             'Reset Defaults': 'Reset Defaults',
         }
 
@@ -376,7 +382,11 @@ class SettingsMenu:
             label = COMPACT_LABELS.get(option, option)
 
             # Get value display string
-            if option in SETTING_RANGES:
+            if option == 'ai_difficulty':
+                level = self.settings.ai_difficulty
+                name = DIFFICULTY_NAMES.get(level, "")
+                value_display = f"< {level} {name} >"
+            elif option in SETTING_RANGES:
                 value = str(getattr(self.settings, option))
                 value_display = f"< {value} >"
             elif option == 'left_paddle_color':
