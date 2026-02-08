@@ -29,8 +29,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install Pygbag
-        run: pip install pygbag
+      - name: Install dependencies
+        run: |
+          pip install pygbag
+          pip install -r requirements.txt
 
       - name: Build with Pygbag
         run: python -m pygbag --build .
