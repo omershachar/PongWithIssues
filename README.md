@@ -17,51 +17,67 @@ Barely functional Pong made by a barely functional dev.
 > **PongWithIssues** is a game of Pong that you can play Pong in it.
 [Click here for further explanations](https://en.wikipedia.org/wiki/Pong)
 
-## Requirements
+## Play in Your Browser
 
-- Python 3.10 or higher (3.11, 3.12, 3.13 all supported)
-- pygame==2.6.1
-- numpy
+**[Play PongWithIssues Online](https://omershachar.github.io/PongWithIssues/)** — no install required. Works on desktop and mobile.
 
 ---
 
-### How to Play
+## Install & Play (Desktop)
 
-1. Clone the repo
+**One command — everything is automatic:**
 
-   ```bash
-   git clone https://github.com/omershachar/PongWithIssues.git
-   ```
+```bash
+git clone https://github.com/omershachar/PongWithIssues.git
+cd PongWithIssues
+python3 play.py
+```
 
-2. Install dependencies
+That's it. `play.py` creates a virtual environment, installs dependencies, and launches the game.
 
-   ```bash
-   pip install -r ./PongWithIssues/requirements.txt
-   ```
+**Or double-click:**
+- **Linux / macOS:** `play.sh`
+- **Windows:** `play.bat`
 
-3. Run it
-
-   ```bash
-   python3 ./PongWithIssues/launcher.py   # Linux/WSL
-   python ./PongWithIssues/launcher.py    # Windows
-   ```
-
-> Or download the `.exe` version from the [Releases](https://www.google.com/search?q=Not+yet+...) tab (coming soon).
+> Requires Python 3.10+
 
 ---
 
-### Game Modes
+## Game Modes
 
 | Mode | Description |
 |------|-------------|
-| **Classic** | Original Pong experience |
-| **Pongception** | Physics mode with spin, momentum transfer, and paddle recoil |
-| **BETA** | Experimental physics sandbox with interactive controls |
-| **Sandbox** | Debug mode with overlay - ball position, velocity, spin, hit counter |
+| **Classic** | Original Pong experience — clean, fast, competitive |
+| **Pongception** | Physics mode with spin, momentum transfer, fire trails, and paddle recoil |
+| **BETA** | Experimental physics sandbox with interactive force/impulse controls |
+| **Sandbox** | Debug mode — ball position, velocity, spin overlay, hit counter, no scoring |
+
+All modes support **vs Friend** (local 2-player) and **vs AI** (10 difficulty levels).
 
 ---
 
-### Controls
+## AI Opponent
+
+10 difficulty levels from **Beginner** to **Impossible**, with spin-aware trajectory prediction. Adjust in the settings menu.
+
+| Level | Name |
+|-------|------|
+| 1 | Beginner |
+| 2 | Easy |
+| 3 | Casual |
+| 4 | Normal |
+| 5 | Intermediate |
+| 6 | Challenging |
+| 7 | Hard |
+| 8 | Expert |
+| 9 | Master |
+| 10 | Impossible |
+
+---
+
+## Controls
+
+### Keyboard
 
 | Action              | Key         |
 |---------------------|-------------|
@@ -69,34 +85,43 @@ Barely functional Pong made by a barely functional dev.
 | Left Paddle Down    | `S`         |
 | Right Paddle Up     | `UP`        |
 | Right Paddle Down   | `DOWN`      |
-| Open Menu           | `M`         |
 | Pause/Resume        | `SPACE`     |
 | Restart Game        | `R`         |
-| Toggle Instructions | `H`         |
+| Back to Menu        | `M` / `ESC` |
 | Settings Menu       | `S` (menu)  |
+| Toggle Instructions | `H`         |
 | Toggle Debug (Sandbox) | `D`      |
-| Exit Game           | `ESC`       |
+
+### Touch (Mobile Web)
+
+| Action | Gesture |
+|--------|---------|
+| Move Left Paddle | Touch left half of screen |
+| Move Right Paddle | Touch right half of screen |
+| Pause | Tap top-right corner |
+| Back to Menu | Tap top-left corner |
+| Select Mode | Tap on mode box |
+| Start Game | Tap selected mode again or tap start area |
+
+In vs AI mode, the entire screen controls your paddle.
 
 ---
 
-### Settings Menu
+## Settings Menu
 
-Access from the main menu with `S`. Customize:
+Access from the main menu with `S`. Features a **live AI preview** — two AI paddles play pong in real-time while you adjust settings.
+
+Customize:
 - Ball size and speed
 - Paddle height and speed
 - Left/right paddle colors (8 options)
 - Background color (6 dark themes)
 - Winning score (1-21)
+- AI difficulty (1-10)
 
 ---
 
-### Web Version
-
-Coming soon (maybe) via GitHub Pages — for now this is [good enough](https://www.google.com/search?q=Play+Pong+free)
-
----
-
-### Building an Executable
+## Building an Executable
 
 ```bash
 python scripts/build.py            # Standard build
@@ -107,17 +132,16 @@ Requires [PyInstaller](https://pyinstaller.org/).
 
 ---
 
-### Built With
+## Built With
 
-- Python 3.10+ (3.10, 3.11, 3.12 and 3.13 all work)
+- Python 3.10+
 - [Pygame](https://www.pygame.org/)
-- TypeScript + HTML5 Canvas (web version)
-- Windows Subsystem for Linux (WSL2/WSLg) or native Windows
-- VS Code
+- [Pygbag](https://github.com/pygame-web/pygbag) (Python → WebAssembly for browser play)
+- NumPy
 
 ---
 
-### Disclaimer
+## Disclaimer
 
 - I have no idea what I'm doing.
 - If this crashes your PC, it's your fault for trusting anything named `PongWithIssues`.
@@ -125,7 +149,7 @@ Requires [PyInstaller](https://pyinstaller.org/).
 
 ---
 
-### WSL / Windows 11 Users
+## WSL / Windows 11 Users
 
 - **Windows 11 (WSL2):**
 You do NOT need an X server (VcXsrv/Xming).
@@ -144,6 +168,6 @@ You MUST install and run an X server (like VcXsrv) on Windows for any game windo
 
 ---
 
-### License
+## License
 
 > Under the [MIT License](LICENSE)

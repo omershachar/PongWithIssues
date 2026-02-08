@@ -633,10 +633,129 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+### Session 14 - 2026-02-07
+
+#### Completed Tasks
+
+**One-Click Launcher:**
+- [x] **Created `play.py`** — cross-platform one-click launcher
+  - Auto-creates `.venv` if not present
+  - Installs requirements.txt dependencies
+  - Shows ASCII PONG banner and progress messages
+  - Suppresses pygame community message
+  - Works on Linux/Mac/Windows
+- [x] **Created `play.sh`** — double-click launcher for Linux/macOS
+- [x] **Created `play.bat`** — double-click launcher for Windows
+
+**Pygbag Black Screen Fix:**
+- [x] **Fixed 4 issues causing black screen after "ready to start":**
+  1. Module-level `pygame.display.set_mode()` in classic/pongception/sandbox hijacked Pygbag canvas during import — moved into `async def main()`
+  2. `numpy` not imported in `main.py` so Pygbag didn't bundle it — added `import numpy`
+  3. `webbrowser` module unavailable in WASM — wrapped with try/except in `pong/menu.py`
+  4. `neat-python` in requirements.txt not available for WASM — removed from requirements.txt
+- [x] Made `launcher.py` pygame.init() conditional: `if not pygame.get_init(): pygame.init()`
+
+**AI Improvements (user-authored):**
+- [x] Acknowledged user's improved AI system: 10 difficulty levels (1=Beginner to 10=Impossible)
+- [x] `DIFFICULTY_NAMES` dict and `DIFFICULTY_PRESETS` with reaction_distance, prediction_skill, spin_awareness, etc.
+- [x] Wired `settings.ai_difficulty` into Classic and Pongception modes
+
+#### Files Created
+- `play.py` — one-click launcher
+- `play.sh` — Linux/macOS wrapper
+- `play.bat` — Windows wrapper
+
+#### Files Modified
+- `main.py` — added `import numpy` for Pygbag bundling
+- `launcher.py` — conditional `pygame.init()`
+- `versions/classic/main.py` — moved display.set_mode() into function
+- `versions/pongception/main.py` — moved display.set_mode() into function
+- `versions/sandbox/main.py` — moved display.set_mode() into function
+- `pong/menu.py` — guarded webbrowser import
+- `requirements.txt` — removed neat-python
+- `.github/workflows/deploy.yml` — added `pip install -r requirements.txt`
+
+#### Commits
+- `e3c966f` — One-click launcher + Pygbag fixes + AI improvements
+
+---
+
+### Session 15 - 2026-02-07
+
+#### Completed Tasks
+
+**Priority 8 - Touch Controls for Mobile Web:**
+- [x] **Created `pong/touch.py`** — Touch input handler module
+  - `TouchHandler` class tracks active finger touches via `FINGERDOWN/FINGERUP/FINGERMOTION`
+  - Normalized coords (0.0-1.0) multiplied by WIDTH/HEIGHT for pixel positions
+  - Left half of screen → left paddle, right half → right paddle
+  - `single_player=True` mode makes all touches control left paddle (vs AI)
+  - Top 40px strip reserved for MENU/PAUSE touch buttons (excluded from paddle control)
+  - `draw_touch_buttons()` renders overlay buttons only when `IS_WEB` (emscripten)
+  - Touch zone hint line drawn at screen center
+- [x] **Modified `pong/helpers.py`** — touch support in paddle movement
+  - `handle_paddle_movement()` accepts optional `touch=` parameter
+  - New `_move_to_target()` helper accelerates paddle toward finger Y position with dead zone
+- [x] **Integrated touch into Classic, Pongception, Sandbox game modes**
+  - Each mode creates `TouchHandler`, processes touch events in event loop
+  - Touch MENU button (top-left) returns to menu
+  - Touch PAUSE button (top-right) toggles pause
+  - `draw_touch_buttons()` called before `pygame.display.update()`
+  - `touch.clear_taps()` called at end of each frame
+- [x] **Added touch navigation to menus**
+  - `pong/menu.py` — new `get_mode_box_rects()` returns mode box rects for hit-testing
+  - `launcher.py` — tap mode boxes to select (tap again to start), tap start area, tap settings area
+  - VS-AI submenu — tap "vs Friend" / "vs AI" / "Back" options
+  - `pong/settings.py` — `handle_input()` accepts `touch=` parameter
+    - Tap setting row to select, tap left/right side of value to adjust
+    - Tap preview area to go back
+
+#### Files Created
+- `pong/touch.py` — Touch input handler
+
+#### Files Modified
+- `pong/helpers.py` — added `touch=` parameter, `_move_to_target()` helper
+- `pong/menu.py` — added `get_mode_box_rects()`
+- `pong/settings.py` — touch support in `handle_input()`
+- `launcher.py` — touch handling for main menu, vs-AI submenu
+- `versions/classic/main.py` — touch integration
+- `versions/pongception/main.py` — touch integration
+- `versions/sandbox/main.py` — touch integration
+
+#### Testing
+- All Python imports: PASSED
+- All modified files: compile check PASSED
+- TouchHandler unit test: PASSED (single_player mode, target methods, IS_WEB detection)
+- get_mode_box_rects: PASSED (4 boxes, correct dimensions)
+
+#### Notes
+- Touch controls are invisible on desktop (IS_WEB check) — zero impact on desktop experience
+- BETA mode does not have touch controls (keyboard-only experimental mode)
+- Touch events use `FINGERDOWN/FINGERUP/FINGERMOTION` for multitouch support
+- Dead zone in `_move_to_target()` is 10% of paddle height to prevent jitter
+
+#### Status: NOT YET COMMITTED
+- All changes are local, awaiting commit and push
+
+---
+
+## Statistics
+
+| Metric | Count |
+|--------|-------|
+| Sessions | 15 |
+| Bugs Found | 15 + 8 web (obsolete) |
+| Bugs Fixed | 15 + 7 web (obsolete) |
+| Files Created | 25+ |
+| Files Modified | 55+ |
+| Files Deleted | 7+ directories |
+| Commits | 18+ |
+
+---
+
 ## Next Steps
-1. Test Pygbag build locally (`python -m pygbag .`)
-2. Verify deployment on GitHub Pages after push
+1. Commit and push touch controls
+2. Test touch controls on mobile after deployment
 3. Priority 5 remaining: Mouse controls, custom images
-4. Priority 6 remaining: AI difficulty levels, special modes
-5. Priority 7: Audio & visual polish (OGG format for Pygbag)
-6. Priority 8 remaining: GitHub README link to Pages, touch controls
+4. Priority 7: Audio & visual polish (OGG format for Pygbag)
+5. Priority 8 remaining: Add GitHub README link to Pages

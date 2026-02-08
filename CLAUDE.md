@@ -49,7 +49,9 @@ pong/                    # Shared core library
 ├── helpers.py           # Collision detection, paddle movement logic
 ├── utilities.py         # Rendering functions, game state helpers
 ├── menu.py              # Main menu UI with mode selection grid
-└── settings.py          # GameSettings and SettingsMenu classes
+├── settings.py          # GameSettings and SettingsMenu classes
+├── ai.py                # AI opponent with 10 difficulty levels
+└── touch.py             # Touch input handler for mobile/web
 
 versions/                # Game mode implementations
 ├── classic/main.py      # Standard Pong
@@ -166,6 +168,6 @@ See `TODO.md` for remaining work:
 - Priority 3: Code consolidation (complete - Ball/Paddle merged, PhysicsObject unified, AI files merged)
 - Priority 4: Essential features (complete - modes, build system, branding)
 - Priority 5: Customization (partially complete - settings menu done, mouse controls remaining)
-- Priority 6: AI opponent (basic AI done, difficulty levels remaining)
+- Priority 6: AI opponent (complete - 10 difficulty levels, spin-aware prediction)
 - Priority 7: Audio & visual polish (pending)
-- Priority 8: Web & mobile (Pygbag WebAssembly deployment, touch controls remaining)
+- Priority 8: Web & mobile (Pygbag deployment complete, touch controls implemented, README link remaining)

@@ -70,7 +70,7 @@
 ### AI Opponent
 - [x] Add game mode selection (Play with friend / Play against computer)
 - [x] Add basic AI opponent
-- [ ] AI difficulty levels
+- [x] AI difficulty levels (10 levels: Beginner to Impossible)
 
 ### Special Modes
 - [ ] Peaceful mode - no ball, no score, just clouds and peaceful music
@@ -112,7 +112,7 @@
 - [x] Add GitHub Actions workflow for Pages deployment
 - [x] **Replaced JS/TS web version with Pygbag (Python → WebAssembly)** — single codebase for desktop and web
 - [ ] Add link for game page in GitHub README
-- [ ] Phone & Tablet touch controls
+- [x] Phone & Tablet touch controls (TouchHandler in `pong/touch.py`, integrated into all game modes and menus)
 
 ### User System
 - [ ] Sign in with name and password
@@ -211,6 +211,19 @@
 - [x] Updated GitHub Actions workflow for Pygbag build + deploy
 - [x] Deleted `versions/web-version/` and old `docs/` web files
 
+### One-Click Launcher & Pygbag Fixes (Session 14)
+- [x] Created `play.py` — one-click cross-platform launcher (auto-creates venv, installs deps, launches game)
+- [x] Created `play.sh` / `play.bat` — double-click wrappers
+- [x] Fixed Pygbag black screen: moved module-level `display.set_mode()` into functions, added `import numpy` to main.py, guarded `webbrowser` import, removed `neat-python` from requirements
+- [x] AI system improved to 10 difficulty levels (1=Beginner to 10=Impossible) with DIFFICULTY_NAMES
+
+### Touch Controls for Mobile Web (Session 15)
+- [x] Created `pong/touch.py` — TouchHandler class + draw_touch_buttons overlay
+- [x] Modified `pong/helpers.py` — handle_paddle_movement accepts `touch=` parameter
+- [x] Added touch controls to Classic, Pongception, Sandbox game modes
+- [x] Added touch navigation to main menu, vs-AI submenu, and settings menu
+- [x] Added `get_mode_box_rects()` to `pong/menu.py` for touch hit-testing
+
 ---
 
-*Last updated: 2026-02-07 (Session 13)*
+*Last updated: 2026-02-07 (Session 15)*
