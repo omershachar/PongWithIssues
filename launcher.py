@@ -9,8 +9,9 @@ if not pygame.get_init():
     pygame.init()
 
 from pong.constants import *
-from pong.menu import draw_menu, handle_menu_click, GAME_MODES
+from pong.menu import draw_menu, handle_menu_click, GAME_MODES, get_mode_box_rects
 from pong.settings import GameSettings, SettingsMenu
+from pong.touch import TouchHandler
 from versions.classic.main import main as run_classic
 from versions.pongception.main import main as run_pongception
 from versions.BETA.main import main as run_BETA
@@ -21,14 +22,25 @@ FONT_MENU_SMALL = pygame.font.SysFont(*FONT_SMALL)
 
 NUM_MODES = len(GAME_MODES)
 
+# Touch target rects for vs-AI submenu options
+_VS_FRIEND_RECT = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 40, 300, 40)
+_VS_AI_RECT = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2, 300, 40)
+_VS_BACK_RECT = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 + 50, 300, 40)
+
+# Touch target for "Press SPACE to start" area
+_START_RECT = pygame.Rect(0, HEIGHT - 180, WIDTH, 80)
+
+# Touch target for settings hint area
+_SETTINGS_RECT = pygame.Rect(0, HEIGHT - 250, WIDTH, 40)
+
 
 def draw_vs_menu(win):
     """Draw the 'vs Friend / vs AI' sub-menu screen."""
     win.fill(BLACK)
     title = FONT_MENU.render("Choose Opponent", True, WHITE)
-    opt1 = FONT_MENU_SMALL.render("[1] vs Friend", True, GREY)
-    opt2 = FONT_MENU_SMALL.render("[2] vs AI", True, GREY)
-    back = FONT_MENU_SMALL.render("[ESC] Back", True, GREY)
+    opt1 = FONT_MENU_SMALL.render("vs Friend", True, GREY)
+    opt2 = FONT_MENU_SMALL.render("vs AI", True, GREY)
+    back = FONT_MENU_SMALL.render("Back", True, GREY)
     win.blit(title, (WIDTH // 2 - title.get_width() // 2, HEIGHT // 2 - 80))
     win.blit(opt1, (WIDTH // 2 - opt1.get_width() // 2, HEIGHT // 2 - 20))
     win.blit(opt2, (WIDTH // 2 - opt2.get_width() // 2, HEIGHT // 2 + 20))
@@ -66,71 +78,109 @@ async def launcher():
     settings = GameSettings()
     settings_menu = SettingsMenu(settings)
 
+    # Touch handler for menu
+    touch = TouchHandler()
+    mode_box_rects = get_mode_box_rects()
+
     while running:
         clock.tick(FPS)
 
         if in_settings:
             # Settings menu loop
             for event in pygame.event.get():
+                touch.handle_event(event)
                 if event.type == pygame.QUIT:
                     running = False
                     break
-                if settings_menu.handle_input(event):
+                if settings_menu.handle_input(event, touch):
                     in_settings = False
+            touch.clear_taps()
             settings_menu.draw(WIN)
         else:
             # Main menu loop
+            start_game = False
             for event in pygame.event.get():
+                touch.handle_event(event)
                 if event.type == pygame.QUIT:
                     running = False
                     break
                 handle_menu_click(event)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        vs_ai = None
-                        if selected_mode in (0, 1):
-                            # Show vs Friend / vs AI sub-menu
-                            choosing = True
-                            while choosing:
-                                draw_vs_menu(WIN)
-                                for sub_event in pygame.event.get():
-                                    if sub_event.type == pygame.QUIT:
-                                        pygame.quit()
-                                        return
-                                    if sub_event.type == pygame.KEYDOWN:
-                                        if sub_event.key == pygame.K_1:
-                                            vs_ai = False
-                                            choosing = False
-                                        elif sub_event.key == pygame.K_2:
-                                            vs_ai = True
-                                            choosing = False
-                                        elif sub_event.key == pygame.K_ESCAPE:
-                                            choosing = False
-                                await asyncio.sleep(0)
-                            if vs_ai is None:
-                                continue
-                            if selected_mode == 0:
-                                await run_classic(vs_ai=vs_ai, settings=settings)
-                            else:
-                                await run_pongception(vs_ai=vs_ai, settings=settings)
-                        elif selected_mode == 2:
-                            await run_BETA()
-                        elif selected_mode == 3:
-                            await run_sandbox(settings=settings)
-                        # Reset display after returning from game
-                        WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-                        set_window_icon()
-
+                        start_game = True
                     elif event.key == pygame.K_RIGHT:
                         selected_mode = (selected_mode + 1) % NUM_MODES
                     elif event.key == pygame.K_LEFT:
                         selected_mode = (selected_mode - 1) % NUM_MODES
-
                     elif event.key == pygame.K_s:
                         in_settings = True
-
                     elif event.key == pygame.K_ESCAPE:
                         running = False
+
+            # Touch: tap on mode boxes to select or start
+            for tap_x, tap_y in touch.taps:
+                for i, rect in enumerate(mode_box_rects):
+                    if rect.collidepoint(tap_x, tap_y):
+                        if i == selected_mode:
+                            start_game = True
+                        else:
+                            selected_mode = i
+                        break
+                # Tap on start area
+                if _START_RECT.collidepoint(tap_x, tap_y):
+                    start_game = True
+                # Tap on settings area
+                if _SETTINGS_RECT.collidepoint(tap_x, tap_y):
+                    in_settings = True
+
+            touch.clear_taps()
+
+            if start_game and running:
+                vs_ai = None
+                if selected_mode in (0, 1):
+                    # Show vs Friend / vs AI sub-menu
+                    choosing = True
+                    while choosing:
+                        draw_vs_menu(WIN)
+                        for sub_event in pygame.event.get():
+                            touch.handle_event(sub_event)
+                            if sub_event.type == pygame.QUIT:
+                                pygame.quit()
+                                return
+                            if sub_event.type == pygame.KEYDOWN:
+                                if sub_event.key == pygame.K_1:
+                                    vs_ai = False
+                                    choosing = False
+                                elif sub_event.key == pygame.K_2:
+                                    vs_ai = True
+                                    choosing = False
+                                elif sub_event.key == pygame.K_ESCAPE:
+                                    choosing = False
+                        # Touch: tap on submenu options
+                        for tap_x, tap_y in touch.taps:
+                            if _VS_FRIEND_RECT.collidepoint(tap_x, tap_y):
+                                vs_ai = False
+                                choosing = False
+                            elif _VS_AI_RECT.collidepoint(tap_x, tap_y):
+                                vs_ai = True
+                                choosing = False
+                            elif _VS_BACK_RECT.collidepoint(tap_x, tap_y):
+                                choosing = False
+                        touch.clear_taps()
+                        await asyncio.sleep(0)
+                    if vs_ai is None:
+                        continue
+                    if selected_mode == 0:
+                        await run_classic(vs_ai=vs_ai, settings=settings)
+                    else:
+                        await run_pongception(vs_ai=vs_ai, settings=settings)
+                elif selected_mode == 2:
+                    await run_BETA()
+                elif selected_mode == 3:
+                    await run_sandbox(settings=settings)
+                # Reset display after returning from game
+                WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+                set_window_icon()
 
             draw_menu(WIN, selected_mode)
 

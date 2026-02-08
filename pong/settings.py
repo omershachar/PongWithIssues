@@ -251,8 +251,34 @@ class SettingsMenu:
         self.editing = False
         self.preview = PreviewGame(self.PREVIEW_WIDTH, HEIGHT, settings)
 
-    def handle_input(self, event):
-        """Handle keyboard input for settings navigation."""
+    def handle_input(self, event, touch=None):
+        """Handle keyboard and touch input for settings navigation."""
+        # Touch input: tap on setting rows or adjustment areas
+        if touch and touch.taps:
+            for tap_x, tap_y in touch.taps:
+                # Check if tap is in the panel area
+                if tap_x >= self.PANEL_X:
+                    # Map tap Y to a setting row
+                    start_y = 85
+                    line_height = 35
+                    row = int((tap_y - start_y) / line_height)
+                    if 0 <= row < len(self.options):
+                        if row == self.selected_option:
+                            # Already selected: check if tap is left or right to adjust
+                            mid_x = self.PANEL_X + self.PANEL_WIDTH // 2
+                            if tap_x < mid_x:
+                                self._adjust_setting(-1)
+                            else:
+                                if self.options[row] == 'Reset Defaults':
+                                    self.settings.reset_defaults()
+                                else:
+                                    self._adjust_setting(1)
+                        else:
+                            self.selected_option = row
+                else:
+                    # Tap on the preview area = go back
+                    return True
+
         if event.type != pygame.KEYDOWN:
             return False  # Return False = stay in settings
 

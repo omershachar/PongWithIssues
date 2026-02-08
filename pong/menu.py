@@ -243,6 +243,21 @@ GAME_MODES = [
     }
 ]
 
+def get_mode_box_rects():
+    """Return list of pygame.Rect for each mode selection box (for touch hit-testing)."""
+    mode_box_width = 160
+    mode_box_height = 70
+    mode_spacing = 20
+    mode_start_y = MENU_SUBTITLES_Y + MENU_MARGIN_Y * 3
+    total_width = len(GAME_MODES) * mode_box_width + (len(GAME_MODES) - 1) * mode_spacing
+    start_x = (WIDTH - total_width) // 2
+    rects = []
+    for i in range(len(GAME_MODES)):
+        x = start_x + i * (mode_box_width + mode_spacing)
+        rects.append(pygame.Rect(x, mode_start_y, mode_box_width, mode_box_height))
+    return rects
+
+
 def draw_menu(WIN, selected_mode):
     WIN.fill(BLACK)
 

@@ -15,6 +15,7 @@ from pong.ball import BallClassic as Ball
 from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
 from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
+from pong.touch import TouchHandler, draw_touch_buttons
 
 async def main(vs_ai=False, settings=None):
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -44,6 +45,7 @@ async def main(vs_ai=False, settings=None):
                           p_w, p_h, color=r_color, mode='classic', fixed_vel=p_speed)
     ball = Ball(*MIDDLE_BOARD, b_radius, b_color, b_speed, 0)
 
+    touch = TouchHandler(single_player=vs_ai)
     left_score = 0
     right_score = 0
 
@@ -52,6 +54,7 @@ async def main(vs_ai=False, settings=None):
         keys = pygame.key.get_pressed()
 
         for event in pygame.event.get():
+            touch.handle_event(event)
             if event.type == pygame.QUIT:
                 return
             if event.type == pygame.KEYDOWN:
@@ -64,6 +67,13 @@ async def main(vs_ai=False, settings=None):
                     paused = False
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions
+
+        # Touch button actions
+        if touch.tapped_menu_btn():
+            touch.clear_taps()
+            return
+        if touch.tapped_pause_btn():
+            paused = not paused
 
         draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL, bg_color)
 
@@ -90,10 +100,11 @@ async def main(vs_ai=False, settings=None):
         footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
         WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
 
+        draw_touch_buttons(WIN, paused)
         pygame.display.update()
 
         if not paused:
-            handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai)
+            handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai, touch=touch)
             if vs_ai:
                 ai_move_paddle(right_paddle, ball, difficulty=ai_diff)
             left_paddle.update()
@@ -119,6 +130,7 @@ async def main(vs_ai=False, settings=None):
             await asyncio.sleep(3)
             left_score, right_score = reset(ball, left_paddle, right_paddle)
 
+        touch.clear_taps()
         await asyncio.sleep(0)
 
 if __name__ == '__main__':

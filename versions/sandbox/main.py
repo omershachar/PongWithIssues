@@ -14,6 +14,7 @@ from pong.paddle import Paddle
 from pong.ball import Ball
 from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
+from pong.touch import TouchHandler, draw_touch_buttons
 
 def draw_debug_info(win, ball, left_paddle, right_paddle):
     """Draw debug information overlay."""
@@ -58,6 +59,7 @@ async def main(settings=None):
                           p_w, p_h, color=r_color, mode='physics', fixed_vel=p_speed)
     ball = Ball(*MIDDLE_BOARD, b_radius, GREEN, mode='physics', vel=(b_speed, 0))
 
+    touch = TouchHandler()
     # No scoring in sandbox - just hit counters
     left_hits = 0
     right_hits = 0
@@ -67,6 +69,7 @@ async def main(settings=None):
         keys = pygame.key.get_pressed()
 
         for event in pygame.event.get():
+            touch.handle_event(event)
             if event.type == pygame.QUIT:
                 return
             if event.type == pygame.KEYDOWN:
@@ -88,6 +91,13 @@ async def main(settings=None):
                     show_instructions = not show_instructions
                 if event.key == pygame.K_d:
                     show_debug = not show_debug
+
+        # Touch button actions
+        if touch.tapped_menu_btn():
+            touch.clear_taps()
+            return
+        if touch.tapped_pause_btn():
+            paused = not paused
 
         # Draw game
         draw_game(WIN, [left_paddle, right_paddle], ball, left_hits, right_hits, FONT_LARGE_DIGITAL, bg_color)
@@ -119,10 +129,11 @@ async def main(settings=None):
         footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
         WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
 
+        draw_touch_buttons(WIN, paused)
         pygame.display.update()
 
         if not paused:
-            handle_paddle_movement(keys, left_paddle, right_paddle)
+            handle_paddle_movement(keys, left_paddle, right_paddle, touch=touch)
             left_paddle.update()
             right_paddle.update()
 
@@ -146,6 +157,7 @@ async def main(settings=None):
                 ball.vel[0] = -abs(ball.vel[0])
                 ball.pos[0] = WIDTH - ball.radius
 
+        touch.clear_taps()
         await asyncio.sleep(0)
 
 

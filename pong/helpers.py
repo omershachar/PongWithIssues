@@ -64,15 +64,18 @@ def handle_ball_collision(ball, left_paddle, right_paddle):
 
             ball.vel[0] = -abs(ball.vel[0])  # bounce left
 
-def handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=False):
+def handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=False, touch=None):
     """
-    Handles keyboard input and accelerates paddles accordingly.
+    Handles keyboard and touch input to accelerate paddles.
 
     Args:
         keys (dict): pygame.key.get_pressed() dictionary.
         left_paddle (Paddle): Left player paddle.
         right_paddle (Paddle): Right player paddle.
+        ai_right (bool): If True, right paddle is AI-controlled (skip input).
+        touch (TouchHandler|None): Touch handler for mobile input.
     """
+    # Keyboard input
     if keys[pygame.K_w]:
         left_paddle.accelerate(up=True)
     if keys[pygame.K_s]:
@@ -82,3 +85,24 @@ def handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=False):
             right_paddle.accelerate(up=True)
         if keys[pygame.K_DOWN]:
             right_paddle.accelerate(up=False)
+
+    # Touch input (supplements keyboard)
+    if touch:
+        left_target = touch.get_left_target()
+        if left_target is not None:
+            _move_to_target(left_paddle, left_target)
+        if not ai_right:
+            right_target = touch.get_right_target()
+            if right_target is not None:
+                _move_to_target(right_paddle, right_target)
+
+
+def _move_to_target(paddle, target_y):
+    """Move paddle toward a target Y position (for touch input)."""
+    paddle_center = paddle.pos[1] + paddle.height / 2
+    dead_zone = paddle.height * 0.1
+    diff = target_y - paddle_center
+    if diff < -dead_zone:
+        paddle.accelerate(up=True)
+    elif diff > dead_zone:
+        paddle.accelerate(up=False)
