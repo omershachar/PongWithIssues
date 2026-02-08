@@ -1,6 +1,11 @@
 import pygame
-import webbrowser
+import sys
 import os
+
+try:
+    import webbrowser
+except ImportError:
+    webbrowser = None  # Not available in WASM/Pygbag
 from pong.constants import *
 from pong.ball import Ball
 
@@ -26,7 +31,8 @@ def handle_menu_click(event):
     global _github_link_rect
     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
         if _github_link_rect and _github_link_rect.collidepoint(event.pos):
-            webbrowser.open(GITHUB_FULL_URL)
+            if webbrowser is not None:
+                webbrowser.open(GITHUB_FULL_URL)
             return True
     return False
 

@@ -16,12 +16,11 @@ from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
 from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
 
-pygame.init()
-pygame.display.set_caption("Pong!")  # Window title
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
-
 async def main(vs_ai=False, settings=None):
+    WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Pong!")
+    clock = pygame.time.Clock()
+
     paused = False
     show_instructions = False
 

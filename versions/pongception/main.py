@@ -18,13 +18,11 @@ from pong.utilities import draw, reset, handle_score
 from pong.helpers import handle_ball_collision, handle_paddle_movement
 from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
 
-# pygame setup
-pygame.init()
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Pongception")
-
 async def main(vs_ai=False, settings=None):
+    WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Pongception")
     clock = pygame.time.Clock()
+
     run = True
     paused = False
     show_instructions = False

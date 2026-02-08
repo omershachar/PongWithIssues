@@ -15,12 +15,6 @@ from pong.ball import Ball
 from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
 
-pygame.init()
-pygame.display.set_caption("Pong - Sandbox")
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
-
-
 def draw_debug_info(win, ball, left_paddle, right_paddle):
     """Draw debug information overlay."""
     debug_lines = [
@@ -39,6 +33,10 @@ def draw_debug_info(win, ball, left_paddle, right_paddle):
 
 
 async def main(settings=None):
+    WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Pong - Sandbox")
+    clock = pygame.time.Clock()
+
     paused = False
     show_debug = True
     show_instructions = False

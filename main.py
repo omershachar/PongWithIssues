@@ -1,9 +1,13 @@
 # main.py — Pygbag entry point
 # Pygbag requires a main.py in the root with an async main() function.
-# This file simply wraps the existing launcher for web deployment.
+# This file wraps the existing launcher for web deployment.
+#
+# NOTE: Pygbag scans this file for imports to decide what to bundle.
+# All packages used anywhere in the game must be imported here.
 
 import asyncio
 import pygame
+import numpy
 import sys
 import os
 

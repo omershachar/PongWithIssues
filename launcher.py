@@ -4,7 +4,9 @@ import sys
 import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), './')))
-pygame.init()
+
+if not pygame.get_init():
+    pygame.init()
 
 from pong.constants import *
 from pong.menu import draw_menu, handle_menu_click, GAME_MODES
