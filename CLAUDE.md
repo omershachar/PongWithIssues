@@ -115,7 +115,7 @@ build/web/           # Pygbag output (auto-generated, gitignored)
    from pong.paddle import Paddle
    from pong.helpers import handle_ball_collision
    from pong.settings import GameSettings
-   from pong_BETA.physics_object import PhysicsObject as BetaPhysics
+   from pong_BETA.object_manage import Box
    print('All imports OK')
    "
 
@@ -157,7 +157,6 @@ Also update `TODO.md` when:
 | `PRD.md` | Product Requirements Document - vision, features, milestones |
 | `progress.md` | Session-by-session progress tracker |
 | `TODO.md` | Master task list (prioritized) |
-| `docs/PROJECT_ANALYSIS.md` | Full codebase analysis with all methods |
 
 ## Known Issues
 

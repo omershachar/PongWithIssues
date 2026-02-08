@@ -739,22 +739,89 @@ All features implemented in this session are awaiting user testing and approval:
 
 ---
 
+---
+
+### Session 16 - 2026-02-08
+
+#### Completed Tasks
+
+**Codebase-Wide Redundancy Cleanup:**
+
+Audited every file in the repo and removed all unused/redundant files, dead code, and stale configuration.
+
+**Unused Font Files Deleted (15 files, ~5.1 MB saved):**
+- Only `digital-7.ttf` and `LiberationMono-Bold.ttf` are loaded by `pong/constants.py`
+- Deleted: 3 digital-7 variants (italic, mono, mono italic), 11 Liberation font files (Sans, Serif, Mono variants), `liberation-fonts-ttf-2.1.5.tar.gz` source archive
+
+**Unused Asset Files Deleted (13 files, ~1.6 MB saved):**
+- Only `icon_32x32.png`, `icon.png`, `icon.ico`, `omer_logo_128x128.png`, `omer_logo_256x256.png` are loaded by code
+- Deleted: `fox.png`, `fox_24x24.png` (never loaded), `omer_logo_64x64.png` (only 128/256 used), 5 extra icon sizes (16/48/64/128/256), SVG/AI/PDF design source files, duplicate `assets/favicon.png` (root `favicon.png` is what Pygbag uses)
+
+**Dead Code Removed:**
+- [x] Deleted `pong_BETA/physics_object.py` — was just a re-export wrapper (`from pong.physics_object import *`)
+- [x] Updated `pong_BETA/object_manage.py` and `versions/BETA/main.py` to import directly from `pong.physics_object`
+- [x] Removed ~178-line `draw_fox_logo()` procedural drawing function from `pong/menu.py` — dead fallback code, PNG logo is always available
+
+**Testing & Documentation Cleanup:**
+- [x] Deleted `testing/testing.py` — standalone test harness, gitignored, not imported by anything, completely dead
+- [x] Removed `testing/` directory (with stale `__pycache__`)
+- [x] Deleted `docs/PROJECT_ANALYSIS.md` — massively outdated (last updated 2026-02-02), documented TypeScript web version/AI/NEAT module/testing files that no longer exist; `CLAUDE.md` already has up-to-date architecture
+- [x] Removed empty `docs/` directory
+- [x] Deleted empty `docs/.env` (local only, untracked)
+
+**Configuration Cleanup:**
+- [x] `.gitignore` — removed stale entries: `pong/venv/` (redundant with `venv/`), Node.js debug/yarn logs (web version deleted), `neat-checkpoint-*`/`*.pickle` (AI module deleted), `testing/` (directory deleted), `docs/backup/` (docs deleted), `TODO.txt` (not needed)
+- [x] `CLAUDE.md` — removed reference to deleted `docs/PROJECT_ANALYSIS.md`, fixed stale `pong_BETA.physics_object` test import
+- [x] `requirements.txt` — verified correct (pygame + numpy are the only external deps)
+
+#### Files Deleted (31 files total)
+**Fonts (15):** `digital-7 (italic).ttf`, `digital-7 (mono italic).ttf`, `digital-7 (mono).ttf`, `LiberationMono-BoldItalic.ttf`, `LiberationMono-Italic.ttf`, `LiberationMono-Regular.ttf`, `LiberationSans-Bold.ttf`, `LiberationSans-BoldItalic.ttf`, `LiberationSans-Italic.ttf`, `LiberationSans-Regular.ttf`, `LiberationSerif-Bold.ttf`, `LiberationSerif-BoldItalic.ttf`, `LiberationSerif-Italic.ttf`, `LiberationSerif-Regular.ttf`, `liberation-fonts-ttf-2.1.5.tar.gz`
+**Assets (13):** `fox.png`, `fox_24x24.png`, `omer_logo_64x64.png`, `icon_16x16.png`, `icon_48x48.png`, `icon_64x64.png`, `icon_128x128.png`, `icon_256x256.png`, `omer logo black.ai`, `omer logo black.svg`, `omer logo.pdf`, `omer logo.svg`, `assets/favicon.png`
+**Code (1):** `pong_BETA/physics_object.py`
+**Docs (1):** `docs/PROJECT_ANALYSIS.md`
+**Other (1):** `docs/.env`, `testing/testing.py`
+
+#### Directories Removed
+- `testing/` (with stale `__pycache__`)
+- `docs/` (empty after PROJECT_ANALYSIS.md deleted)
+
+#### Files Modified
+- `pong/menu.py` — removed `draw_fox_logo()` function and its fallback call
+- `pong_BETA/object_manage.py` — import from `pong.physics_object` instead of `pong_BETA.physics_object`
+- `versions/BETA/main.py` — import from `pong.physics_object` instead of `pong_BETA.physics_object`
+- `.gitignore` — removed 11 stale entries
+- `CLAUDE.md` — removed `docs/PROJECT_ANALYSIS.md` reference, fixed test import
+- `progress.md` — added this session log
+
+#### Testing
+- All Python imports: PASSED
+- BETA mode loads correctly with direct `pong.physics_object` import
+- Remaining font files: `digital-7.ttf`, `LiberationMono-Bold.ttf`, `readme.txt`
+- Remaining asset files: `icon_32x32.png`, `icon.png`, `icon.ico`, `omer_logo_128x128.png`, `omer_logo_256x256.png`
+
+#### Notes
+- Total space saved: ~6.7 MB of unused files
+- The `pong/FONTS/readme.txt` was kept for digital-7 font license compliance
+- The `pong_BETA/` directory still exists with `__init__.py` and `object_manage.py` — these are actively used by BETA mode
+
+---
+
 ## Statistics
 
 | Metric | Count |
 |--------|-------|
-| Sessions | 15 |
+| Sessions | 16 |
 | Bugs Found | 15 + 8 web (obsolete) |
 | Bugs Fixed | 15 + 7 web (obsolete) |
 | Files Created | 25+ |
-| Files Modified | 55+ |
-| Files Deleted | 7+ directories |
+| Files Modified | 60+ |
+| Files Deleted | 31 files + 2 directories |
 | Commits | 18+ |
 
 ---
 
 ## Next Steps
-1. Commit and push touch controls
+1. Commit and push all cleanup changes
 2. Test touch controls on mobile after deployment
 3. Priority 5 remaining: Mouse controls, custom images
 4. Priority 7: Audio & visual polish (OGG format for Pygbag)
