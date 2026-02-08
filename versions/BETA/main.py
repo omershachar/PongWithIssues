@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 import time, math, numpy as np
 from pong.constants import *
-from pong_BETA.physics_object import *
+from pong.physics_object import *
 from pong_BETA.object_manage import Box, _draw_grid, _draw_info, PLAY_W, IMPULSE, FORCE_MAG, FIXED_DT, BG_INFO, BG_PLAY, REST_E, INFO_W
 
 async def main():

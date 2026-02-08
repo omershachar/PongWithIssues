@@ -4,7 +4,7 @@ object_manage.py -- Handles objects general behavior, methods and monitoring.
 
 import math
 from pong.constants import *
-from pong_BETA.physics_object import *
+from pong.physics_object import *
 
 INFO_W = 280            # right-side debug panel width
 PLAY_W = WIDTH - INFO_W # sandbox area width
