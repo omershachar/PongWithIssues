@@ -16,6 +16,7 @@ from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
 from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
 from pong.touch import TouchHandler, draw_touch_buttons
+from pong.powerups import PowerUpManager
 
 async def main(vs_ai=False, settings=None):
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -49,6 +50,10 @@ async def main(vs_ai=False, settings=None):
     left_score = 0
     right_score = 0
 
+    # Power-ups
+    power_ups_on = settings.power_ups_enabled if settings else False
+    pu_mgr = PowerUpManager(left_paddle, right_paddle) if power_ups_on else None
+
     while True:
         clock.tick(FPS)
         keys = pygame.key.get_pressed()
@@ -64,6 +69,7 @@ async def main(vs_ai=False, settings=None):
                     paused = not paused
                 if event.key == pygame.K_r:
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
+                    if pu_mgr: pu_mgr.reset()
                     paused = False
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions
@@ -76,6 +82,11 @@ async def main(vs_ai=False, settings=None):
             paused = not paused
 
         draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL, bg_color)
+
+        # Draw power-ups and extra balls (between base render and UI overlay)
+        if pu_mgr:
+            pu_mgr.draw(WIN)
+            pu_mgr.draw_extra_balls(WIN)
 
         # Display "MODE: CLASSIC" at top left
         if vs_ai:
@@ -104,22 +115,80 @@ async def main(vs_ai=False, settings=None):
         pygame.display.update()
 
         if not paused:
+            # Freeze guard: save positions for frozen paddles
+            if pu_mgr:
+                frozen_l = pu_mgr.is_frozen(left_paddle)
+                frozen_r = pu_mgr.is_frozen(right_paddle)
+                if frozen_l: saved_l = left_paddle.pos.copy()
+                if frozen_r: saved_r = right_paddle.pos.copy()
+            else:
+                frozen_l = frozen_r = False
+
             handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai, touch=touch)
             if vs_ai:
                 ai_move_paddle(right_paddle, ball, difficulty=ai_diff)
+
+            # Enforce freeze: restore position, zero velocity
+            if frozen_l:
+                left_paddle.pos[:] = saved_l
+                left_paddle.vel[:] = 0
+            if frozen_r:
+                right_paddle.pos[:] = saved_r
+                right_paddle.vel[:] = 0
+
             left_paddle.update()
             right_paddle.update()
 
             ball.move()
+            old_vx = ball.vel[0]
             handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
+            # Track last paddle hit for power-up attribution
+            if pu_mgr:
+                if old_vx < 0 and ball.vel[0] > 0:
+                    pu_mgr.set_last_hit('left')
+                elif old_vx > 0 and ball.vel[0] < 0:
+                    pu_mgr.set_last_hit('right')
 
-            # Update score
-            if ball.pos[0] - ball.radius < 0:
-                right_score += 1
-                ball.reset()
-            elif ball.pos[0] + ball.radius > WIDTH:
-                left_score += 1
-                ball.reset()
+            # Extra balls physics
+            if pu_mgr:
+                for eb in pu_mgr.extra_balls:
+                    eb.move()
+                    handle_ball_collision(eb, left_paddle, right_paddle, HEIGHT)
+                pu_mgr.update(ball)
+                pu_mgr.create_extra_balls(ball, mode='classic')
+
+            # Scoring
+            if pu_mgr and (pu_mgr.extra_balls or pu_mgr.main_ball_parked):
+                # Multi-ball active: park main if it exits, wait for all
+                if not pu_mgr.main_ball_parked:
+                    if ball.pos[0] - ball.radius < 0:
+                        pu_mgr.park_main_ball(ball, 'left')
+                    elif ball.pos[0] + ball.radius > WIDTH:
+                        pu_mgr.park_main_ball(ball, 'right')
+                # Remove exited extra balls
+                pu_mgr.extra_balls = [
+                    eb for eb in pu_mgr.extra_balls
+                    if -eb.radius <= eb.pos[0] <= WIDTH + eb.radius
+                ]
+                result = pu_mgr.check_multiball_done()
+                if result == 'right_scores':
+                    right_score += 1
+                    ball.reset()
+                    pu_mgr.reset()
+                elif result == 'left_scores':
+                    left_score += 1
+                    ball.reset()
+                    pu_mgr.reset()
+            else:
+                # Normal scoring
+                if ball.pos[0] - ball.radius < 0:
+                    right_score += 1
+                    ball.reset()
+                    if pu_mgr: pu_mgr.reset()
+                elif ball.pos[0] + ball.radius > WIDTH:
+                    left_score += 1
+                    ball.reset()
+                    if pu_mgr: pu_mgr.reset()
 
         if left_score >= win_score or right_score >= win_score:
             right_name = "AI" if vs_ai else "Right Player"
@@ -129,6 +198,7 @@ async def main(vs_ai=False, settings=None):
             pygame.display.update()
             await asyncio.sleep(3)
             left_score, right_score = reset(ball, left_paddle, right_paddle)
+            if pu_mgr: pu_mgr.reset()
 
         touch.clear_taps()
         await asyncio.sleep(0)

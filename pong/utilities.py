@@ -47,8 +47,6 @@ def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK
     for y in range(0, HEIGHT, net_height + gap):
         win.blit(net_segment, (WIDTH // 2 - net_width // 2, y))
 
-    pygame.display.update()
-
 def reset(ball, left_paddle, right_paddle):
     """
     Reset all game objects.

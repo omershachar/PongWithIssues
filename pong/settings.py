@@ -37,6 +37,9 @@ class GameSettings:
         # AI settings
         self.ai_difficulty = 5  # 1 (Beginner) to 10 (Impossible)
 
+        # Power-up settings
+        self.power_ups_enabled = True
+
         # Control settings
         self.left_up_key = pygame.K_w
         self.left_down_key = pygame.K_s
@@ -61,6 +64,7 @@ class GameSettings:
             'background_color': self.background_color,
             'winning_score': self.winning_score,
             'ai_difficulty': self.ai_difficulty,
+            'power_ups_enabled': self.power_ups_enabled,
         }
 
 
@@ -244,6 +248,7 @@ class SettingsMenu:
         self.settings = settings
         self.selected_option = 0
         self.options = list(SETTING_RANGES.keys()) + [
+            'power_ups_enabled',
             'left_paddle_color', 'right_paddle_color', 'background_color', 'Reset Defaults'
         ]
         self.color_keys = list(COLOR_OPTIONS.keys())
@@ -311,6 +316,8 @@ class SettingsMenu:
             new_value = max(range_info['min'], min(range_info['max'], new_value))
             setattr(self.settings, option, new_value)
 
+        elif option == 'power_ups_enabled':
+            self.settings.power_ups_enabled = not self.settings.power_ups_enabled
         elif option == 'left_paddle_color':
             self._cycle_color('left_paddle_color', direction, COLOR_OPTIONS)
         elif option == 'right_paddle_color':
@@ -389,6 +396,7 @@ class SettingsMenu:
             'right_paddle_color': 'R. Paddle',
             'background_color': 'BG Color',
             'ai_difficulty': 'AI Level',
+            'power_ups_enabled': 'Power-Ups',
             'Reset Defaults': 'Reset Defaults',
         }
 
@@ -415,6 +423,8 @@ class SettingsMenu:
             elif option in SETTING_RANGES:
                 value = str(getattr(self.settings, option))
                 value_display = f"< {value} >"
+            elif option == 'power_ups_enabled':
+                value_display = "< ON >" if self.settings.power_ups_enabled else "< OFF >"
             elif option == 'left_paddle_color':
                 value_display = f"< {self._get_color_name(self.settings.left_paddle_color)} >"
             elif option == 'right_paddle_color':

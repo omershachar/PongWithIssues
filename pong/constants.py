@@ -129,3 +129,18 @@ WINNING_SCORE = 3
 # Game states
 MENU = 0
 PLAYING = 1
+
+# -------------------- Power-Up Settings --------------------
+
+POWERUP_BOX_SIZE = 24
+POWERUP_SPAWN_MIN = 300       # 5s at 60 FPS
+POWERUP_SPAWN_MAX = 720       # 12s
+POWERUP_LIFETIME = 600        # 10s on field
+POWERUP_BLINK_AT = 420        # start blinking at 7s
+RESIZE_DURATION = 480         # 8s
+FREEZE_DURATION = 150         # 2.5s
+RESIZE_GROW = 1.6
+RESIZE_SHRINK = 0.65
+POWERUP_COLOR_RESIZE = (0, 200, 80)       # green
+POWERUP_COLOR_FREEZE = (80, 180, 255)     # ice blue
+POWERUP_COLOR_MULTI = (255, 180, 0)       # amber
