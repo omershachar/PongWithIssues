@@ -83,9 +83,8 @@ async def main(vs_ai=False, settings=None):
             pu_mgr.draw_extra_balls(WIN)
 
         # Physics debug info
-        debug_font = pygame.font.SysFont(*FONT_DATA)
-        vel_text = debug_font.render(f"Velocity: [{ball.vel[0]:.2f}, {ball.vel[1]:.2f}]", True, GREY)
-        spin_text = debug_font.render(f"Spin: {getattr(ball, 'spin', 0):.2f}", True, GREY)
+        vel_text = FONT_SMALL_DIGITAL.render(f"Velocity: [{ball.vel[0]:.2f}, {ball.vel[1]:.2f}]", True, GREY)
+        spin_text = FONT_SMALL_DIGITAL.render(f"Spin: {getattr(ball, 'spin', 0):.2f}", True, GREY)
         WIN.blit(vel_text, (10, 60))
         WIN.blit(spin_text, (10, 85))
 

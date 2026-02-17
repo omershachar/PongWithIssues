@@ -19,8 +19,8 @@ from versions.BETA.main import main as run_BETA
 from versions.cursed.main import main as run_cursed
 from versions.sandbox.main import main as run_sandbox
 
-FONT_MENU = pygame.font.SysFont(*FONT_DEFAULT)
-FONT_MENU_SMALL = pygame.font.SysFont(*FONT_SMALL)
+FONT_MENU = FONT_DEFAULT_DIGITAL
+FONT_MENU_SMALL = FONT_SMALL_DIGITAL
 
 NUM_MODES = len(GAME_MODES)
 

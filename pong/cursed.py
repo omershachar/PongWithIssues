@@ -335,7 +335,12 @@ class CursedEventManager:
         """Return Comic Sans font if that event is active, else the original."""
         if self.has_event('COMIC SANS'):
             if self._comic_font is None:
-                self._comic_font = pygame.font.SysFont('comicsansms', 45)
+                try:
+                    self._comic_font = pygame.font.SysFont('comicsansms', 45)
+                except Exception:
+                    # SysFont not available on WASM/Pygbag — use bundled font
+                    self._comic_font = pygame.font.Font(
+                        "pong/FONTS/LiberationMono-Bold.ttf", 45)
             return self._comic_font
         return original_font
 

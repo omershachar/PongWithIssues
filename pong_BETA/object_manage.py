@@ -17,9 +17,9 @@ IMPULSE   = 260.0       # Q/E/F impulses (N·s≈px*kg/s)
 FIXED_DT  = 1/120       # physics step
 REST_E    = 0.90        # bouncy walls in play area
 
-# Fonts (use your constants’ tuples, e.g. FONT_SMALL = ('Consolas', 16))
-FONT_INFO = pygame.font.SysFont(*FONT_SMALL)
-FONT_HEAD = pygame.font.SysFont(*FONT_DEFAULT)
+# Fonts — use file-based fonts (SysFont not available on WASM/Pygbag)
+FONT_INFO = FONT_SMALL_DIGITAL
+FONT_HEAD = FONT_DEFAULT_DIGITAL
 
 class Box(PhysicsObject):
     def __init__(self, pos=(PLAY_W/2, HEIGHT/2), size=32, **kw):
