@@ -108,10 +108,13 @@
 - **Status**: ✅ Complete
 
 ### 5.3 Crazy Mode
-- Smaller paddles and ball
-- Higher ball velocity (increases over time?)
-- Screen shake on hits
-- **Status**: 🔲 Planned
+- Smaller paddles and ball (shrinks over time)
+- Higher ball velocity (increases over time)
+- Paddle speed increases over time
+- Screen shake intensifies with rally length
+- Colors shift toward red over time
+- Win score increases each round (3, 5, 7, 9...)
+- **Status**: ✅ Complete
 
 ### 5.4 Peaceful Mode
 - No ball, no score
@@ -125,7 +128,7 @@
 - Ball splits unexpectedly
 - Paddles occasionally disappear
 - Gravity shifts randomly
-- **Status**: 🔲 Planned
+- **Status**: ✅ Complete
 
 ---
 
@@ -225,7 +228,7 @@
 ### Phase 1: Core Polish (Current)
 - [x] Fix all critical bugs
 - [x] Clean up codebase
-- [ ] Fix TypeScript strict mode errors
+- [x] Fix TypeScript strict mode errors (obsolete - TypeScript replaced with Pygbag/Python)
 - [ ] Improve mobile web experience
 
 ### Phase 2: AI Opponent
@@ -236,7 +239,7 @@
 
 ### Phase 3: Additional Modes
 - [x] Add mode selection to web version (4 modes)
-- [ ] Implement Crazy Mode
+- [x] Implement Crazy Mode
 - [ ] Implement Peaceful Mode
 
 ### Phase 4: Power-Ups

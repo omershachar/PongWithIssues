@@ -2,6 +2,7 @@
 constants.py -- All game-wide settings and fixed values for PongWithIssues.
 """
 
+import sys
 import numpy as np
 import pygame
 pygame.font.init()
@@ -17,6 +18,14 @@ FONT_LARGE_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 45)
 FONT_BIG_DIGITAL    = pygame.font.Font("pong/FONTS/digital-7.ttf", 65)
 FONT_TITLE_DIGITAL  = pygame.font.Font("pong/FONTS/digital-7.ttf", 80)
 ASCII_FONT = pygame.font.Font("pong/FONTS/LiberationMono-Bold.ttf", 24)
+
+# Larger score/mode fonts on web (Pygbag) for small-screen readability
+if sys.platform == "emscripten":
+    FONT_SCORE_GAME = pygame.font.Font("pong/FONTS/digital-7.ttf", 55)
+    FONT_MODE_GAME  = pygame.font.Font("pong/FONTS/digital-7.ttf", 24)
+else:
+    FONT_SCORE_GAME = FONT_LARGE_DIGITAL
+    FONT_MODE_GAME  = FONT_SMALL_DIGITAL
 
 # Fallback system fonts (name + size tuples)
 FONT_SMALL      = ("comicsans", 25)

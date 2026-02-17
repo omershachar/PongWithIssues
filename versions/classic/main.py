@@ -78,11 +78,11 @@ async def main(vs_ai=False, settings=None):
     def draw_full_scene():
         """Draw the complete game scene (used by countdown/pause as background)."""
         sx, sy = juice.shake.get_offset()
-        draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL, bg_color, offset=(sx, sy))
+        draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_SCORE_GAME, bg_color, offset=(sx, sy))
         if pu_mgr:
             pu_mgr.draw(WIN)
             pu_mgr.draw_extra_balls(WIN)
-        mode_text = FONT_SMALL_DIGITAL.render(mode_label, True, GREY)
+        mode_text = FONT_MODE_GAME.render(mode_label, True, GREY)
         WIN.blit(mode_text, (10, 10))
         juice.draw(WIN)
 
@@ -274,9 +274,9 @@ async def main(vs_ai=False, settings=None):
                 audio.play('score')
                 # Score pop on the side that scored
                 if left_score > right_score or (left_score == right_score and ball.vel[0] > 0):
-                    juice.on_score(WIDTH // 4, 20 + 25, str(left_score), FONT_LARGE_DIGITAL, LIGHT_PURPLE)
+                    juice.on_score(WIDTH // 4, 20 + 25, str(left_score), FONT_SCORE_GAME, LIGHT_PURPLE)
                 else:
-                    juice.on_score(WIDTH * 3 // 4, 20 + 25, str(right_score), FONT_LARGE_DIGITAL, LIGHT_PURPLE)
+                    juice.on_score(WIDTH * 3 // 4, 20 + 25, str(right_score), FONT_SCORE_GAME, LIGHT_PURPLE)
 
         # Win condition
         if left_score >= win_score or right_score >= win_score:

@@ -78,8 +78,8 @@ async def main(settings=None):
 
     def draw_full_scene():
         """Draw the complete game scene."""
-        draw_game(WIN, [left_paddle, right_paddle], ball, left_hits, right_hits, FONT_LARGE_DIGITAL, bg_color)
-        mode_text = FONT_SMALL_DIGITAL.render("MODE: SANDBOX", True, GREEN)
+        draw_game(WIN, [left_paddle, right_paddle], ball, left_hits, right_hits, FONT_SCORE_GAME, bg_color)
+        mode_text = FONT_MODE_GAME.render("MODE: SANDBOX", True, GREEN)
         WIN.blit(mode_text, (10, 10))
         if show_debug:
             draw_debug_info(WIN, ball, left_paddle, right_paddle)

@@ -94,34 +94,95 @@ class Paddle(PhysicsObject):
             self.pos[1] += self.fixed_vel
         self._clamp_to_screen()
 
-    def update(self):
+    def accelerate_x(self, forward=True, multiplier=1.0):
+        """
+        Applies X-axis acceleration (physics mode only, for Cursed mode).
+        Forward means toward the center of the board.
+
+        Args:
+            forward (bool): True to move toward center, False to move back.
+            multiplier (float): Acceleration multiplier for charge-up.
+        """
+        if self.mode != 'physics':
+            return
+        accel = PADDLE_DEFAULT_ACC[1] * 0.8 * multiplier
+        # Left paddle: forward = positive X. Right paddle: forward = negative X.
+        is_left = self.original_pos[0] < WIDTH / 2
+        if is_left:
+            self.acc[0] += accel if forward else -accel
+        else:
+            self.acc[0] += -accel if forward else accel
+
+    def update(self, cursed_mode=False):
         """
         Updates paddle position. Physics mode uses acceleration, classic uses direct movement.
+
+        Args:
+            cursed_mode (bool): If True, use higher velocity limits and looser clamping.
         """
         if self.mode == 'physics':
             self.vel += self.acc
             self.acc[:] = 0
 
-            # Clamp vertical velocity
-            self.vel[1] = np.clip(self.vel[1], -PADDLE_MAX_VEL, PADDLE_MAX_VEL)
+            if cursed_mode:
+                # CURSED: Much higher speed caps for insane gameplay
+                max_y = PADDLE_MAX_VEL * 1.8
+                max_x = PADDLE_MAX_VEL * 1.5
+                friction_y = 0.88
+                friction_x = 0.85
+            else:
+                max_y = PADDLE_MAX_VEL
+                max_x = PADDLE_MAX_VEL * 0.6
+                friction_y = 0.85
+                friction_x = 0.80
+
+            # Clamp velocities
+            self.vel[1] = np.clip(self.vel[1], -max_y, max_y)
+            self.vel[0] = np.clip(self.vel[0], -max_x, max_x)
 
             # Update position
             self.pos += self.vel
 
-            # Apply friction on Y axis
-            self.vel[1] *= 0.85
+            # Apply friction
+            self.vel[1] *= friction_y
+            self.vel[0] *= friction_x
 
         # Classic mode doesn't need update() - movement is direct
-        self._clamp_to_screen()
+        self._clamp_to_screen(cursed_mode=cursed_mode)
 
-    def _clamp_to_screen(self):
-        """Keeps the paddle inside the screen bounds."""
+    def _clamp_to_screen(self, cursed_mode=False):
+        """Keeps the paddle inside the screen bounds (Y and X)."""
+        # Y bounds
         if self.pos[1] < 0:
             self.pos[1] = 0
             self.vel[1] = 0
         elif self.pos[1] + self.height > HEIGHT:
             self.pos[1] = HEIGHT - self.height
             self.vel[1] = 0
+
+        if cursed_mode:
+            # CURSED: Full board access! Only clamp to screen edges.
+            if self.pos[0] < GAME_MARGIN_X:
+                self.pos[0] = GAME_MARGIN_X
+                self.vel[0] = 0
+            elif self.pos[0] + self.width > WIDTH - GAME_MARGIN_X:
+                self.pos[0] = WIDTH - GAME_MARGIN_X - self.width
+                self.vel[0] = 0
+        else:
+            # Normal: paddle can't cross center
+            is_left = self.original_pos[0] < WIDTH / 2
+            if is_left:
+                x_min = GAME_MARGIN_X
+                x_max = WIDTH // 2 - self.width - 10
+            else:
+                x_min = WIDTH // 2 + 10
+                x_max = WIDTH - GAME_MARGIN_X - self.width
+            if self.pos[0] < x_min:
+                self.pos[0] = x_min
+                self.vel[0] = 0
+            elif self.pos[0] > x_max:
+                self.pos[0] = x_max
+                self.vel[0] = 0
 
     def reset(self):
         """Resets the paddle to its original position and clears movement."""

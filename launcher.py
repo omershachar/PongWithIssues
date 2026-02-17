@@ -9,7 +9,7 @@ if not pygame.get_init():
     pygame.init()
 
 from pong.constants import *
-from pong.menu import draw_menu, handle_menu_click, GAME_MODES, get_mode_box_rects
+from pong.menu import draw_menu, handle_menu_click, GAME_MODES, get_mode_box_rects, ball_menu
 from pong.settings import GameSettings, SettingsMenu
 from pong.touch import TouchHandler
 from pong import audio
@@ -17,6 +17,7 @@ from versions.classic.main import main as run_classic
 from versions.pongception.main import main as run_pongception
 from versions.BETA.main import main as run_BETA
 from versions.cursed.main import main as run_cursed
+from versions.crazy.main import main as run_crazy
 from versions.sandbox.main import main as run_sandbox
 
 FONT_MENU = FONT_DEFAULT_DIGITAL
@@ -92,7 +93,7 @@ async def launcher():
         clock.tick(FPS)
 
         if in_settings:
-            # Settings menu loop
+            # Settings menu loop (side panel over the main menu)
             for event in pygame.event.get():
                 touch.handle_event(event)
                 if event.type == pygame.QUIT:
@@ -101,7 +102,7 @@ async def launcher():
                 if settings_menu.handle_input(event, touch):
                     in_settings = False
             touch.clear_taps()
-            settings_menu.draw(WIN)
+            settings_menu.draw(WIN, selected_mode, draw_menu, ball_menu)
         else:
             # Main menu loop
             start_game = False
@@ -143,7 +144,7 @@ async def launcher():
 
             if start_game and running:
                 vs_ai = None
-                if selected_mode in (0, 1, 3):
+                if selected_mode in (0, 1, 3, 4):
                     # Modes with vs Friend / vs AI sub-menu
                     choosing = True
                     while choosing:
@@ -182,9 +183,11 @@ async def launcher():
                         await run_pongception(vs_ai=vs_ai, settings=settings)
                     elif selected_mode == 3:
                         await run_cursed(vs_ai=vs_ai, settings=settings)
+                    elif selected_mode == 4:
+                        await run_crazy(vs_ai=vs_ai, settings=settings)
                 elif selected_mode == 2:
                     await run_BETA()
-                elif selected_mode == 4:
+                elif selected_mode == 5:
                     await run_sandbox(settings=settings)
                 # Reset display after returning from game
                 WIN = pygame.display.set_mode((WIDTH, HEIGHT))

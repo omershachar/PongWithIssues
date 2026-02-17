@@ -48,6 +48,9 @@ class GameSettings:
         # Power-up settings
         self.power_ups_enabled = True
 
+        # Cursed mode settings
+        self.cursed_events_enabled = True
+
         # Audio settings
         self.master_volume = 0.7
         self.sfx_volume = 1.0
@@ -84,6 +87,7 @@ class GameSettings:
             'winning_score': int(self.winning_score),
             'ai_difficulty': int(self.ai_difficulty),
             'power_ups_enabled': bool(self.power_ups_enabled),
+            'cursed_events_enabled': bool(self.cursed_events_enabled),
             'master_volume': float(self.master_volume),
             'sfx_volume': float(self.sfx_volume),
             'screen_shake': int(self.screen_shake),
@@ -163,160 +167,127 @@ SETTING_RANGES = {
 SHAKE_NAMES = {0: 'OFF', 1: 'Subtle', 2: 'Intense'}
 
 
-class PreviewGame:
-    """
-    A mini pong game with two AI paddles for the settings live preview.
-    Runs in a confined area (area_width x area_height) on the left side.
-    """
-
-    PREVIEW_MARGIN_X = 10
-
-    def __init__(self, area_width, area_height, settings):
-        self.area_width = area_width
-        self.area_height = area_height
-        self.settings = settings
-        self.clip_rect = pygame.Rect(0, 0, area_width, area_height)
-        self._create_objects()
-
-    def _create_objects(self):
-        """Create ball and paddles scaled to the preview area."""
-        s = self.settings
-        cx = self.area_width // 2
-        cy = self.area_height // 2
-
-        self.ball = Ball(
-            cx, cy, s.ball_radius, s.ball_color,
-            mass=1, vel=(s.ball_speed, 0), mode='physics'
-        )
-
-        self.left_paddle = Paddle(
-            self.PREVIEW_MARGIN_X,
-            cy - s.paddle_height // 2,
-            s.paddle_width, s.paddle_height,
-            color=s.left_paddle_color, mode='physics',
-            fixed_vel=s.paddle_speed
-        )
-
-        self.right_paddle = Paddle(
-            self.area_width - self.PREVIEW_MARGIN_X - s.paddle_width,
-            cy - s.paddle_height // 2,
-            s.paddle_width, s.paddle_height,
-            color=s.right_paddle_color, mode='physics',
-            fixed_vel=s.paddle_speed
-        )
-
-    def apply_settings(self):
-        """Update preview objects to match current settings in real-time."""
-        s = self.settings
-
-        # Ball radius
-        self.ball.radius = s.ball_radius
-
-        # Paddle dimensions and colors
-        for paddle, color in [(self.left_paddle, s.left_paddle_color),
-                              (self.right_paddle, s.right_paddle_color)]:
-            old_center_y = paddle.pos[1] + paddle.height / 2
-            paddle.width = s.paddle_width
-            paddle.height = s.paddle_height
-            paddle.color = color
-            paddle.fixed_vel = s.paddle_speed
-            # Re-center vertically after height change
-            paddle.pos[1] = old_center_y - paddle.height / 2
-
-        # Right paddle x-position depends on width
-        self.right_paddle.pos[0] = self.area_width - self.PREVIEW_MARGIN_X - s.paddle_width
-
-    def update(self):
-        """Run one frame of AI pong."""
-        # AI drives both paddles
-        ai_move_paddle(self.right_paddle, self.ball, difficulty=6)
-        self._ai_move_left(self.left_paddle, self.ball)
-
-        # Physics update
-        self.left_paddle.update()
-        self.right_paddle.update()
-        self.ball.update()
-
-        # Collisions
-        handle_ball_collision(self.ball, self.left_paddle, self.right_paddle)
-
-        # Reset ball if it exits the preview area
-        self._check_and_reset_ball()
-
-    def _ai_move_left(self, paddle, ball):
-        """AI for the left paddle — tracks ball when it moves left."""
-        paddle_center = paddle.pos[1] + paddle.height / 2
-        dead_zone = paddle.height * 0.1
-
-        if ball.vel[0] < 0:
-            diff = ball.pos[1] - paddle_center
-            if abs(diff) > dead_zone:
-                paddle.accelerate(up=(diff < 0))
-        else:
-            center = self.area_height / 2
-            diff = center - paddle_center
-            if abs(diff) > dead_zone * 2:
-                paddle.accelerate(up=(diff < 0))
-
-    def _check_and_reset_ball(self):
-        """Reset ball to center when it exits left/right."""
-        bx = self.ball.pos[0]
-        if bx < -self.ball.radius or bx > self.area_width + self.ball.radius:
-            cx = self.area_width // 2
-            cy = self.area_height // 2
-            # Launch toward the side the ball exited from (so it's interesting)
-            direction = 1 if bx < 0 else -1
-            self.ball.pos[:] = [cx, cy]
-            self.ball.vel[:] = [self.settings.ball_speed * direction, 0]
-            self.ball.spin = 0
-            self.ball.trail.clear()
-
-    def draw(self, surface):
-        """Draw the preview game objects, clipped to the preview area."""
-        old_clip = surface.get_clip()
-        surface.set_clip(self.clip_rect)
-
-        # Center dashed net
-        cx = self.area_width // 2
-        dash_len = 10
-        gap = 8
-        y = 0
-        while y < self.area_height:
-            pygame.draw.line(surface, DARK_GREY, (cx, y), (cx, min(y + dash_len, self.area_height)), 1)
-            y += dash_len + gap
-
-        # Draw game objects
-        self.left_paddle.draw(surface)
-        self.right_paddle.draw(surface)
-        self.ball.draw(surface)
-
-        surface.set_clip(old_clip)
-
-
 class SettingsMenu:
     """
-    Interactive settings menu with a live AI preview on the left
-    and a compact settings panel on the right.
+    Interactive settings menu drawn as a side panel on the RIGHT side of the screen.
+    The main menu (with its bouncing ball) is still visible on the LEFT.
+    Two AI paddles play against each other using the menu's bouncing ball,
+    and all changes apply instantly to the preview.
     """
 
-    # Layout constants
-    PREVIEW_WIDTH = 500
-    SEPARATOR_X = 500
+    # Layout constants — settings panel on the right
+    PANEL_WIDTH = 300
+    PANEL_X = WIDTH - 300
+    SEPARATOR_X = WIDTH - 300
     SEPARATOR_WIDTH = 2
-    PANEL_X = 502
-    PANEL_WIDTH = 298
 
     def __init__(self, settings: GameSettings):
         self.settings = settings
         self.selected_option = 0
         self.options = list(SETTING_RANGES.keys()) + [
-            'power_ups_enabled', 'particles_enabled',
+            'power_ups_enabled', 'cursed_events_enabled', 'particles_enabled',
             'left_paddle_color', 'right_paddle_color', 'background_color', 'Reset Defaults'
         ]
         self.color_keys = list(COLOR_OPTIONS.keys())
         self.bg_color_keys = list(BACKGROUND_OPTIONS.keys())
         self.editing = False
-        self.preview = PreviewGame(self.PREVIEW_WIDTH, HEIGHT, settings)
+
+        # Preview paddles (play with the menu's bouncing ball)
+        self._left_paddle = None
+        self._right_paddle = None
+        self._paddles_created = False
+
+    def _ensure_paddles(self):
+        """Lazily create preview paddles in the menu area (left side of screen)."""
+        if self._paddles_created:
+            return
+        s = self.settings
+        preview_w = self.PANEL_X  # Width of the visible menu area
+        cy = HEIGHT // 2
+        margin = 15
+        self._left_paddle = Paddle(
+            margin, cy - s.paddle_height // 2,
+            s.paddle_width, s.paddle_height,
+            color=s.left_paddle_color, mode='physics', fixed_vel=s.paddle_speed
+        )
+        self._right_paddle = Paddle(
+            preview_w - margin - s.paddle_width, cy - s.paddle_height // 2,
+            s.paddle_width, s.paddle_height,
+            color=s.right_paddle_color, mode='physics', fixed_vel=s.paddle_speed
+        )
+        self._paddles_created = True
+
+    def _apply_preview_settings(self):
+        """Update preview paddle properties to match current settings."""
+        if not self._paddles_created:
+            return
+        s = self.settings
+        preview_w = self.PANEL_X
+        margin = 15
+
+        for paddle, color in [(self._left_paddle, s.left_paddle_color),
+                              (self._right_paddle, s.right_paddle_color)]:
+            old_center_y = paddle.pos[1] + paddle.height / 2
+            paddle.width = s.paddle_width
+            paddle.height = s.paddle_height
+            paddle.color = color
+            paddle.fixed_vel = s.paddle_speed
+            paddle.pos[1] = old_center_y - paddle.height / 2
+
+        # Right paddle x-position
+        self._right_paddle.pos[0] = preview_w - margin - s.paddle_width
+
+    def _update_preview(self, ball_menu):
+        """Run one frame of AI pong in the preview area using the menu's bouncing ball."""
+        if not self._paddles_created:
+            return
+        s = self.settings
+        preview_w = self.PANEL_X
+
+        # AI for right paddle (tracks ball when it goes right)
+        ai_move_paddle(self._right_paddle, ball_menu, difficulty=6)
+
+        # AI for left paddle (tracks ball when it goes left)
+        paddle = self._left_paddle
+        paddle_center = paddle.pos[1] + paddle.height / 2
+        dead_zone = paddle.height * 0.1
+        if ball_menu.vel[0] < 0:
+            diff = ball_menu.pos[1] - paddle_center
+            if abs(diff) > dead_zone:
+                paddle.accelerate(up=(diff < 0))
+        else:
+            center = HEIGHT / 2
+            diff = center - paddle_center
+            if abs(diff) > dead_zone * 2:
+                paddle.accelerate(up=(diff < 0))
+
+        self._left_paddle.update()
+        self._right_paddle.update()
+
+        # Move the ball (physics mode with trail + Magnus)
+        ball_menu.update()
+
+        # Wall bounce (top/bottom) within the full screen height
+        if ball_menu.pos[1] + ball_menu.radius >= HEIGHT:
+            ball_menu.pos[1] = HEIGHT - ball_menu.radius
+            ball_menu.vel[1] *= -1
+        elif ball_menu.pos[1] - ball_menu.radius <= 0:
+            ball_menu.pos[1] = ball_menu.radius
+            ball_menu.vel[1] *= -1
+
+        # Collisions with preview paddles
+        handle_ball_collision(ball_menu, self._left_paddle, self._right_paddle)
+
+        # Reset ball if it exits the preview area (past the paddles)
+        bx = ball_menu.pos[0]
+        if bx < -ball_menu.radius or bx > preview_w + ball_menu.radius:
+            cx = preview_w // 2
+            cy = HEIGHT // 2
+            direction = 1 if bx < 0 else -1
+            ball_menu.pos[:] = [cx, cy]
+            ball_menu.vel[:] = [s.ball_speed * direction, 0]
+            ball_menu.spin = 0
+            ball_menu.trail.clear()
 
     def handle_input(self, event, touch=None):
         """Handle keyboard and touch input for settings navigation."""
@@ -343,17 +314,19 @@ class SettingsMenu:
                         else:
                             self.selected_option = row
                 else:
-                    # Tap on the preview area = go back
+                    # Tap on the menu area = go back
                     self.settings.save()
                     self._apply_audio_settings()
+                    self._paddles_created = False
                     return True
 
         if event.type != pygame.KEYDOWN:
             return False  # Return False = stay in settings
 
-        if event.key == pygame.K_ESCAPE or event.key == pygame.K_m:
+        if event.key == pygame.K_ESCAPE or event.key == pygame.K_m or event.key == pygame.K_s:
             self.settings.save()
             self._apply_audio_settings()
+            self._paddles_created = False
             return True  # Return True = exit settings
 
         if event.key == pygame.K_UP:
@@ -390,6 +363,8 @@ class SettingsMenu:
 
         elif option == 'power_ups_enabled':
             self.settings.power_ups_enabled = not self.settings.power_ups_enabled
+        elif option == 'cursed_events_enabled':
+            self.settings.cursed_events_enabled = not self.settings.cursed_events_enabled
         elif option == 'particles_enabled':
             self.settings.particles_enabled = not self.settings.particles_enabled
         elif option == 'left_paddle_color':
@@ -431,37 +406,61 @@ class SettingsMenu:
                 return name
         return 'Custom'
 
-    def draw(self, win):
-        """Draw side-panel settings: live preview left, settings right."""
-        # --- Live preview (left side) ---
-        self.preview.apply_settings()
-        self.preview.update()
+    def draw(self, win, selected_mode=0, draw_menu_fn=None, ball_menu=None):
+        """
+        Draw the settings as a side panel. The main menu is drawn behind it
+        so the bouncing ball and menu art remain visible.
 
-        # Fill preview area with background color
-        preview_rect = pygame.Rect(0, 0, self.PREVIEW_WIDTH, HEIGHT)
-        win.fill(self.settings.background_color, preview_rect)
-        self.preview.draw(win)
+        Args:
+            win: pygame display surface
+            selected_mode: current selected mode in the main menu
+            draw_menu_fn: callable to draw the main menu background
+            ball_menu: the menu's bouncing ball object (for live AI preview)
+        """
+        self._ensure_paddles()
+        self._apply_preview_settings()
 
-        # --- Separator ---
+        # Update ball radius to match settings
+        if ball_menu:
+            ball_menu.radius = self.settings.ball_radius
+
+        # --- Draw the main menu as background (left side stays visible) ---
+        if draw_menu_fn is not None:
+            # Draw menu WITHOUT triggering display.update — we'll update after
+            # the settings panel is drawn on top
+            draw_menu_fn(win, selected_mode, _skip_update=True)
+        else:
+            win.fill(self.settings.background_color)
+
+        # --- Update and draw preview paddles in the menu area ---
+        if ball_menu:
+            self._update_preview(ball_menu)
+            self._left_paddle.draw(win)
+            self._right_paddle.draw(win)
+
+        # --- Dark overlay on right side for the settings panel ---
+        panel_rect = pygame.Rect(self.PANEL_X, 0, self.PANEL_WIDTH, HEIGHT)
+        panel_bg = pygame.Surface((self.PANEL_WIDTH, HEIGHT), pygame.SRCALPHA)
+        panel_bg.fill((0, 0, 0, 220))
+        win.blit(panel_bg, (self.PANEL_X, 0))
+
+        # --- Separator line ---
         pygame.draw.line(win, PURPLE,
                          (self.SEPARATOR_X, 0),
                          (self.SEPARATOR_X, HEIGHT),
                          self.SEPARATOR_WIDTH)
 
-        # --- Settings panel (right side) ---
-        panel_rect = pygame.Rect(self.PANEL_X, 0, self.PANEL_WIDTH, HEIGHT)
-        win.fill(BLACK, panel_rect)
-
-        px = self.PANEL_X  # panel left edge
+        # --- Settings panel content ---
+        px = self.PANEL_X
         pw = self.PANEL_WIDTH
-        pad = 10  # inner padding
+        pad = 10
 
         # Title
         title = FONT_MEDIUM_DIGITAL.render("SETTINGS", True, PURPLE)
         win.blit(title, (px + pw // 2 - title.get_width() // 2, 20))
 
         # Navigation hint
-        hint = FONT_TINY_DIGITAL.render("[UP/DN] Nav  [LT/RT] Adj  [ESC] Back", True, GREY)
+        hint = FONT_TINY_DIGITAL.render("[UP/DN] Nav  [LT/RT] Adj  [S/ESC] Back", True, GREY)
         win.blit(hint, (px + pw // 2 - hint.get_width() // 2, 55))
 
         # Compact labels for the narrow panel
@@ -480,6 +479,7 @@ class SettingsMenu:
             'right_paddle_color': 'R. Paddle',
             'background_color': 'BG Color',
             'power_ups_enabled': 'Power-Ups',
+            'cursed_events_enabled': 'Cursed Evt',
             'particles_enabled': 'Particles',
             'Reset Defaults': 'Reset All',
         }
@@ -518,6 +518,8 @@ class SettingsMenu:
                 value_display = f"< {value} >"
             elif option == 'power_ups_enabled':
                 value_display = "< ON >" if self.settings.power_ups_enabled else "< OFF >"
+            elif option == 'cursed_events_enabled':
+                value_display = "< ON >" if self.settings.cursed_events_enabled else "< OFF >"
             elif option == 'particles_enabled':
                 value_display = "< ON >" if self.settings.particles_enabled else "< OFF >"
             elif option == 'left_paddle_color':

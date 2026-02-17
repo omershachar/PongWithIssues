@@ -10,7 +10,7 @@ from pong.constants import *
 from pong.ball import Ball
 from pong import audio
 
-ball_menu = Ball(*MIDDLE_BOARD, BALL_RADIUS, WHITE, mode='classic', vel=(BALL_DEFAULT_VEL[0], 4))
+ball_menu = Ball(*MIDDLE_BOARD, BALL_RADIUS, WHITE, mode='physics', vel=(BALL_DEFAULT_VEL[0], 4))
 
 # Developer info
 DEVELOPER = "omershachar"
@@ -65,6 +65,12 @@ GAME_MODES = [
         'ball_color': (255, 50, 200)
     },
     {
+        'name': 'Crazy',
+        'description': 'Small paddles, speed ramps, screen shake',
+        'color': (255, 140, 0),
+        'ball_color': (255, 180, 50)
+    },
+    {
         'name': 'Sandbox',
         'description': 'Debug mode - no scoring',
         'color': GREEN,
@@ -96,7 +102,7 @@ def get_mode_box_rects():
     return rects
 
 
-def draw_menu(WIN, selected_mode):
+def draw_menu(WIN, selected_mode, _skip_update=False):
     WIN.fill(BLACK)
 
     # Draw ASCII art title
@@ -195,9 +201,9 @@ def draw_menu(WIN, selected_mode):
     _github_link_rect = pygame.Rect(link_x, link_y,
                                     link_text.get_width(), link_text.get_height() + 2)
 
-    # Draw bouncing ball
+    # Draw bouncing ball (skip bounce update if being used as settings background)
     ball_menu.draw(WIN)
-    if ball_menu.bounce_box(WIDTH, HEIGHT):
-        audio.play('wall_bounce')
-
-    pygame.display.update()
+    if not _skip_update:
+        if ball_menu.bounce_box(WIDTH, HEIGHT):
+            audio.play('wall_bounce')
+        pygame.display.update()
