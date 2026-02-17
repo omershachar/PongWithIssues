@@ -16,7 +16,7 @@ class Paddle(PhysicsObject):
     In 'classic' mode: Uses direct velocity-based movement.
     """
 
-    def __init__(self, x, y, width, height, color=LIGHT_PURPLE, mode='physics', fixed_vel=PADDLE_DEFAULT_VEL):
+    def __init__(self, x, y, width, height, color=LIGHT_PURPLE, mode='physics', fixed_vel=PADDLE_DEFAULT_VEL, side=None):
         """
         Initializes the paddle with position, size, and color.
 
@@ -28,6 +28,7 @@ class Paddle(PhysicsObject):
             color (tuple): RGB color value.
             mode (str): 'classic' or 'physics'
             fixed_vel (float): Fixed velocity for classic mode.
+            side (str|None): 'left' or 'right'. Auto-detected from x if None.
         """
         super().__init__(pos=(x, y), mass=1, vel=(0, 0))
         self.original_pos = np.array([x, y], dtype=float)
@@ -36,6 +37,11 @@ class Paddle(PhysicsObject):
         self.color = color
         self.mode = mode
         self.fixed_vel = fixed_vel
+        # Side detection: explicit or auto from spawn position
+        if side is not None:
+            self.side = side
+        else:
+            self.side = 'left' if x < WIDTH / 2 else 'right'
 
     # Properties for backwards compatibility with classic mode code
     @property
@@ -107,27 +113,31 @@ class Paddle(PhysicsObject):
             return
         accel = PADDLE_DEFAULT_ACC[1] * 0.8 * multiplier
         # Left paddle: forward = positive X. Right paddle: forward = negative X.
-        is_left = self.original_pos[0] < WIDTH / 2
+        is_left = self.side == 'left'
         if is_left:
             self.acc[0] += accel if forward else -accel
         else:
             self.acc[0] += -accel if forward else accel
 
-    def update(self, cursed_mode=False):
+    def update(self, cursed_mode=False, max_vel_override=None, screen_w=None, screen_h=None):
         """
         Updates paddle position. Physics mode uses acceleration, classic uses direct movement.
 
         Args:
             cursed_mode (bool): If True, use higher velocity limits and looser clamping.
+            max_vel_override (float|None): Override max velocity for cursed paddles.
+            screen_w (int|None): Override screen width for larger arenas.
+            screen_h (int|None): Override screen height for larger arenas.
         """
         if self.mode == 'physics':
             self.vel += self.acc
             self.acc[:] = 0
 
             if cursed_mode:
-                # CURSED: Much higher speed caps for insane gameplay
-                max_y = PADDLE_MAX_VEL * 1.8
-                max_x = PADDLE_MAX_VEL * 1.5
+                # Use override if provided, else legacy 1.8x
+                base_max = max_vel_override if max_vel_override is not None else PADDLE_MAX_VEL * 1.8
+                max_y = base_max
+                max_x = base_max * 0.83
                 friction_y = 0.88
                 friction_x = 0.85
             else:
@@ -148,16 +158,19 @@ class Paddle(PhysicsObject):
             self.vel[0] *= friction_x
 
         # Classic mode doesn't need update() - movement is direct
-        self._clamp_to_screen(cursed_mode=cursed_mode)
+        self._clamp_to_screen(cursed_mode=cursed_mode, screen_w=screen_w, screen_h=screen_h)
 
-    def _clamp_to_screen(self, cursed_mode=False):
+    def _clamp_to_screen(self, cursed_mode=False, screen_w=None, screen_h=None):
         """Keeps the paddle inside the screen bounds (Y and X)."""
+        W = screen_w or WIDTH
+        H = screen_h or HEIGHT
+
         # Y bounds
         if self.pos[1] < 0:
             self.pos[1] = 0
             self.vel[1] = 0
-        elif self.pos[1] + self.height > HEIGHT:
-            self.pos[1] = HEIGHT - self.height
+        elif self.pos[1] + self.height > H:
+            self.pos[1] = H - self.height
             self.vel[1] = 0
 
         if cursed_mode:
@@ -165,18 +178,18 @@ class Paddle(PhysicsObject):
             if self.pos[0] < GAME_MARGIN_X:
                 self.pos[0] = GAME_MARGIN_X
                 self.vel[0] = 0
-            elif self.pos[0] + self.width > WIDTH - GAME_MARGIN_X:
-                self.pos[0] = WIDTH - GAME_MARGIN_X - self.width
+            elif self.pos[0] + self.width > W - GAME_MARGIN_X:
+                self.pos[0] = W - GAME_MARGIN_X - self.width
                 self.vel[0] = 0
         else:
             # Normal: paddle can't cross center
-            is_left = self.original_pos[0] < WIDTH / 2
+            is_left = self.side == 'left'
             if is_left:
                 x_min = GAME_MARGIN_X
-                x_max = WIDTH // 2 - self.width - 10
+                x_max = W // 2 - self.width - 10
             else:
-                x_min = WIDTH // 2 + 10
-                x_max = WIDTH - GAME_MARGIN_X - self.width
+                x_min = W // 2 + 10
+                x_max = W - GAME_MARGIN_X - self.width
             if self.pos[0] < x_min:
                 self.pos[0] = x_min
                 self.vel[0] = 0

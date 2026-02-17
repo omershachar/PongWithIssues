@@ -1,17 +1,21 @@
 """
-Cursed Pong -- INSANE sword-fighting chaos mode.
+Cursed Pong -- INSANE sword-fighting chaos mode with dual combat modes.
 
-Physics paddles with full board movement, ball & paddle grabbing,
-directional sword combat with gore, and optional random cursed events.
+Bigger arena, slower paddles, Force/Saber toggle, charged force powers,
+lightning bolt kill move, goal nets, Rayman-style cartoon hands.
 
 Controls:
-  Left:  WASD = move + aim sword, E = grab/release
-  Right: Arrows = move + aim sword, RSHIFT = grab/release
-  Sword swings where you point. 3 hits to kill!
+  Left:  WASD = move, E = toggle Force/Saber, G = grab/release
+         Force: F = push, Q = pull, F+Q hold = LIGHTNING
+         Saber: F = swing, Q = block
+  Right: Arrows = move, RShift = toggle, Backslash = grab/release
+         Force: RAlt = push, RCtrl = pull, RAlt+RCtrl hold = LIGHTNING
+         Saber: RAlt = swing, RCtrl = block
 """
 import sys
 import os
 import asyncio
+import time
 import pygame
 import numpy as np
 import math
@@ -30,13 +34,18 @@ from pong import audio
 from pong.juice import JuiceManager
 from pong.game_flow import countdown, PauseMenu, WinScreen, confirm_exit
 from pong.cursed import CursedEventManager
-from pong.cursed_combat import CursedCombatManager
+from pong.cursed_combat import CursedCombatManager, MODE_FORCE, MODE_SABER, CHARGE_FORCE_TIME
+from pong.abilities import AbilityManager, ForcePush, ForcePull, ChargedForcePush, ChargedForcePull
+from pong.force_effects import ForceEffectSystem
 
 BALL_FRICTION = 0.997  # Ball slows down faster for easier catching
 
+# Cursed arena dimensions
+CW, CH = CURSED_WIDTH, CURSED_HEIGHT
+
 
 async def main(vs_ai=False, settings=None):
-    WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    WIN = pygame.display.set_mode((CW, CH))
     pygame.display.set_caption("CURSED Pong!")
     clock = pygame.time.Clock()
 
@@ -56,15 +65,19 @@ async def main(vs_ai=False, settings=None):
     win_score = settings.winning_score if settings else WINNING_SCORE
     ai_diff = settings.ai_difficulty if settings else 5
     cursed_events_on = getattr(settings, 'cursed_events_enabled', True) if settings else True
+    goal_net_on = getattr(settings, 'goal_net_enabled', False) if settings else False
+    goal_frac = getattr(settings, 'goal_net_size', 0.40) if settings else 0.40
 
-    # Physics-mode paddles with full board access
-    left_paddle = Paddle(ORIGINAL_LEFT_PADDLE_POS[0], ORIGINAL_LEFT_PADDLE_POS[1],
-                         p_w, p_h, color=l_color, mode='physics', fixed_vel=p_speed)
-    right_paddle = Paddle(ORIGINAL_RIGHT_PADDLE_POS[0], ORIGINAL_RIGHT_PADDLE_POS[1],
-                          p_w, p_h, color=r_color, mode='physics', fixed_vel=p_speed)
+    # Physics-mode paddles at new arena positions
+    left_paddle = Paddle(GAME_MARGIN_X, CH // 2 - p_h // 2,
+                         p_w, p_h, color=l_color, mode='physics', fixed_vel=p_speed, side='left')
+    right_paddle = Paddle(CW - GAME_MARGIN_X - p_w, CH // 2 - p_h // 2,
+                          p_w, p_h, color=r_color, mode='physics', fixed_vel=p_speed, side='right')
 
-    ball = Ball(*MIDDLE_BOARD, b_radius, (255, 50, 200), mass=1,
+    ball = Ball(CW // 2, CH // 2, b_radius, (255, 50, 200), mass=1,
                 vel=(b_speed, 0), mode='physics')
+    # Override ball reset position for larger arena
+    ball.original_pos = np.array([CW // 2, CH // 2], dtype=float)
 
     touch = TouchHandler(single_player=vs_ai)
     left_score = 0
@@ -74,12 +87,29 @@ async def main(vs_ai=False, settings=None):
     pu_mgr = PowerUpManager(left_paddle, right_paddle) if power_ups_on else None
     juice = JuiceManager(settings)
     cursed = CursedEventManager() if cursed_events_on else None
-    combat = CursedCombatManager()
+    combat = CursedCombatManager(left_color=l_color, right_color=r_color, screen_w=CW, screen_h=CH)
+
+    # Force abilities
+    ability_mgr = AbilityManager()
+    ability_mgr.register('left', 'push', ForcePush())
+    ability_mgr.register('left', 'pull', ForcePull())
+    ability_mgr.register('right', 'push', ForcePush())
+    ability_mgr.register('right', 'pull', ForcePull())
+    force_fx = ForceEffectSystem()
 
     pause_menu = PauseMenu()
     win_screen = WinScreen()
 
     orig_p_h = p_h
+
+    # Keydown timestamps for charged force detection
+    _l_push_down_t = 0.0
+    _l_pull_down_t = 0.0
+    _r_push_down_t = 0.0
+    _r_pull_down_t = 0.0
+    # Track if lightning was firing (to skip force on keyup)
+    _l_lightning_was_charging = False
+    _r_lightning_was_charging = False
 
     events_label = " [Events ON]" if cursed_events_on else ""
     if vs_ai:
@@ -88,10 +118,43 @@ async def main(vs_ai=False, settings=None):
     else:
         mode_label = f"CURSED{events_label}"
 
+    def _draw_goal_nets(target):
+        """Draw golden goal net frames on left and right edges."""
+        if not goal_net_on:
+            return
+        net_h = int(CH * goal_frac)
+        net_top = CH // 2 - net_h // 2
+        net_bottom = net_top + net_h
+        net_depth = 20
+        gold = (255, 215, 0)
+        dark_gold = (180, 150, 0)
+
+        for side_x in [0, CW - net_depth]:
+            # Frame
+            pygame.draw.rect(target, gold,
+                             (side_x, net_top, net_depth, net_h), 2)
+            # Net mesh lines
+            mesh_spacing = 12
+            for y in range(net_top, net_bottom, mesh_spacing):
+                pygame.draw.line(target, dark_gold,
+                                 (side_x, y), (side_x + net_depth, y), 1)
+            for x in range(side_x, side_x + net_depth, mesh_spacing // 2):
+                pygame.draw.line(target, dark_gold,
+                                 (x, net_top), (x, net_bottom), 1)
+
+    def _ball_in_goal_zone(ball_y):
+        """Check if ball Y is within the goal net zone."""
+        if not goal_net_on:
+            return True  # no nets = always scores
+        net_h = int(CH * goal_frac)
+        net_top = CH // 2 - net_h // 2
+        net_bottom = net_top + net_h
+        return net_top <= ball_y <= net_bottom
+
     def draw_full_scene():
         sx, sy = juice.shake.get_offset()
         if cursed and cursed.has_event('SCREEN FLIP'):
-            temp = pygame.Surface((WIDTH, HEIGHT))
+            temp = pygame.Surface((CW, CH))
             _draw_scene_to(temp, sx, sy)
             flipped = pygame.transform.flip(temp, False, True)
             WIN.blit(flipped, (0, 0))
@@ -114,14 +177,22 @@ async def main(vs_ai=False, settings=None):
 
         draw_game(target, paddles_to_draw, ball, left_score, right_score,
                   use_font, bg_color, offset=(sx, sy),
-                  hide_ball=(hide_ball or combat.ball_grabbed_by is not None))
+                  hide_ball=(hide_ball or combat.ball_grabbed_by is not None),
+                  screen_w=CW, screen_h=CH)
+
+        # Goal nets
+        _draw_goal_nets(target)
 
         if pu_mgr:
             pu_mgr.draw(target)
             pu_mgr.draw_extra_balls(target)
 
-        # Combat visuals (blood, swords, cut paddles, grab indicators)
+        # Combat visuals (blood, swords, cut paddles, grab indicators, lightning, mode badges)
         combat.draw(target, left_paddle, right_paddle)
+
+        # Force effects (shockwaves, particles) + cooldown bars
+        force_fx.draw(target)
+        ability_mgr.draw_cooldown_bars(target, left_paddle, right_paddle)
 
         # Draw grabbed ball on top of paddle
         if combat.ball_grabbed_by and not hide_ball:
@@ -140,7 +211,7 @@ async def main(vs_ai=False, settings=None):
 
         # Controls hint
         ctrl_text = FONT_TINY_DIGITAL.render(
-            "L:[WASD]=move+sword E=grab  R:[Arrows]=move+sword RShift=grab  3 hits to kill!",
+            "[E]=mode [G]=grab  Force:[F]push [Q]pull [F+Q]LIGHTNING  Saber:[F]swing [Q]block",
             True, DARK_GREY)
         target.blit(ctrl_text, (10, 35))
 
@@ -157,10 +228,13 @@ async def main(vs_ai=False, settings=None):
     while True:
         clock.tick(FPS)
         keys = pygame.key.get_pressed()
+        now = time.monotonic()
 
         for event in pygame.event.get():
             touch.handle_event(event)
             if event.type == pygame.QUIT:
+                # Restore window size before returning
+                pygame.display.set_mode((WIDTH, HEIGHT))
                 return
 
             if paused:
@@ -172,14 +246,21 @@ async def main(vs_ai=False, settings=None):
                         cursed.reset_paddles(left_paddle, right_paddle)
                         cursed.reset()
                     combat.reset()
+                    ability_mgr.reset()
+                    force_fx.reset()
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
+                    ball.original_pos = np.array([CW // 2, CH // 2], dtype=float)
+                    ball.pos[:] = ball.original_pos
                     if pu_mgr: pu_mgr.reset()
                     paused = False
                     result = await countdown(WIN, draw_full_scene)
-                    if result == 'quit': return
+                    if result == 'quit':
+                        pygame.display.set_mode((WIDTH, HEIGHT))
+                        return
                 elif action == 'menu':
                     if cursed:
                         cursed.reset_paddles(left_paddle, right_paddle)
+                    pygame.display.set_mode((WIDTH, HEIGHT))
                     return
                 continue
 
@@ -189,6 +270,7 @@ async def main(vs_ai=False, settings=None):
                     if should_exit:
                         if cursed:
                             cursed.reset_paddles(left_paddle, right_paddle)
+                        pygame.display.set_mode((WIDTH, HEIGHT))
                         return
                 if event.key == pygame.K_SPACE:
                     paused = True
@@ -197,16 +279,27 @@ async def main(vs_ai=False, settings=None):
                         cursed.reset_paddles(left_paddle, right_paddle)
                         cursed.reset()
                     combat.reset()
+                    ability_mgr.reset()
+                    force_fx.reset()
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
+                    ball.original_pos = np.array([CW // 2, CH // 2], dtype=float)
+                    ball.pos[:] = ball.original_pos
                     if pu_mgr: pu_mgr.reset()
                     result = await countdown(WIN, draw_full_scene)
-                    if result == 'quit': return
+                    if result == 'quit':
+                        pygame.display.set_mode((WIDTH, HEIGHT))
+                        return
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions
 
-                # ---- Combat actions (on key down) ----
-                # Left player: E = grab/release
+                # ---- Mode toggle ----
                 if event.key == pygame.K_e:
+                    combat.toggle_mode('left')
+                if event.key == pygame.K_RSHIFT:
+                    combat.toggle_mode('right')
+
+                # ---- Grab/Release: G / BACKSLASH ----
+                if event.key == pygame.K_g:
                     if combat.ball_grabbed_by == 'left':
                         combat.release_ball(left_paddle, ball)
                     elif combat.paddle_grabbed and 'left_grabs' in combat.paddle_grabbed:
@@ -215,8 +308,7 @@ async def main(vs_ai=False, settings=None):
                         if not combat.try_grab_ball('left', left_paddle, ball):
                             combat.try_grab_paddle('left', left_paddle, right_paddle)
 
-                # Right player: RSHIFT = grab/release
-                if event.key == pygame.K_RSHIFT:
+                if event.key == pygame.K_BACKSLASH:
                     if combat.ball_grabbed_by == 'right':
                         combat.release_ball(right_paddle, ball)
                     elif combat.paddle_grabbed and 'right_grabs' in combat.paddle_grabbed:
@@ -224,6 +316,145 @@ async def main(vs_ai=False, settings=None):
                     else:
                         if not combat.try_grab_ball('right', right_paddle, ball):
                             combat.try_grab_paddle('right', right_paddle, left_paddle)
+
+                # ---- Saber actions (on keydown) ----
+                if event.key == pygame.K_f and combat.mode_left == MODE_SABER:
+                    ldx = (1 if keys[pygame.K_d] else 0) - (1 if keys[pygame.K_a] else 0)
+                    ldy = (1 if keys[pygame.K_s] else 0) - (1 if keys[pygame.K_w] else 0)
+                    combat.left_sword.apply_swing_impulse(ldx, ldy)
+                    audio.play('lightsaber_clash')
+
+                if event.key == pygame.K_RALT and combat.mode_right == MODE_SABER:
+                    rdx = (1 if keys[pygame.K_RIGHT] else 0) - (1 if keys[pygame.K_LEFT] else 0)
+                    rdy = (1 if keys[pygame.K_DOWN] else 0) - (1 if keys[pygame.K_UP] else 0)
+                    combat.right_sword.apply_swing_impulse(rdx, rdy)
+                    audio.play('lightsaber_clash')
+
+                # ---- Force mode: record keydown timestamps ----
+                if event.key == pygame.K_f and combat.mode_left == MODE_FORCE:
+                    _l_push_down_t = now
+                if event.key == pygame.K_q and combat.mode_left == MODE_FORCE:
+                    _l_pull_down_t = now
+                if event.key == pygame.K_RALT and combat.mode_right == MODE_FORCE:
+                    _r_push_down_t = now
+                if event.key == pygame.K_RCTRL and combat.mode_right == MODE_FORCE:
+                    _r_pull_down_t = now
+
+            # ---- Force mode: KEYUP → fire normal or charged ----
+            if event.type == pygame.KEYUP:
+                def _get_force_dir(sword, paddle, default_forward):
+                    if sword.visible:
+                        return sword._base_angle() + sword.angle
+                    return default_forward
+
+                def _get_paddle_center(p):
+                    return (p.pos[0] + p.width / 2, p.pos[1] + p.height / 2)
+
+                def _force_targets(side):
+                    targets = [(ball, 1.0)]
+                    if side == 'left':
+                        targets.append((right_paddle, 0.6))
+                    else:
+                        targets.append((left_paddle, 0.6))
+                    return targets
+
+                # Left push release
+                if event.key == pygame.K_f and combat.mode_left == MODE_FORCE:
+                    if not _l_lightning_was_charging:
+                        hold = now - _l_push_down_t if _l_push_down_t > 0 else 0
+                        origin = _get_paddle_center(left_paddle)
+                        direction = _get_force_dir(combat.left_sword, left_paddle, 0.0)
+                        if hold >= CHARGE_FORCE_TIME:
+                            ab = ChargedForcePush()
+                            ab.try_activate(origin=origin, direction=direction)
+                            ab.apply_to_objects(_force_targets('left'),
+                                                grabbed_obj=ball if combat.ball_grabbed_by else None)
+                            force_fx.emit_push(origin[0], origin[1], direction, l_color)
+                            audio.play('force_push')
+                            juice.shake.trigger(14, 0.2)
+                        else:
+                            if ability_mgr.try_activate('left', 'push', origin=origin, direction=direction):
+                                ab = ability_mgr.get('left', 'push')
+                                ab.apply_to_objects(_force_targets('left'),
+                                                    grabbed_obj=ball if combat.ball_grabbed_by else None)
+                                force_fx.emit_push(origin[0], origin[1], direction, l_color)
+                                audio.play('force_push')
+                                juice.shake.trigger(8, 0.12)
+                    _l_push_down_t = 0.0
+                    _l_lightning_was_charging = False
+
+                # Left pull release
+                if event.key == pygame.K_q and combat.mode_left == MODE_FORCE:
+                    if not _l_lightning_was_charging:
+                        hold = now - _l_pull_down_t if _l_pull_down_t > 0 else 0
+                        origin = _get_paddle_center(left_paddle)
+                        direction = _get_force_dir(combat.left_sword, left_paddle, 0.0)
+                        if hold >= CHARGE_FORCE_TIME:
+                            ab = ChargedForcePull()
+                            ab.try_activate(origin=origin, direction=direction)
+                            ab.apply_to_objects(_force_targets('left'),
+                                                grabbed_obj=ball if combat.ball_grabbed_by else None)
+                            force_fx.emit_pull(origin[0], origin[1], direction, l_color)
+                            audio.play('force_pull')
+                            juice.shake.trigger(12, 0.18)
+                        else:
+                            if ability_mgr.try_activate('left', 'pull', origin=origin, direction=direction):
+                                ab = ability_mgr.get('left', 'pull')
+                                ab.apply_to_objects(_force_targets('left'),
+                                                    grabbed_obj=ball if combat.ball_grabbed_by else None)
+                                force_fx.emit_pull(origin[0], origin[1], direction, l_color)
+                                audio.play('force_pull')
+                    _l_pull_down_t = 0.0
+                    _l_lightning_was_charging = False
+
+                # Right push release
+                if event.key == pygame.K_RALT and combat.mode_right == MODE_FORCE:
+                    if not _r_lightning_was_charging:
+                        hold = now - _r_push_down_t if _r_push_down_t > 0 else 0
+                        origin = _get_paddle_center(right_paddle)
+                        direction = _get_force_dir(combat.right_sword, right_paddle, math.pi)
+                        if hold >= CHARGE_FORCE_TIME:
+                            ab = ChargedForcePush()
+                            ab.try_activate(origin=origin, direction=direction)
+                            ab.apply_to_objects(_force_targets('right'),
+                                                grabbed_obj=ball if combat.ball_grabbed_by else None)
+                            force_fx.emit_push(origin[0], origin[1], direction, r_color)
+                            audio.play('force_push')
+                            juice.shake.trigger(14, 0.2)
+                        else:
+                            if ability_mgr.try_activate('right', 'push', origin=origin, direction=direction):
+                                ab = ability_mgr.get('right', 'push')
+                                ab.apply_to_objects(_force_targets('right'),
+                                                    grabbed_obj=ball if combat.ball_grabbed_by else None)
+                                force_fx.emit_push(origin[0], origin[1], direction, r_color)
+                                audio.play('force_push')
+                                juice.shake.trigger(8, 0.12)
+                    _r_push_down_t = 0.0
+                    _r_lightning_was_charging = False
+
+                # Right pull release
+                if event.key == pygame.K_RCTRL and combat.mode_right == MODE_FORCE:
+                    if not _r_lightning_was_charging:
+                        hold = now - _r_pull_down_t if _r_pull_down_t > 0 else 0
+                        origin = _get_paddle_center(right_paddle)
+                        direction = _get_force_dir(combat.right_sword, right_paddle, math.pi)
+                        if hold >= CHARGE_FORCE_TIME:
+                            ab = ChargedForcePull()
+                            ab.try_activate(origin=origin, direction=direction)
+                            ab.apply_to_objects(_force_targets('right'),
+                                                grabbed_obj=ball if combat.ball_grabbed_by else None)
+                            force_fx.emit_pull(origin[0], origin[1], direction, r_color)
+                            audio.play('force_pull')
+                            juice.shake.trigger(12, 0.18)
+                        else:
+                            if ability_mgr.try_activate('right', 'pull', origin=origin, direction=direction):
+                                ab = ability_mgr.get('right', 'pull')
+                                ab.apply_to_objects(_force_targets('right'),
+                                                    grabbed_obj=ball if combat.ball_grabbed_by else None)
+                                force_fx.emit_pull(origin[0], origin[1], direction, r_color)
+                                audio.play('force_pull')
+                    _r_pull_down_t = 0.0
+                    _r_lightning_was_charging = False
 
         # Touch buttons
         if not paused:
@@ -233,6 +464,7 @@ async def main(vs_ai=False, settings=None):
                 if should_exit:
                     if cursed:
                         cursed.reset_paddles(left_paddle, right_paddle)
+                    pygame.display.set_mode((WIDTH, HEIGHT))
                     return
             if touch.tapped_pause_btn():
                 paused = True
@@ -246,15 +478,22 @@ async def main(vs_ai=False, settings=None):
                     cursed.reset_paddles(left_paddle, right_paddle)
                     cursed.reset()
                 combat.reset()
+                ability_mgr.reset()
+                force_fx.reset()
                 left_score, right_score = reset(ball, left_paddle, right_paddle)
+                ball.original_pos = np.array([CW // 2, CH // 2], dtype=float)
+                ball.pos[:] = ball.original_pos
                 if pu_mgr: pu_mgr.reset()
                 paused = False
                 touch.clear_taps()
                 result = await countdown(WIN, draw_full_scene)
-                if result == 'quit': return
+                if result == 'quit':
+                    pygame.display.set_mode((WIDTH, HEIGHT))
+                    return
             elif action == 'menu':
                 if cursed:
                     cursed.reset_paddles(left_paddle, right_paddle)
+                pygame.display.set_mode((WIDTH, HEIGHT))
                 return
 
         juice.update()
@@ -271,11 +510,11 @@ async def main(vs_ai=False, settings=None):
             pause_menu.draw(WIN)
 
         if show_instructions:
-            footer_text = "[SPACE] pause | [R] restart | [M] menu | [E] grab | Sword = move keys"
+            footer_text = "[SPACE] pause | [R] restart | [M] menu | [E] mode | [G] grab | [F/Q] Force/Swing | [F+Q] LIGHTNING"
         else:
             footer_text = "Press [H] for help"
         footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
-        WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
+        WIN.blit(footer, (GAME_MARGIN_X, CH - 30))
 
         draw_touch_zones(WIN, touch)
         touch.update_ripples()
@@ -284,6 +523,8 @@ async def main(vs_ai=False, settings=None):
         pygame.display.update()
 
         if not paused and not skip_frame:
+            dt = 1 / 60
+
             # Freeze guard
             frozen_l = pu_mgr.is_frozen(left_paddle) if pu_mgr else False
             frozen_r = pu_mgr.is_frozen(right_paddle) if pu_mgr else False
@@ -293,6 +534,12 @@ async def main(vs_ai=False, settings=None):
             # Skip movement for cut (dead) paddles
             left_can_move = not combat.is_cut('left')
             right_can_move = not combat.is_cut('right')
+
+            # Lightning freeze check
+            if combat.is_lightning_frozen('left'):
+                left_can_move = False
+            if combat.is_lightning_frozen('right'):
+                right_can_move = False
 
             # Input handling
             if left_can_move and right_can_move:
@@ -317,19 +564,51 @@ async def main(vs_ai=False, settings=None):
             if vs_ai and right_can_move:
                 ai_move_paddle(right_paddle, ball, difficulty=ai_diff)
 
-            # ---- Directional sword from movement keys ----
-            # Left sword: WASD direction
-            ldx = (1 if keys[pygame.K_d] else 0) - (1 if keys[pygame.K_a] else 0)
-            ldy = (1 if keys[pygame.K_s] else 0) - (1 if keys[pygame.K_w] else 0)
-            combat.set_sword_direction('left', ldx, ldy)
+            # ---- Saber block: Q/RCTRL held in saber mode ----
+            if combat.mode_left == MODE_SABER:
+                combat.left_sword.set_blocking(keys[pygame.K_q])
+            else:
+                combat.left_sword.set_blocking(False)
 
-            # Right sword: Arrow keys direction
+            if combat.mode_right == MODE_SABER:
+                combat.right_sword.set_blocking(keys[pygame.K_RCTRL])
+            else:
+                combat.right_sword.set_blocking(False)
+
+            # ---- Directional sword from movement keys (saber mode only) ----
+            if combat.mode_left == MODE_SABER:
+                ldx = (1 if keys[pygame.K_d] else 0) - (1 if keys[pygame.K_a] else 0)
+                ldy = (1 if keys[pygame.K_s] else 0) - (1 if keys[pygame.K_w] else 0)
+                combat.set_sword_direction('left', ldx, ldy)
+            else:
+                # Force mode: sword hidden
+                combat.set_sword_direction('left', 0, 0)
+
             if not vs_ai:
-                rdx = (1 if keys[pygame.K_RIGHT] else 0) - (1 if keys[pygame.K_LEFT] else 0)
-                rdy = (1 if keys[pygame.K_DOWN] else 0) - (1 if keys[pygame.K_UP] else 0)
-                combat.set_sword_direction('right', rdx, rdy)
+                if combat.mode_right == MODE_SABER:
+                    rdx = (1 if keys[pygame.K_RIGHT] else 0) - (1 if keys[pygame.K_LEFT] else 0)
+                    rdy = (1 if keys[pygame.K_DOWN] else 0) - (1 if keys[pygame.K_UP] else 0)
+                    combat.set_sword_direction('right', rdx, rdy)
+                else:
+                    combat.set_sword_direction('right', 0, 0)
             else:
                 combat.set_sword_direction('right', 0, 0)  # AI has no sword
+
+            # ---- Lightning: detect both push+pull held in force mode ----
+            l_both = (keys[pygame.K_f] and keys[pygame.K_q] and
+                      combat.mode_left == MODE_FORCE)
+            r_both = (keys[pygame.K_RALT] and keys[pygame.K_RCTRL] and
+                      combat.mode_right == MODE_FORCE)
+
+            combat.update_lightning_charge('left', l_both, dt,
+                                           (left_paddle, right_paddle))
+            combat.update_lightning_charge('right', r_both, dt,
+                                           (left_paddle, right_paddle))
+
+            if l_both:
+                _l_lightning_was_charging = True
+            if r_both:
+                _r_lightning_was_charging = True
 
             # Enforce freeze
             if frozen_l:
@@ -345,9 +624,11 @@ async def main(vs_ai=False, settings=None):
             if combat.is_cut('right'):
                 right_paddle.vel[:] = 0
 
-            # Update paddles with cursed mode physics (full board)
-            left_paddle.update(cursed_mode=True)
-            right_paddle.update(cursed_mode=True)
+            # Update paddles with cursed mode physics (bigger arena, slower)
+            left_paddle.update(cursed_mode=True, max_vel_override=CURSED_PADDLE_MAX_VEL,
+                               screen_w=CW, screen_h=CH)
+            right_paddle.update(cursed_mode=True, max_vel_override=CURSED_PADDLE_MAX_VEL,
+                                screen_w=CW, screen_h=CH)
 
             # Update grabbed objects
             if combat.ball_grabbed_by == 'left':
@@ -368,12 +649,13 @@ async def main(vs_ai=False, settings=None):
 
                 old_vx = ball.vel[0]
                 old_vy = ball.vel[1]
-                hit = handle_ball_collision_cursed(ball, left_paddle, right_paddle)
+                hit = handle_ball_collision_cursed(ball, left_paddle, right_paddle,
+                                                  screen_h=CH)
 
                 # Wall bounce effects
                 if old_vy != 0 and (old_vy > 0) != (ball.vel[1] > 0):
                     audio.play('wall_bounce')
-                    wall_y = ball.radius if ball.pos[1] <= HEIGHT // 2 else HEIGHT - ball.radius
+                    wall_y = ball.radius if ball.pos[1] <= CH // 2 else CH - ball.radius
                     juice.on_wall_bounce(ball.pos[0], wall_y)
 
                 # Paddle hit effects
@@ -393,14 +675,19 @@ async def main(vs_ai=False, settings=None):
                     juice.on_paddle_hit(right_paddle.pos[0], ball.pos[1], r_color)
                     if pu_mgr: pu_mgr.set_last_hit('right')
 
-            # Combat system update (swords, blood, ramming)
+            # Combat system update (swords, blood, ramming, lightning)
             combat.update(left_paddle, right_paddle, ball)
+
+            # Force abilities & effects
+            ability_mgr.update(dt)
+            force_fx.update(dt)
 
             # Extra balls (power-ups)
             if pu_mgr:
                 for eb in pu_mgr.extra_balls:
                     eb.update()
-                    handle_ball_collision_cursed(eb, left_paddle, right_paddle)
+                    handle_ball_collision_cursed(eb, left_paddle, right_paddle,
+                                                screen_h=CH)
                 pu_mgr.update(ball)
                 pu_mgr.create_extra_balls(ball, mode='physics')
 
@@ -410,12 +697,21 @@ async def main(vs_ai=False, settings=None):
                 if pu_mgr and (pu_mgr.extra_balls or pu_mgr.main_ball_parked):
                     if not pu_mgr.main_ball_parked:
                         if ball.pos[0] < 0:
-                            pu_mgr.park_main_ball(ball, 'left')
-                        elif ball.pos[0] > WIDTH:
-                            pu_mgr.park_main_ball(ball, 'right')
+                            if _ball_in_goal_zone(ball.pos[1]):
+                                pu_mgr.park_main_ball(ball, 'left')
+                            else:
+                                # Bounce off wall outside goal zone
+                                ball.pos[0] = ball.radius
+                                ball.vel[0] = abs(ball.vel[0])
+                        elif ball.pos[0] > CW:
+                            if _ball_in_goal_zone(ball.pos[1]):
+                                pu_mgr.park_main_ball(ball, 'right')
+                            else:
+                                ball.pos[0] = CW - ball.radius
+                                ball.vel[0] = -abs(ball.vel[0])
                     pu_mgr.extra_balls = [
                         eb for eb in pu_mgr.extra_balls
-                        if -eb.radius <= eb.pos[0] <= WIDTH + eb.radius
+                        if -eb.radius <= eb.pos[0] <= CW + eb.radius
                     ]
                     result = pu_mgr.check_multiball_done()
                     if result == 'right_scores':
@@ -426,11 +722,20 @@ async def main(vs_ai=False, settings=None):
                         scored = True
                 else:
                     if ball.pos[0] - ball.radius < 0:
-                        right_score += 1
-                        scored = True
-                    elif ball.pos[0] + ball.radius > WIDTH:
-                        left_score += 1
-                        scored = True
+                        if _ball_in_goal_zone(ball.pos[1]):
+                            right_score += 1
+                            scored = True
+                        else:
+                            # Bounce off wall outside goal zone
+                            ball.pos[0] = ball.radius
+                            ball.vel[0] = abs(ball.vel[0])
+                    elif ball.pos[0] + ball.radius > CW:
+                        if _ball_in_goal_zone(ball.pos[1]):
+                            left_score += 1
+                            scored = True
+                        else:
+                            ball.pos[0] = CW - ball.radius
+                            ball.vel[0] = -abs(ball.vel[0])
 
                 if scored:
                     audio.play('score')
@@ -440,13 +745,16 @@ async def main(vs_ai=False, settings=None):
                     # Don't reset combat on score — dead paddles stay dead!
                     left_paddle.height = orig_p_h
                     right_paddle.height = orig_p_h
-                    ball.reset()
+                    ball.pos[:] = [CW // 2, CH // 2]
+                    ball.vel[:] = [b_speed if left_score > right_score else -b_speed, 0]
+                    ball.spin = 0
+                    ball.trail.clear()
                     if pu_mgr: pu_mgr.reset()
                     if left_score > right_score or (left_score == right_score and ball.vel[0] > 0):
-                        juice.on_score(WIDTH // 4, 20 + 25, str(left_score),
+                        juice.on_score(CW // 4, 20 + 25, str(left_score),
                                        FONT_SCORE_GAME, LIGHT_PURPLE)
                     else:
-                        juice.on_score(WIDTH * 3 // 4, 20 + 25, str(right_score),
+                        juice.on_score(CW * 3 // 4, 20 + 25, str(right_score),
                                        FONT_SCORE_GAME, LIGHT_PURPLE)
 
         # Win condition
@@ -467,6 +775,7 @@ async def main(vs_ai=False, settings=None):
                 for event in pygame.event.get():
                     touch.handle_event(event)
                     if event.type == pygame.QUIT:
+                        pygame.display.set_mode((WIDTH, HEIGHT))
                         return
                     action = win_screen.handle_event(event)
                     if action == 'play_again':
@@ -475,12 +784,17 @@ async def main(vs_ai=False, settings=None):
                             cursed.reset()
                             cursed.total_events_triggered = 0
                         combat.reset()
+                        ability_mgr.reset()
+                        force_fx.reset()
                         left_paddle.height = orig_p_h
                         right_paddle.height = orig_p_h
                         left_score, right_score = reset(ball, left_paddle, right_paddle)
+                        ball.original_pos = np.array([CW // 2, CH // 2], dtype=float)
+                        ball.pos[:] = ball.original_pos
                         if pu_mgr: pu_mgr.reset()
                         choosing = False
                     elif action == 'menu':
+                        pygame.display.set_mode((WIDTH, HEIGHT))
                         return
 
                 action = win_screen.handle_touch(touch)
@@ -490,12 +804,17 @@ async def main(vs_ai=False, settings=None):
                         cursed.reset()
                         cursed.total_events_triggered = 0
                     combat.reset()
+                    ability_mgr.reset()
+                    force_fx.reset()
                     left_paddle.height = orig_p_h
                     right_paddle.height = orig_p_h
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
+                    ball.original_pos = np.array([CW // 2, CH // 2], dtype=float)
+                    ball.pos[:] = ball.original_pos
                     if pu_mgr: pu_mgr.reset()
                     choosing = False
                 elif action == 'menu':
+                    pygame.display.set_mode((WIDTH, HEIGHT))
                     return
 
                 draw_full_scene()
@@ -506,7 +825,9 @@ async def main(vs_ai=False, settings=None):
                 await asyncio.sleep(0)
 
             result = await countdown(WIN, draw_full_scene)
-            if result == 'quit': return
+            if result == 'quit':
+                pygame.display.set_mode((WIDTH, HEIGHT))
+                return
 
         touch.clear_taps()
         await asyncio.sleep(0)

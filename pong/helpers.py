@@ -161,7 +161,7 @@ def handle_paddle_movement_cursed(keys, left_paddle, right_paddle, ai_right=Fals
                 _move_to_target(right_paddle, right_target)
 
 
-def handle_ball_collision_cursed(ball, left_paddle, right_paddle):
+def handle_ball_collision_cursed(ball, left_paddle, right_paddle, screen_h=None):
     """
     Insane cursed mode collision handler.
 
@@ -176,10 +176,11 @@ def handle_ball_collision_cursed(ball, left_paddle, right_paddle):
     """
     import numpy as _np
     hit_side = None
+    H = screen_h or HEIGHT
 
     # Wall collision (top and bottom)
-    if ball.pos[1] + ball.radius >= HEIGHT:
-        ball.pos[1] = HEIGHT - ball.radius
+    if ball.pos[1] + ball.radius >= H:
+        ball.pos[1] = H - ball.radius
         ball.vel[1] *= -1
     elif ball.pos[1] - ball.radius <= 0:
         ball.pos[1] = ball.radius

@@ -153,3 +153,9 @@ RESIZE_SHRINK = 0.65
 POWERUP_COLOR_RESIZE = (0, 200, 80)       # green
 POWERUP_COLOR_FREEZE = (80, 180, 255)     # ice blue
 POWERUP_COLOR_MULTI = (255, 180, 0)       # amber
+
+# -------------------- Cursed Mode Arena --------------------
+
+CURSED_WIDTH = 1100
+CURSED_HEIGHT = 900
+CURSED_PADDLE_MAX_VEL = PADDLE_MAX_VEL * 1.1  # slower than old 1.8x multiplier

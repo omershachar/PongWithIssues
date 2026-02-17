@@ -6,14 +6,9 @@ import pygame
 import numpy as np
 from pong.constants import *
 
-def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK, offset=(0, 0), hide_ball=False):
+def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK, offset=(0, 0), hide_ball=False, screen_w=None, screen_h=None):
     """
-    Renders all visual game elements to the window:
-    - Background
-    - Player scores
-    - Paddles
-    - Net
-    - Ball
+    Renders all visual game elements to the window.
 
     Args:
         win (pygame.Surface): The surface to draw on.
@@ -23,14 +18,18 @@ def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK
         right_score (int): Right player's score.
         score_font (pygame.font.Font): Font used to render scores.
         bg_color (tuple): RGB background color.
+        screen_w (int|None): Override screen width (for Cursed mode larger arena).
+        screen_h (int|None): Override screen height.
     """
+    W = screen_w or WIDTH
+    H = screen_h or HEIGHT
     win.fill(bg_color)
 
     # Draw scores
     left_score_text = score_font.render(f"{left_score}", True, LIGHT_PURPLE)
     right_score_text = score_font.render(f"{right_score}", True, LIGHT_PURPLE)
-    win.blit(left_score_text, (WIDTH // 4 - left_score_text.get_width() // 2, 20))
-    win.blit(right_score_text, (WIDTH * 3 // 4 - right_score_text.get_width() // 2, 20))
+    win.blit(left_score_text, (W // 4 - left_score_text.get_width() // 2, 20))
+    win.blit(right_score_text, (W * 3 // 4 - right_score_text.get_width() // 2, 20))
 
     # Draw paddles and ball
     for paddle in paddles:
@@ -45,8 +44,8 @@ def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK
     net_segment = pygame.Surface((net_width, net_height), pygame.SRCALPHA)
     net_segment.fill(LIGHT_PURPLE)
     net_segment.set_alpha(120)
-    for y in range(0, HEIGHT, net_height + gap):
-        win.blit(net_segment, (WIDTH // 2 - net_width // 2, y))
+    for y in range(0, H, net_height + gap):
+        win.blit(net_segment, (W // 2 - net_width // 2, y))
 
 def reset(ball, left_paddle, right_paddle):
     """
@@ -57,11 +56,12 @@ def reset(ball, left_paddle, right_paddle):
     right_paddle.reset()
     return 0, 0
     
-def handle_score(ball, left_score, right_score):
+def handle_score(ball, left_score, right_score, screen_w=None):
+    W = screen_w or WIDTH
     if ball.pos[0] < 0:
         right_score = right_score + 1
         ball.reset()
-    elif ball.pos[0] > WIDTH:
+    elif ball.pos[0] > W:
         left_score = left_score + 1
         ball.reset()
     return left_score, right_score

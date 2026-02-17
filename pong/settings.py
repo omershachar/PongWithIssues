@@ -59,6 +59,10 @@ class GameSettings:
         self.screen_shake = 1  # 0=off, 1=subtle, 2=intense
         self.particles_enabled = True
 
+        # Goal net settings (Cursed mode)
+        self.goal_net_enabled = False
+        self.goal_net_size = 0.40  # fraction of screen height
+
         # Game speed multiplier
         self.game_speed = 1.0  # 0.5x to 2.0x
 
@@ -93,6 +97,8 @@ class GameSettings:
             'screen_shake': int(self.screen_shake),
             'particles_enabled': bool(self.particles_enabled),
             'game_speed': float(self.game_speed),
+            'goal_net_enabled': bool(self.goal_net_enabled),
+            'goal_net_size': float(self.goal_net_size),
         }
 
     def from_dict(self, data):
@@ -161,6 +167,7 @@ SETTING_RANGES = {
     'sfx_volume': {'min': 0.0, 'max': 1.0, 'step': 0.1, 'label': 'SFX Volume'},
     'screen_shake': {'min': 0, 'max': 2, 'step': 1, 'label': 'Shake'},
     'game_speed': {'min': 0.5, 'max': 2.0, 'step': 0.25, 'label': 'Game Speed'},
+    'goal_net_size': {'min': 0.2, 'max': 0.7, 'step': 0.05, 'label': 'Goal Net Size'},
 }
 
 # Human-readable names for screen shake levels
@@ -185,7 +192,7 @@ class SettingsMenu:
         self.settings = settings
         self.selected_option = 0
         self.options = list(SETTING_RANGES.keys()) + [
-            'power_ups_enabled', 'cursed_events_enabled', 'particles_enabled',
+            'power_ups_enabled', 'cursed_events_enabled', 'goal_net_enabled', 'particles_enabled',
             'left_paddle_color', 'right_paddle_color', 'background_color', 'Reset Defaults'
         ]
         self.color_keys = list(COLOR_OPTIONS.keys())
@@ -365,6 +372,8 @@ class SettingsMenu:
             self.settings.power_ups_enabled = not self.settings.power_ups_enabled
         elif option == 'cursed_events_enabled':
             self.settings.cursed_events_enabled = not self.settings.cursed_events_enabled
+        elif option == 'goal_net_enabled':
+            self.settings.goal_net_enabled = not self.settings.goal_net_enabled
         elif option == 'particles_enabled':
             self.settings.particles_enabled = not self.settings.particles_enabled
         elif option == 'left_paddle_color':
@@ -480,6 +489,8 @@ class SettingsMenu:
             'background_color': 'BG Color',
             'power_ups_enabled': 'Power-Ups',
             'cursed_events_enabled': 'Cursed Evt',
+            'goal_net_enabled': 'Goal Nets',
+            'goal_net_size': 'Net Size',
             'particles_enabled': 'Particles',
             'Reset Defaults': 'Reset All',
         }
@@ -520,6 +531,11 @@ class SettingsMenu:
                 value_display = "< ON >" if self.settings.power_ups_enabled else "< OFF >"
             elif option == 'cursed_events_enabled':
                 value_display = "< ON >" if self.settings.cursed_events_enabled else "< OFF >"
+            elif option == 'goal_net_enabled':
+                value_display = "< ON >" if self.settings.goal_net_enabled else "< OFF >"
+            elif option == 'goal_net_size':
+                pct = int(self.settings.goal_net_size * 100)
+                value_display = f"< {pct}% >"
             elif option == 'particles_enabled':
                 value_display = "< ON >" if self.settings.particles_enabled else "< OFF >"
             elif option == 'left_paddle_color':

@@ -229,6 +229,90 @@ def _make_countdown_go():
     return _generate_sound(wave * 0.6)
 
 
+def _make_force_push():
+    """Deep bass whomp — 300ms, sine sweep 120->40Hz + noise burst."""
+    duration = 0.3
+    n = int(SAMPLE_RATE * duration)
+    t = np.linspace(0, duration, n, endpoint=False)
+    freq = np.linspace(120, 40, n)
+    sweep = np.sin(2 * np.pi * np.cumsum(freq) / SAMPLE_RATE)
+    burst = _noise(duration) * np.exp(-t * 12)
+    wave = sweep * 0.7 + burst * 0.3
+    wave = _envelope(wave, attack=0.005, decay=0.15)
+    return _generate_sound(wave * 0.7)
+
+
+def _make_force_pull():
+    """Rising suction whoosh — 350ms, sine sweep 60->300Hz + filtered noise."""
+    duration = 0.35
+    n = int(SAMPLE_RATE * duration)
+    t = np.linspace(0, duration, n, endpoint=False)
+    freq = np.linspace(60, 300, n)
+    sweep = np.sin(2 * np.pi * np.cumsum(freq) / SAMPLE_RATE)
+    raw = _noise(duration)
+    # Simple filter: multiply noise by rising sine for bandpass effect
+    filt = np.sin(2 * np.pi * np.cumsum(np.linspace(100, 600, n)) / SAMPLE_RATE)
+    filtered = raw * np.abs(filt)
+    wave = sweep * 0.6 + filtered * 0.4
+    wave = _envelope(wave, attack=0.01, decay=0.2)
+    return _generate_sound(wave * 0.6)
+
+
+def _make_lightsaber_clash():
+    """Electric clash — 150ms, square wave 800Hz + sine 2400Hz + noise decay."""
+    duration = 0.15
+    n = int(SAMPLE_RATE * duration)
+    t = np.linspace(0, duration, n, endpoint=False)
+    sq = _square_wave(800, duration)
+    hi = _sine_wave(2400, duration)
+    nz = _noise(duration) * np.exp(-t * 30)
+    wave = sq * 0.3 + hi * 0.3 + nz * 0.4
+    wave = _envelope(wave, attack=0.001, decay=0.1)
+    return _generate_sound(wave * 0.6)
+
+
+def _make_lightsaber_ignite():
+    """Rising hum 80->220Hz, 0.5s — saber powering up."""
+    duration = 0.5
+    n = int(SAMPLE_RATE * duration)
+    t = np.linspace(0, duration, n, endpoint=False)
+    freq = np.linspace(80, 220, n)
+    wave = np.sin(2 * np.pi * np.cumsum(freq) / SAMPLE_RATE)
+    # Add slight buzz overtone
+    wave += 0.2 * np.sin(2 * np.pi * np.cumsum(freq * 2.5) / SAMPLE_RATE)
+    wave = _envelope(wave, attack=0.02, decay=0.1)
+    return _generate_sound(wave * 0.6)
+
+
+def _make_lightsaber_sheathe():
+    """Descending hum 220->70Hz, 0.4s — saber powering down."""
+    duration = 0.4
+    n = int(SAMPLE_RATE * duration)
+    t = np.linspace(0, duration, n, endpoint=False)
+    freq = np.linspace(220, 70, n)
+    wave = np.sin(2 * np.pi * np.cumsum(freq) / SAMPLE_RATE)
+    wave += 0.15 * np.sin(2 * np.pi * np.cumsum(freq * 2.5) / SAMPLE_RATE)
+    wave = _envelope(wave, attack=0.005, decay=0.2)
+    return _generate_sound(wave * 0.5)
+
+
+def _make_lightning_strike():
+    """Electric crack + hiss + rumble, 0.65s — lightning bolt kill move."""
+    duration = 0.65
+    n = int(SAMPLE_RATE * duration)
+    t = np.linspace(0, duration, n, endpoint=False)
+    # Initial crack: short noise burst
+    crack = _noise(duration) * np.exp(-t * 25)
+    # Electric hiss: high-freq sine with random modulation
+    hiss_freq = 3000 + 1500 * np.sin(2 * np.pi * 40 * t)
+    hiss = np.sin(2 * np.pi * np.cumsum(hiss_freq) / SAMPLE_RATE) * np.exp(-t * 6)
+    # Low rumble
+    rumble = _sine_wave(50, duration) * np.exp(-t * 3)
+    wave = crack * 0.4 + hiss * 0.3 + rumble * 0.3
+    wave = _envelope(wave, attack=0.001, decay=0.3)
+    return _generate_sound(wave * 0.7)
+
+
 # ---------------------------------------------------------------------------
 # SoundManager class
 # ---------------------------------------------------------------------------
@@ -269,6 +353,12 @@ class SoundManager:
             "countdown_tick": _make_countdown_tick,
             "countdown_go": _make_countdown_go,
             "cursed_event": _make_cursed_event,
+            "force_push": _make_force_push,
+            "force_pull": _make_force_pull,
+            "lightsaber_clash": _make_lightsaber_clash,
+            "lightsaber_ignite": _make_lightsaber_ignite,
+            "lightsaber_sheathe": _make_lightsaber_sheathe,
+            "lightning_strike": _make_lightning_strike,
         }
 
         for name, gen_func in generators.items():
