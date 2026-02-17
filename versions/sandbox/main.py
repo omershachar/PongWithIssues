@@ -14,7 +14,10 @@ from pong.paddle import Paddle
 from pong.ball import Ball
 from pong.utilities import draw as draw_game, reset, handle_ball_collision
 from pong.helpers import handle_paddle_movement
-from pong.touch import TouchHandler, draw_touch_buttons
+from pong.touch import TouchHandler, draw_touch_buttons, draw_touch_zones
+from pong import audio
+from pong.juice import JuiceManager
+from pong.game_flow import PauseMenu, confirm_exit
 
 def draw_debug_info(win, ball, left_paddle, right_paddle):
     """Draw debug information overlay."""
@@ -37,6 +40,9 @@ async def main(settings=None):
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Pong - Sandbox")
     clock = pygame.time.Clock()
+
+    # Initialize audio
+    audio.init()
 
     paused = False
     show_debug = True
@@ -64,6 +70,21 @@ async def main(settings=None):
     left_hits = 0
     right_hits = 0
 
+    # Juice (visual effects) — respects settings
+    juice = JuiceManager(settings)
+
+    # Pause menu
+    pause_menu = PauseMenu()
+
+    def draw_full_scene():
+        """Draw the complete game scene."""
+        draw_game(WIN, [left_paddle, right_paddle], ball, left_hits, right_hits, FONT_LARGE_DIGITAL, bg_color)
+        mode_text = FONT_SMALL_DIGITAL.render("MODE: SANDBOX", True, GREEN)
+        WIN.blit(mode_text, (10, 10))
+        if show_debug:
+            draw_debug_info(WIN, ball, left_paddle, right_paddle)
+        juice.draw(WIN)
+
     while True:
         clock.tick(FPS)
         keys = pygame.key.get_pressed()
@@ -72,12 +93,12 @@ async def main(settings=None):
             touch.handle_event(event)
             if event.type == pygame.QUIT:
                 return
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE or event.key == pygame.K_m:
-                    return
-                if event.key == pygame.K_SPACE:
-                    paused = not paused
-                if event.key == pygame.K_r:
+
+            if paused:
+                action = pause_menu.handle_event(event, touch)
+                if action == 'resume':
+                    paused = False
+                elif action == 'restart':
                     ball.pos = ball.original_pos.copy()
                     ball.vel = ball.original_vel.copy()
                     ball.spin = 0
@@ -87,39 +108,66 @@ async def main(settings=None):
                     left_hits = 0
                     right_hits = 0
                     paused = False
+                elif action == 'menu':
+                    return
+                continue
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_m:
+                    should_exit = await confirm_exit(WIN, draw_full_scene, touch)
+                    if should_exit:
+                        return
+                if event.key == pygame.K_SPACE:
+                    paused = True
+                if event.key == pygame.K_r:
+                    ball.pos = ball.original_pos.copy()
+                    ball.vel = ball.original_vel.copy()
+                    ball.spin = 0
+                    ball.trail.clear()
+                    left_paddle.reset()
+                    right_paddle.reset()
+                    left_hits = 0
+                    right_hits = 0
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions
                 if event.key == pygame.K_d:
                     show_debug = not show_debug
 
         # Touch button actions
-        if touch.tapped_menu_btn():
-            touch.clear_taps()
-            return
-        if touch.tapped_pause_btn():
-            paused = not paused
-
-        # Draw game
-        draw_game(WIN, [left_paddle, right_paddle], ball, left_hits, right_hits, FONT_LARGE_DIGITAL, bg_color)
-
-        # Mode label
-        mode_text = FONT_SMALL_DIGITAL.render("MODE: SANDBOX", True, GREEN)
-        WIN.blit(mode_text, (10, 10))
-
-        # Debug info overlay
-        if show_debug:
-            draw_debug_info(WIN, ball, left_paddle, right_paddle)
+        if not paused:
+            if touch.tapped_menu_btn():
+                should_exit = await confirm_exit(WIN, draw_full_scene, touch)
+                touch.clear_taps()
+                if should_exit:
+                    return
+            if touch.tapped_pause_btn():
+                paused = True
 
         if paused:
-            # Dark overlay
-            overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 150))
-            WIN.blit(overlay, (0, 0))
+            action = pause_menu.handle_touch(touch)
+            if action == 'resume':
+                paused = False
+            elif action == 'restart':
+                ball.pos = ball.original_pos.copy()
+                ball.vel = ball.original_vel.copy()
+                ball.spin = 0
+                ball.trail.clear()
+                left_paddle.reset()
+                right_paddle.reset()
+                left_hits = 0
+                right_hits = 0
+                paused = False
+            elif action == 'menu':
+                return
 
-            pause_text = FONT_BIG_DIGITAL.render("PAUSED", True, GREEN)
-            resume_text = FONT_SMALL_DIGITAL.render("Press [SPACE] to resume", True, GREY)
-            WIN.blit(pause_text, (WIDTH // 2 - pause_text.get_width() // 2, HEIGHT // 2 - pause_text.get_height()))
-            WIN.blit(resume_text, (WIDTH // 2 - resume_text.get_width() // 2, HEIGHT // 2 + 10))
+        # Update juice effects
+        juice.update()
+
+        # Draw scene
+        draw_full_scene()
+
+        if paused:
+            pause_menu.draw(WIN)
 
         # Footer instructions
         if show_instructions:
@@ -129,6 +177,9 @@ async def main(settings=None):
         footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
         WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
 
+        draw_touch_zones(WIN, touch)
+        touch.update_ripples()
+        touch.draw_ripples(WIN)
         draw_touch_buttons(WIN, paused)
         pygame.display.update()
 
@@ -139,23 +190,37 @@ async def main(settings=None):
 
             ball.update()
 
-            # Check paddle collisions and track hits
-            ball_before_x = ball.pos[0]
+            old_vx = ball.vel[0]
+            old_vy = ball.vel[1]
             handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
 
-            # Count hits (ball direction changed)
-            if ball.vel[0] > 0 and ball_before_x < WIDTH / 2:
+            # Wall bounce detection — check if vy flipped sign
+            if old_vy != 0 and (old_vy > 0) != (ball.vel[1] > 0):
+                audio.play('wall_bounce')
+                wall_y = ball.radius if ball.pos[1] <= HEIGHT // 2 else HEIGHT - ball.radius
+                juice.on_wall_bounce(ball.pos[0], wall_y)
+
+            # Detect paddle hits — check if vx flipped sign
+            if old_vx < 0 and ball.vel[0] > 0:
                 left_hits += 1
-            elif ball.vel[0] < 0 and ball_before_x > WIDTH / 2:
+                audio.play('paddle_hit')
+                juice.on_paddle_hit(left_paddle.pos[0] + left_paddle.width, ball.pos[1], l_color)
+            elif old_vx > 0 and ball.vel[0] < 0:
                 right_hits += 1
+                audio.play('paddle_hit')
+                juice.on_paddle_hit(right_paddle.pos[0], ball.pos[1], r_color)
 
             # In sandbox, ball bounces off all walls (no scoring)
             if ball.pos[0] - ball.radius < 0:
                 ball.vel[0] = abs(ball.vel[0])
                 ball.pos[0] = ball.radius
+                audio.play('wall_bounce')
+                juice.on_wall_bounce(ball.radius, ball.pos[1])
             elif ball.pos[0] + ball.radius > WIDTH:
                 ball.vel[0] = -abs(ball.vel[0])
                 ball.pos[0] = WIDTH - ball.radius
+                audio.play('wall_bounce')
+                juice.on_wall_bounce(WIDTH - ball.radius, ball.pos[1])
 
         touch.clear_taps()
         await asyncio.sleep(0)

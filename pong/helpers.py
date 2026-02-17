@@ -98,11 +98,17 @@ def handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=False, touc
 
 
 def _move_to_target(paddle, target_y):
-    """Move paddle toward a target Y position (for touch input)."""
+    """Move paddle toward a target Y position (for touch input).
+    Uses a larger dead zone for finger precision and double-accelerates
+    when far away for more responsive feel."""
     paddle_center = paddle.pos[1] + paddle.height / 2
-    dead_zone = paddle.height * 0.1
+    dead_zone = paddle.height * 0.2
     diff = target_y - paddle_center
     if diff < -dead_zone:
         paddle.accelerate(up=True)
+        if abs(diff) > paddle.height:
+            paddle.accelerate(up=True)  # Double speed when far away
     elif diff > dead_zone:
         paddle.accelerate(up=False)
+        if abs(diff) > paddle.height:
+            paddle.accelerate(up=False)

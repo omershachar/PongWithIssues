@@ -55,6 +55,9 @@ ehthumbs.db
 Thumbs.db
 
 # ---------- Project Specific ----------
+# User settings (auto-saved, user-specific)
+settings.json
+
 # Personal notes
 notes.txt
 

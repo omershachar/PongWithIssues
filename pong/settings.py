@@ -1,7 +1,11 @@
 """
 settings.py -- Game settings and customization options.
 Allows players to adjust ball/paddle size, speed, colors, and more.
+Supports save/load to JSON for persistence across sessions.
 """
+import json
+import os
+import sys
 import pygame
 import numpy as np
 from pong.constants import *
@@ -9,6 +13,10 @@ from pong.ball import Ball
 from pong.paddle import Paddle
 from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
 from pong.helpers import handle_ball_collision
+
+# Settings file path (desktop: next to launcher, web: not used)
+_SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings.json')
+_IS_WEB = sys.platform == "emscripten"
 
 
 class GameSettings:
@@ -40,6 +48,17 @@ class GameSettings:
         # Power-up settings
         self.power_ups_enabled = True
 
+        # Audio settings
+        self.master_volume = 0.7
+        self.sfx_volume = 1.0
+
+        # Visual settings
+        self.screen_shake = 1  # 0=off, 1=subtle, 2=intense
+        self.particles_enabled = True
+
+        # Game speed multiplier
+        self.game_speed = 1.0  # 0.5x to 2.0x
+
         # Control settings
         self.left_up_key = pygame.K_w
         self.left_down_key = pygame.K_s
@@ -51,21 +70,57 @@ class GameSettings:
         self.__init__()
 
     def to_dict(self):
-        """Export settings as dictionary."""
+        """Export settings as a JSON-serializable dictionary."""
         return {
-            'ball_radius': self.ball_radius,
-            'ball_speed': self.ball_speed,
-            'ball_color': self.ball_color,
-            'paddle_width': self.paddle_width,
-            'paddle_height': self.paddle_height,
-            'paddle_speed': self.paddle_speed,
-            'left_paddle_color': self.left_paddle_color,
-            'right_paddle_color': self.right_paddle_color,
-            'background_color': self.background_color,
-            'winning_score': self.winning_score,
-            'ai_difficulty': self.ai_difficulty,
-            'power_ups_enabled': self.power_ups_enabled,
+            'ball_radius': int(self.ball_radius),
+            'ball_speed': float(self.ball_speed),
+            'ball_color': list(self.ball_color),
+            'paddle_width': int(self.paddle_width),
+            'paddle_height': int(self.paddle_height),
+            'paddle_speed': float(self.paddle_speed),
+            'left_paddle_color': list(self.left_paddle_color),
+            'right_paddle_color': list(self.right_paddle_color),
+            'background_color': list(self.background_color),
+            'winning_score': int(self.winning_score),
+            'ai_difficulty': int(self.ai_difficulty),
+            'power_ups_enabled': bool(self.power_ups_enabled),
+            'master_volume': float(self.master_volume),
+            'sfx_volume': float(self.sfx_volume),
+            'screen_shake': int(self.screen_shake),
+            'particles_enabled': bool(self.particles_enabled),
+            'game_speed': float(self.game_speed),
         }
+
+    def from_dict(self, data):
+        """Load settings from a dictionary. Unknown keys are ignored."""
+        color_fields = {'ball_color', 'left_paddle_color', 'right_paddle_color', 'background_color'}
+        for key, value in data.items():
+            if hasattr(self, key):
+                if key in color_fields and isinstance(value, list):
+                    setattr(self, key, tuple(value))
+                else:
+                    setattr(self, key, value)
+
+    def save(self):
+        """Save settings to JSON file. No-op on web."""
+        if _IS_WEB:
+            return
+        try:
+            with open(_SETTINGS_FILE, 'w') as f:
+                json.dump(self.to_dict(), f, indent=2)
+        except Exception:
+            pass
+
+    def load(self):
+        """Load settings from JSON file. No-op on web or if file missing."""
+        if _IS_WEB:
+            return
+        try:
+            with open(_SETTINGS_FILE, 'r') as f:
+                data = json.load(f)
+            self.from_dict(data)
+        except Exception:
+            pass
 
 
 # Predefined color options
@@ -98,7 +153,14 @@ SETTING_RANGES = {
     'paddle_speed': {'min': 3, 'max': 15, 'step': 1, 'label': 'Paddle Speed'},
     'winning_score': {'min': 1, 'max': 21, 'step': 1, 'label': 'Winning Score'},
     'ai_difficulty': {'min': 1, 'max': 10, 'step': 1, 'label': 'AI Difficulty'},
+    'master_volume': {'min': 0.0, 'max': 1.0, 'step': 0.1, 'label': 'Volume'},
+    'sfx_volume': {'min': 0.0, 'max': 1.0, 'step': 0.1, 'label': 'SFX Volume'},
+    'screen_shake': {'min': 0, 'max': 2, 'step': 1, 'label': 'Shake'},
+    'game_speed': {'min': 0.5, 'max': 2.0, 'step': 0.25, 'label': 'Game Speed'},
 }
+
+# Human-readable names for screen shake levels
+SHAKE_NAMES = {0: 'OFF', 1: 'Subtle', 2: 'Intense'}
 
 
 class PreviewGame:
@@ -248,7 +310,7 @@ class SettingsMenu:
         self.settings = settings
         self.selected_option = 0
         self.options = list(SETTING_RANGES.keys()) + [
-            'power_ups_enabled',
+            'power_ups_enabled', 'particles_enabled',
             'left_paddle_color', 'right_paddle_color', 'background_color', 'Reset Defaults'
         ]
         self.color_keys = list(COLOR_OPTIONS.keys())
@@ -282,12 +344,16 @@ class SettingsMenu:
                             self.selected_option = row
                 else:
                     # Tap on the preview area = go back
+                    self.settings.save()
+                    self._apply_audio_settings()
                     return True
 
         if event.type != pygame.KEYDOWN:
             return False  # Return False = stay in settings
 
         if event.key == pygame.K_ESCAPE or event.key == pygame.K_m:
+            self.settings.save()
+            self._apply_audio_settings()
             return True  # Return True = exit settings
 
         if event.key == pygame.K_UP:
@@ -314,16 +380,29 @@ class SettingsMenu:
             range_info = SETTING_RANGES[option]
             new_value = current + (direction * range_info['step'])
             new_value = max(range_info['min'], min(range_info['max'], new_value))
+            # Round floats to avoid drift
+            if isinstance(range_info['step'], float):
+                new_value = round(new_value, 2)
             setattr(self.settings, option, new_value)
+            # Apply audio changes live
+            if option in ('master_volume', 'sfx_volume'):
+                self._apply_audio_settings()
 
         elif option == 'power_ups_enabled':
             self.settings.power_ups_enabled = not self.settings.power_ups_enabled
+        elif option == 'particles_enabled':
+            self.settings.particles_enabled = not self.settings.particles_enabled
         elif option == 'left_paddle_color':
             self._cycle_color('left_paddle_color', direction, COLOR_OPTIONS)
         elif option == 'right_paddle_color':
             self._cycle_color('right_paddle_color', direction, COLOR_OPTIONS)
         elif option == 'background_color':
             self._cycle_color('background_color', direction, BACKGROUND_OPTIONS)
+
+    def _apply_audio_settings(self):
+        """Push current volume settings to the audio system."""
+        from pong import audio
+        audio.set_volume(master=self.settings.master_volume, sfx=self.settings.sfx_volume)
 
     def _cycle_color(self, attr, direction, color_dict=None):
         """Cycle through color options."""
@@ -392,12 +471,17 @@ class SettingsMenu:
             'paddle_height': 'Paddle Ht',
             'paddle_speed': 'Paddle Spd',
             'winning_score': 'Win Score',
+            'ai_difficulty': 'AI Level',
+            'master_volume': 'Volume',
+            'sfx_volume': 'SFX Vol',
+            'screen_shake': 'Shake',
+            'game_speed': 'Speed',
             'left_paddle_color': 'L. Paddle',
             'right_paddle_color': 'R. Paddle',
             'background_color': 'BG Color',
-            'ai_difficulty': 'AI Level',
             'power_ups_enabled': 'Power-Ups',
-            'Reset Defaults': 'Reset Defaults',
+            'particles_enabled': 'Particles',
+            'Reset Defaults': 'Reset All',
         }
 
         # Settings list
@@ -420,11 +504,22 @@ class SettingsMenu:
                 level = self.settings.ai_difficulty
                 name = DIFFICULTY_NAMES.get(level, "")
                 value_display = f"< {level} {name} >"
+            elif option == 'screen_shake':
+                value_display = f"< {SHAKE_NAMES.get(self.settings.screen_shake, '?')} >"
+            elif option == 'master_volume' or option == 'sfx_volume':
+                val = getattr(self.settings, option)
+                pct = int(val * 100)
+                value_display = f"< {pct}% >"
+            elif option == 'game_speed':
+                val = self.settings.game_speed
+                value_display = f"< {val:.2g}x >"
             elif option in SETTING_RANGES:
                 value = str(getattr(self.settings, option))
                 value_display = f"< {value} >"
             elif option == 'power_ups_enabled':
                 value_display = "< ON >" if self.settings.power_ups_enabled else "< OFF >"
+            elif option == 'particles_enabled':
+                value_display = "< ON >" if self.settings.particles_enabled else "< OFF >"
             elif option == 'left_paddle_color':
                 value_display = f"< {self._get_color_name(self.settings.left_paddle_color)} >"
             elif option == 'right_paddle_color':

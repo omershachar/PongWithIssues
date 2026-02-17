@@ -820,9 +820,82 @@ Audited every file in the repo and removed all unused/redundant files, dead code
 
 ---
 
+### Session 17 - 2026-02-17
+
+#### Completed Tasks
+
+**Priority Overhaul & P1: Game Feel & Juice:**
+
+Rethought all project priorities around three pillars: Best Playing Experience, Full Adjustability, Cursed Vibe. Rewrote TODO.md with new 7-tier priority system.
+
+**Audio System (`pong/audio.py`):**
+- [x] Created `SoundManager` class with procedural sound generation via numpy
+- [x] 11 sounds generated at init time — no external audio files needed:
+  - `paddle_hit` (50ms thwack), `wall_bounce` (30ms tap), `score` (300ms sweep)
+  - `win` (C5-E5-G5 jingle), `lose` (G4-E4-C4 descending)
+  - `powerup_collect` (shimmer), `powerup_activate` (whoosh), `powerup_expire` (tick-tick)
+  - `freeze` (ice crack), `countdown_tick` (600Hz beep), `countdown_go` (900Hz beep)
+- [x] Volume controls: master, sfx, music (0.0 to 1.0)
+- [x] Graceful fallback if audio init fails (web environments)
+- [x] Module-level convenience API: `audio.init()`, `audio.play('paddle_hit')`
+
+**Visual Juice System (`pong/juice.py`):**
+- [x] `ScreenShake` — exponential decay, intensity levels (off/subtle/intense)
+- [x] `FlashEffect` — semi-transparent color overlay with alpha fade
+- [x] `ParticleSystem` — 200-particle pool, gravity, alpha fade, __slots__ optimization
+- [x] `ScorePop` — two-phase scale animation (grow 1.0→1.5, settle back)
+- [x] `JuiceManager` — convenience wrapper with high-level event triggers:
+  - `on_paddle_hit()`, `on_score()`, `on_powerup_collect()`, `on_freeze()`, `on_wall_bounce()`
+
+**Game Flow System (`pong/game_flow.py`):**
+- [x] `countdown()` — async 3-2-1-GO countdown before rounds (with sound)
+- [x] `PauseMenu` — interactive overlay: Resume / Restart / Main Menu (keyboard + touch)
+- [x] `WinScreen` — interactive overlay: Play Again / Main Menu, shows final score
+- [x] `confirm_exit()` — "Leave match?" dialog with Leave/Cancel buttons
+
+**Integration into All Game Modes:**
+- [x] **Classic mode** — full audio (paddle hit, wall bounce, score, win/lose, countdown), juice effects (particles, shake, flash, score pop), interactive pause menu, interactive win screen, countdown before rounds, exit confirmation
+- [x] **Pongception mode** — identical integration with physics-mode sounds
+- [x] **Sandbox mode** — audio for bounces/hits, juice effects, interactive pause menu, exit confirmation (no win screen since no scoring)
+- [x] **Launcher** — audio.init() called on startup
+
+#### Files Created
+- `pong/audio.py` — Procedural sound manager (250 lines)
+- `pong/juice.py` — Visual effects system (280 lines)
+- `pong/game_flow.py` — Shared game flow UI (230 lines)
+
+#### Files Modified
+- `versions/classic/main.py` — audio + juice + game flow integration
+- `versions/pongception/main.py` — audio + juice + game flow integration
+- `versions/sandbox/main.py` — audio + juice + game flow integration
+- `launcher.py` — audio initialization
+- `pong/utilities.py` — added `offset` parameter to `draw()`
+- `TODO.md` — complete rewrite with new priority system
+
+#### Testing
+- All 20 project files: compile check PASSED
+- Full import smoke test: PASSED (all new modules import correctly)
+- Audio system: 11 sounds generated, volume control, singleton pattern all verified
+
+---
+
+## Statistics
+
+| Metric | Count |
+|--------|-------|
+| Sessions | 17 |
+| Bugs Found | 15 + 8 web (obsolete) |
+| Bugs Fixed | 15 + 7 web (obsolete) |
+| Files Created | 28+ |
+| Files Modified | 66+ |
+| Files Deleted | 31 files + 2 directories |
+| Commits | 19+ |
+
+---
+
 ## Next Steps
-1. Commit and push all cleanup changes
-2. Test touch controls on mobile after deployment
-3. Priority 5 remaining: Mouse controls, custom images
-4. Priority 7: Audio & visual polish (OGG format for Pygbag)
-5. Priority 8 remaining: Add GitHub README link to Pages
+1. Test game with audio and juice effects on desktop
+2. Test on web (Pygbag deployment) with audio
+3. P2: Mobile & Touch Experience improvements
+4. P3: Settings persistence + new customization options
+5. P4: Cursed Mode implementation

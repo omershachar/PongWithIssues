@@ -8,6 +8,7 @@ except ImportError:
     webbrowser = None  # Not available in WASM/Pygbag
 from pong.constants import *
 from pong.ball import Ball
+from pong import audio
 
 ball_menu = Ball(*MIDDLE_BOARD, BALL_RADIUS, WHITE, mode='classic', vel=(BALL_DEFAULT_VEL[0], 4))
 
@@ -58,6 +59,12 @@ GAME_MODES = [
         'ball_color': DARK_GREY
     },
     {
+        'name': 'Cursed',
+        'description': 'Random chaos events!',
+        'color': (255, 50, 200),
+        'ball_color': (255, 50, 200)
+    },
+    {
         'name': 'Sandbox',
         'description': 'Debug mode - no scoring',
         'color': GREEN,
@@ -65,11 +72,20 @@ GAME_MODES = [
     }
 ]
 
+def _mode_layout():
+    """Compute box dimensions based on number of modes."""
+    n = len(GAME_MODES)
+    if n <= 4:
+        return 160, 70, 20
+    else:
+        # Shrink to fit 800px width
+        spacing = 12
+        box_w = (WIDTH - 20 - (n - 1) * spacing) // n
+        return box_w, 70, spacing
+
 def get_mode_box_rects():
     """Return list of pygame.Rect for each mode selection box (for touch hit-testing)."""
-    mode_box_width = 160
-    mode_box_height = 70
-    mode_spacing = 20
+    mode_box_width, mode_box_height, mode_spacing = _mode_layout()
     mode_start_y = MENU_SUBTITLES_Y + MENU_MARGIN_Y * 3
     total_width = len(GAME_MODES) * mode_box_width + (len(GAME_MODES) - 1) * mode_spacing
     start_x = (WIDTH - total_width) // 2
@@ -99,9 +115,7 @@ def draw_menu(WIN, selected_mode):
 
     # Mode selection grid
     mode_start_y = MENU_SUBTITLES_Y + MENU_MARGIN_Y * 3
-    mode_box_width = 160
-    mode_box_height = 70
-    mode_spacing = 20
+    mode_box_width, mode_box_height, mode_spacing = _mode_layout()
     total_width = len(GAME_MODES) * mode_box_width + (len(GAME_MODES) - 1) * mode_spacing
     start_x = (WIDTH - total_width) // 2
 
@@ -183,6 +197,7 @@ def draw_menu(WIN, selected_mode):
 
     # Draw bouncing ball
     ball_menu.draw(WIN)
-    ball_menu.bounce_box(WIDTH, HEIGHT)
+    if ball_menu.bounce_box(WIDTH, HEIGHT):
+        audio.play('wall_bounce')
 
     pygame.display.update()

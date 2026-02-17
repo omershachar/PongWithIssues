@@ -6,7 +6,7 @@ import pygame
 import numpy as np
 from pong.constants import *
 
-def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK):
+def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK, offset=(0, 0), hide_ball=False):
     """
     Renders all visual game elements to the window:
     - Background
@@ -35,7 +35,8 @@ def draw(win, paddles, ball, left_score, right_score, score_font, bg_color=BLACK
     # Draw paddles and ball
     for paddle in paddles:
         paddle.draw(win)
-    ball.draw(win)
+    if not hide_ball:
+        ball.draw(win)
 
     # Draw dashed net
     net_width = 6

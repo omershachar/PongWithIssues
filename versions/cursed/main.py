@@ -1,5 +1,6 @@
 """
-Classic Pong -- Main file containing only essentials and activation commands.
+Cursed Pong -- Chaos mode with random disruptive events every ~12 seconds.
+Fork of Classic mode with CursedEventManager layered on top.
 """
 import sys
 import os
@@ -20,10 +21,11 @@ from pong.powerups import PowerUpManager
 from pong import audio
 from pong.juice import JuiceManager
 from pong.game_flow import countdown, PauseMenu, WinScreen, confirm_exit
+from pong.cursed import CursedEventManager
 
 async def main(vs_ai=False, settings=None):
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Pong!")
+    pygame.display.set_caption("Cursed Pong!")
     clock = pygame.time.Clock()
 
     # Initialize audio
@@ -31,7 +33,6 @@ async def main(vs_ai=False, settings=None):
 
     paused = False
     show_instructions = False
-    game_started = False  # For countdown
 
     # Apply settings or use defaults
     p_w = settings.paddle_width if settings else PADDLE_SIZE[0]
@@ -39,7 +40,7 @@ async def main(vs_ai=False, settings=None):
     p_speed = settings.paddle_speed if settings else PADDLE_DEFAULT_VEL
     b_radius = settings.ball_radius if settings else BALL_RADIUS
     b_speed = settings.ball_speed if settings else BALL_DEFAULT_VEL[0]
-    b_color = LIGHT_PURPLE  # classic always uses this
+    b_color = LIGHT_PURPLE
     l_color = settings.left_paddle_color if settings else LIGHT_PURPLE
     r_color = settings.right_paddle_color if settings else LIGHT_PURPLE
     bg_color = settings.background_color if settings else BLACK
@@ -57,12 +58,14 @@ async def main(vs_ai=False, settings=None):
     left_score = 0
     right_score = 0
 
-    # Power-ups
-    power_ups_on = settings.power_ups_enabled if settings else False
-    pu_mgr = PowerUpManager(left_paddle, right_paddle) if power_ups_on else None
+    # Power-ups (always on in cursed mode)
+    pu_mgr = PowerUpManager(left_paddle, right_paddle)
 
-    # Juice (visual effects) — respects settings
+    # Juice (visual effects)
     juice = JuiceManager(settings)
+
+    # Cursed event manager
+    cursed = CursedEventManager()
 
     # Pause menu & win screen
     pause_menu = PauseMenu()
@@ -71,26 +74,47 @@ async def main(vs_ai=False, settings=None):
     # Mode label
     if vs_ai:
         diff_name = DIFFICULTY_NAMES.get(ai_diff, "")
-        mode_label = f"MODE: CLASSIC vs AI ({diff_name})"
+        mode_label = f"MODE: CURSED vs AI ({diff_name})"
     else:
-        mode_label = "MODE: CLASSIC"
+        mode_label = "MODE: CURSED"
+
+    # Store original paddle heights for reset
+    orig_p_h = p_h
 
     def draw_full_scene():
-        """Draw the complete game scene (used by countdown/pause as background)."""
+        """Draw the complete game scene."""
         sx, sy = juice.shake.get_offset()
-        draw_game(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL, bg_color, offset=(sx, sy))
+
+        # Screen flip: render to temp surface then flip
+        if cursed.has_event('SCREEN FLIP'):
+            temp = pygame.Surface((WIDTH, HEIGHT))
+            _draw_scene_to(temp, sx, sy)
+            flipped = pygame.transform.flip(temp, False, True)
+            WIN.blit(flipped, (0, 0))
+        else:
+            _draw_scene_to(WIN, sx, sy)
+
+    def _draw_scene_to(target, sx, sy):
+        """Draw game elements to a target surface."""
+        # Blind effect: darken opponent half
+        use_font = cursed.get_font(FONT_LARGE_DIGITAL)
+        draw_game(target, [left_paddle, right_paddle], ball, left_score, right_score,
+                  use_font, bg_color, offset=(sx, sy),
+                  hide_ball=cursed.has_event('INVISIBLE BALL'))
         if pu_mgr:
-            pu_mgr.draw(WIN)
-            pu_mgr.draw_extra_balls(WIN)
+            pu_mgr.draw(target)
+            pu_mgr.draw_extra_balls(target)
+
         mode_text = FONT_SMALL_DIGITAL.render(mode_label, True, GREY)
-        WIN.blit(mode_text, (10, 10))
-        juice.draw(WIN)
+        target.blit(mode_text, (10, 10))
+        juice.draw(target)
+        cursed.draw_active_bar(target)
+        cursed.draw_announcements(target)
 
     # Initial countdown
     result = await countdown(WIN, draw_full_scene)
     if result == 'quit':
         return
-    game_started = True
 
     while True:
         clock.tick(FPS)
@@ -106,12 +130,15 @@ async def main(vs_ai=False, settings=None):
                 if action == 'resume':
                     paused = False
                 elif action == 'restart':
+                    cursed.reset_paddles(left_paddle, right_paddle)
+                    cursed.reset()
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
-                    if pu_mgr: pu_mgr.reset()
+                    pu_mgr.reset()
                     paused = False
                     result = await countdown(WIN, draw_full_scene)
                     if result == 'quit': return
                 elif action == 'menu':
+                    cursed.reset_paddles(left_paddle, right_paddle)
                     return
                 continue
 
@@ -119,12 +146,15 @@ async def main(vs_ai=False, settings=None):
                 if event.key == pygame.K_ESCAPE or event.key == pygame.K_m:
                     should_exit = await confirm_exit(WIN, draw_full_scene, touch)
                     if should_exit:
+                        cursed.reset_paddles(left_paddle, right_paddle)
                         return
                 if event.key == pygame.K_SPACE:
                     paused = True
                 if event.key == pygame.K_r:
+                    cursed.reset_paddles(left_paddle, right_paddle)
+                    cursed.reset()
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
-                    if pu_mgr: pu_mgr.reset()
+                    pu_mgr.reset()
                     result = await countdown(WIN, draw_full_scene)
                     if result == 'quit': return
                 if event.key == pygame.K_h:
@@ -136,6 +166,7 @@ async def main(vs_ai=False, settings=None):
                 should_exit = await confirm_exit(WIN, draw_full_scene, touch)
                 touch.clear_taps()
                 if should_exit:
+                    cursed.reset_paddles(left_paddle, right_paddle)
                     return
             if touch.tapped_pause_btn():
                 paused = True
@@ -146,17 +177,24 @@ async def main(vs_ai=False, settings=None):
             if action == 'resume':
                 paused = False
             elif action == 'restart':
+                cursed.reset_paddles(left_paddle, right_paddle)
+                cursed.reset()
                 left_score, right_score = reset(ball, left_paddle, right_paddle)
-                if pu_mgr: pu_mgr.reset()
+                pu_mgr.reset()
                 paused = False
                 touch.clear_taps()
                 result = await countdown(WIN, draw_full_scene)
                 if result == 'quit': return
             elif action == 'menu':
+                cursed.reset_paddles(left_paddle, right_paddle)
                 return
 
         # Update juice effects
         juice.update()
+
+        # Update cursed events
+        if not paused:
+            cursed.update(ball, left_paddle, right_paddle, pu_mgr)
 
         # Draw scene
         draw_full_scene()
@@ -164,7 +202,7 @@ async def main(vs_ai=False, settings=None):
         if paused:
             pause_menu.draw(WIN)
 
-        # Bottom footer instructions
+        # Footer
         if show_instructions:
             footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
         else:
@@ -178,21 +216,27 @@ async def main(vs_ai=False, settings=None):
         draw_touch_buttons(WIN, paused)
         pygame.display.update()
 
-        if not paused:
-            # Freeze guard: save positions for frozen paddles
-            if pu_mgr:
-                frozen_l = pu_mgr.is_frozen(left_paddle)
-                frozen_r = pu_mgr.is_frozen(right_paddle)
-                if frozen_l: saved_l = left_paddle.pos.copy()
-                if frozen_r: saved_r = right_paddle.pos.copy()
-            else:
-                frozen_l = frozen_r = False
+        if not paused and not cursed.should_skip_frame():
+            # Freeze guard
+            frozen_l = pu_mgr.is_frozen(left_paddle)
+            frozen_r = pu_mgr.is_frozen(right_paddle)
+            if frozen_l: saved_l = left_paddle.pos.copy()
+            if frozen_r: saved_r = right_paddle.pos.copy()
 
-            handle_paddle_movement(keys, left_paddle, right_paddle, ai_right=vs_ai, touch=touch)
+            # Handle controls (with possible reversal)
+            if cursed.has_event('REVERSE CONTROLS'):
+                # Swap W/S and UP/DOWN by creating reversed key dict
+                reversed_keys = _make_reversed_keys(keys)
+                handle_paddle_movement(reversed_keys, left_paddle, right_paddle,
+                                       ai_right=vs_ai, touch=touch)
+            else:
+                handle_paddle_movement(keys, left_paddle, right_paddle,
+                                       ai_right=vs_ai, touch=touch)
+
             if vs_ai:
                 ai_move_paddle(right_paddle, ball, difficulty=ai_diff)
 
-            # Enforce freeze: restore position, zero velocity
+            # Enforce freeze
             if frozen_l:
                 left_paddle.pos[:] = saved_l
                 left_paddle.vel[:] = 0
@@ -209,34 +253,32 @@ async def main(vs_ai=False, settings=None):
             old_vy = ball.vel[1]
             handle_ball_collision(ball, left_paddle, right_paddle, HEIGHT)
 
-            # Wall bounce detection — check if vy flipped sign
+            # Wall bounce detection
             if old_vy != 0 and (old_vy > 0) != (ball.vel[1] > 0):
                 audio.play('wall_bounce')
                 wall_y = ball.radius if ball.pos[1] <= HEIGHT // 2 else HEIGHT - ball.radius
                 juice.on_wall_bounce(ball.pos[0], wall_y)
 
-            # Detect paddle hit — check if vx flipped sign
+            # Paddle hit detection
             if old_vx < 0 and ball.vel[0] > 0:
                 audio.play('paddle_hit')
                 juice.on_paddle_hit(left_paddle.pos[0] + left_paddle.width, ball.pos[1], l_color)
-                if pu_mgr: pu_mgr.set_last_hit('left')
+                pu_mgr.set_last_hit('left')
             elif old_vx > 0 and ball.vel[0] < 0:
                 audio.play('paddle_hit')
                 juice.on_paddle_hit(right_paddle.pos[0], ball.pos[1], r_color)
-                if pu_mgr: pu_mgr.set_last_hit('right')
+                pu_mgr.set_last_hit('right')
 
             # Extra balls physics
-            if pu_mgr:
-                for eb in pu_mgr.extra_balls:
-                    eb.move()
-                    handle_ball_collision(eb, left_paddle, right_paddle, HEIGHT)
-                pu_mgr.update(ball)
-                pu_mgr.create_extra_balls(ball, mode='classic')
+            for eb in pu_mgr.extra_balls:
+                eb.move()
+                handle_ball_collision(eb, left_paddle, right_paddle, HEIGHT)
+            pu_mgr.update(ball)
+            pu_mgr.create_extra_balls(ball, mode='classic')
 
             # Scoring
             scored = False
-            if pu_mgr and (pu_mgr.extra_balls or pu_mgr.main_ball_parked):
-                # Multi-ball active
+            if pu_mgr.extra_balls or pu_mgr.main_ball_parked:
                 if not pu_mgr.main_ball_parked:
                     if ball.pos[0] - ball.radius < 0:
                         pu_mgr.park_main_ball(ball, 'left')
@@ -250,29 +292,35 @@ async def main(vs_ai=False, settings=None):
                 if result == 'right_scores':
                     right_score += 1
                     scored = True
+                    cursed.reset_paddles(left_paddle, right_paddle)
+                    cursed.reset()
                     ball.reset()
                     pu_mgr.reset()
                 elif result == 'left_scores':
                     left_score += 1
                     scored = True
+                    cursed.reset_paddles(left_paddle, right_paddle)
+                    cursed.reset()
                     ball.reset()
                     pu_mgr.reset()
             else:
-                # Normal scoring
                 if ball.pos[0] - ball.radius < 0:
                     right_score += 1
                     scored = True
+                    cursed.reset_paddles(left_paddle, right_paddle)
+                    cursed.reset()
                     ball.reset()
-                    if pu_mgr: pu_mgr.reset()
+                    pu_mgr.reset()
                 elif ball.pos[0] + ball.radius > WIDTH:
                     left_score += 1
                     scored = True
+                    cursed.reset_paddles(left_paddle, right_paddle)
+                    cursed.reset()
                     ball.reset()
-                    if pu_mgr: pu_mgr.reset()
+                    pu_mgr.reset()
 
             if scored:
                 audio.play('score')
-                # Score pop on the side that scored
                 if left_score > right_score or (left_score == right_score and ball.vel[0] > 0):
                     juice.on_score(WIDTH // 4, 20 + 25, str(left_score), FONT_LARGE_DIGITAL, LIGHT_PURPLE)
                 else:
@@ -288,7 +336,6 @@ async def main(vs_ai=False, settings=None):
             else:
                 audio.play('lose') if vs_ai else audio.play('win')
 
-            # Interactive win screen — save final scores before potential reset
             final_left, final_right = left_score, right_score
             win_screen.selected = 0
             choosing = True
@@ -300,17 +347,22 @@ async def main(vs_ai=False, settings=None):
                         return
                     action = win_screen.handle_event(event)
                     if action == 'play_again':
+                        cursed.reset_paddles(left_paddle, right_paddle)
+                        cursed.reset()
+                        cursed.total_events_triggered = 0
                         left_score, right_score = reset(ball, left_paddle, right_paddle)
-                        if pu_mgr: pu_mgr.reset()
+                        pu_mgr.reset()
                         choosing = False
                     elif action == 'menu':
                         return
 
-                # Touch handling for win screen
                 action = win_screen.handle_touch(touch)
                 if action == 'play_again':
+                    cursed.reset_paddles(left_paddle, right_paddle)
+                    cursed.reset()
+                    cursed.total_events_triggered = 0
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
-                    if pu_mgr: pu_mgr.reset()
+                    pu_mgr.reset()
                     choosing = False
                 elif action == 'menu':
                     return
@@ -322,12 +374,34 @@ async def main(vs_ai=False, settings=None):
                 touch.clear_taps()
                 await asyncio.sleep(0)
 
-            # Countdown before next match
             result = await countdown(WIN, draw_full_scene)
             if result == 'quit': return
 
         touch.clear_taps()
         await asyncio.sleep(0)
+
+
+class _ReversedKeys:
+    """Proxy that swaps W/S and UP/DOWN key states."""
+
+    def __init__(self, keys):
+        self._keys = keys
+
+    def __getitem__(self, key):
+        if key == pygame.K_w:
+            return self._keys[pygame.K_s]
+        elif key == pygame.K_s:
+            return self._keys[pygame.K_w]
+        elif key == pygame.K_UP:
+            return self._keys[pygame.K_DOWN]
+        elif key == pygame.K_DOWN:
+            return self._keys[pygame.K_UP]
+        return self._keys[key]
+
+
+def _make_reversed_keys(keys):
+    return _ReversedKeys(keys)
+
 
 if __name__ == '__main__':
     asyncio.run(main())

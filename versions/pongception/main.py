@@ -17,15 +17,20 @@ from pong.ball import Ball
 from pong.utilities import draw, reset
 from pong.helpers import handle_ball_collision, handle_paddle_movement
 from pong.ai import ai_move_paddle, DIFFICULTY_NAMES
-from pong.touch import TouchHandler, draw_touch_buttons
+from pong.touch import TouchHandler, draw_touch_buttons, draw_touch_zones
 from pong.powerups import PowerUpManager
+from pong import audio
+from pong.juice import JuiceManager
+from pong.game_flow import countdown, PauseMenu, WinScreen, confirm_exit
 
 async def main(vs_ai=False, settings=None):
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Pongception")
     clock = pygame.time.Clock()
 
-    run = True
+    # Initialize audio
+    audio.init()
+
     paused = False
     show_instructions = False
 
@@ -56,81 +61,133 @@ async def main(vs_ai=False, settings=None):
     power_ups_on = settings.power_ups_enabled if settings else False
     pu_mgr = PowerUpManager(left_paddle, right_paddle) if power_ups_on else None
 
-    while run:
-        dt = clock.tick(FPS) / 1000.0  # Delta time in seconds
+    # Juice (visual effects) — respects settings
+    juice = JuiceManager(settings)
 
+    # Pause menu & win screen
+    pause_menu = PauseMenu()
+    win_screen_ui = WinScreen()
+
+    # Mode label
+    if vs_ai:
+        diff_name = DIFFICULTY_NAMES.get(ai_diff, "")
+        mode_label = f"MODE: PHYSICS vs AI ({diff_name})"
+    else:
+        mode_label = "MODE: PHYSICS"
+
+    def draw_full_scene():
+        """Draw the complete game scene."""
         draw(WIN, [left_paddle, right_paddle], ball, left_score, right_score, FONT_LARGE_DIGITAL, bg_color)
-
-        # Draw power-ups and extra balls (between base render and UI overlay)
         if pu_mgr:
             pu_mgr.draw(WIN)
             pu_mgr.draw_extra_balls(WIN)
 
+        # Physics debug info
         debug_font = pygame.font.SysFont(*FONT_DATA)
         vel_text = debug_font.render(f"Velocity: [{ball.vel[0]:.2f}, {ball.vel[1]:.2f}]", True, GREY)
         spin_text = debug_font.render(f"Spin: {getattr(ball, 'spin', 0):.2f}", True, GREY)
-
         WIN.blit(vel_text, (10, 60))
         WIN.blit(spin_text, (10, 85))
 
-        if paused:
-            pause_text = FONT_BIG_DIGITAL.render("PAUSED", True, PURPLE)
-            resume_text = FONT_SMALL_DIGITAL.render("Press [SPACE] to resume", True, GREY)
-            WIN.blit(pause_text, (WIDTH // 2 - pause_text.get_width() // 2, HEIGHT // 2 - pause_text.get_height()))
-            WIN.blit(resume_text, (WIDTH // 2 - resume_text.get_width() // 2, HEIGHT // 2 + 10))
-
-        # Top-left mode label
-        if vs_ai:
-            diff_name = DIFFICULTY_NAMES.get(ai_diff, "")
-            mode_label = f"MODE: PHYSICS vs AI ({diff_name})"
-        else:
-            mode_label = "MODE: PHYSICS"
         mode_text = FONT_SMALL_DIGITAL.render(mode_label, True, GREY)
         WIN.blit(mode_text, (10, 10))
+        juice.draw(WIN)
 
-        # Bottom footer instructions
-        if show_instructions:
-                footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
-        else:
-            footer_text = "Press [H] for help"
-        footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
-        WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
+    # Initial countdown
+    result = await countdown(WIN, draw_full_scene)
+    if result == 'quit':
+        return
 
-        draw_touch_buttons(WIN, paused)
-        pygame.display.update()
+    run = True
+    while run:
+        dt = clock.tick(FPS) / 1000.0
 
         for event in pygame.event.get():
             touch.handle_event(event)
             if event.type == pygame.QUIT:
                 run = False
                 break
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    run = False
-                    break
-                if event.key == pygame.K_m:
-                    run = False
-                    break
-                if event.key == pygame.K_SPACE:
-                    paused = not paused
-                if event.key == pygame.K_r:
+
+            if paused:
+                action = pause_menu.handle_event(event, touch)
+                if action == 'resume':
+                    paused = False
+                elif action == 'restart':
                     left_score, right_score = reset(ball, left_paddle, right_paddle)
                     if pu_mgr: pu_mgr.reset()
                     paused = False
+                    result = await countdown(WIN, draw_full_scene)
+                    if result == 'quit': return
+                elif action == 'menu':
+                    return
+                continue
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_m:
+                    should_exit = await confirm_exit(WIN, draw_full_scene, touch)
+                    if should_exit:
+                        return
+                if event.key == pygame.K_SPACE:
+                    paused = True
+                if event.key == pygame.K_r:
+                    left_score, right_score = reset(ball, left_paddle, right_paddle)
+                    if pu_mgr: pu_mgr.reset()
+                    result = await countdown(WIN, draw_full_scene)
+                    if result == 'quit': return
                 if event.key == pygame.K_h:
                     show_instructions = not show_instructions
 
         # Touch button actions
-        if touch.tapped_menu_btn():
-            touch.clear_taps()
-            run = False
-            continue
-        if touch.tapped_pause_btn():
-            paused = not paused
+        if not paused:
+            if touch.tapped_menu_btn():
+                should_exit = await confirm_exit(WIN, draw_full_scene, touch)
+                touch.clear_taps()
+                if should_exit:
+                    return
+            if touch.tapped_pause_btn():
+                paused = True
+
+        # Touch pause menu handling
+        if paused:
+            action = pause_menu.handle_touch(touch)
+            if action == 'resume':
+                paused = False
+            elif action == 'restart':
+                left_score, right_score = reset(ball, left_paddle, right_paddle)
+                if pu_mgr: pu_mgr.reset()
+                paused = False
+                touch.clear_taps()
+                result = await countdown(WIN, draw_full_scene)
+                if result == 'quit': return
+            elif action == 'menu':
+                return
+
+        # Update juice effects
+        juice.update()
+
+        # Draw scene
+        draw_full_scene()
+
+        if paused:
+            pause_menu.draw(WIN)
+
+        # Bottom footer
+        if show_instructions:
+            footer_text = "Press [SPACE] to pause | [R] to restart | [M] to return | [ESC] to quit | [H] to hide"
+        else:
+            footer_text = "Press [H] for help"
+        footer = FONT_SMALL_DIGITAL.render(footer_text, True, GREY)
+        WIN.blit(footer, (GAME_MARGIN_X, GAME_FOOTER[1]))
+
+        draw_touch_zones(WIN, touch)
+        touch.update_ripples()
+        touch.draw_ripples(WIN)
+        draw_touch_buttons(WIN, paused)
+        pygame.display.update()
 
         keys = pygame.key.get_pressed()
         if not paused:
-            # Freeze guard: save positions for frozen paddles
+            # Freeze guard
             if pu_mgr:
                 frozen_l = pu_mgr.is_frozen(left_paddle)
                 frozen_r = pu_mgr.is_frozen(right_paddle)
@@ -143,7 +200,6 @@ async def main(vs_ai=False, settings=None):
             if vs_ai:
                 ai_move_paddle(right_paddle, ball, difficulty=ai_diff)
 
-            # Enforce freeze: restore position, zero velocity
             if frozen_l:
                 left_paddle.pos[:] = saved_l
                 left_paddle.vel[:] = 0
@@ -156,15 +212,26 @@ async def main(vs_ai=False, settings=None):
             ball.update()
 
             old_vx = ball.vel[0]
+            old_vy = ball.vel[1]
             handle_ball_collision(ball, left_paddle, right_paddle)
-            # Track last paddle hit for power-up attribution
-            if pu_mgr:
-                if old_vx < 0 and ball.vel[0] > 0:
-                    pu_mgr.set_last_hit('left')
-                elif old_vx > 0 and ball.vel[0] < 0:
-                    pu_mgr.set_last_hit('right')
 
-            # Extra balls physics
+            # Wall bounce detection — check if vy flipped sign
+            if old_vy != 0 and (old_vy > 0) != (ball.vel[1] > 0):
+                audio.play('wall_bounce')
+                wall_y = ball.radius if ball.pos[1] <= HEIGHT // 2 else HEIGHT - ball.radius
+                juice.on_wall_bounce(ball.pos[0], wall_y)
+
+            # Detect paddle hit — check if vx flipped sign
+            if old_vx < 0 and ball.vel[0] > 0:
+                audio.play('paddle_hit')
+                juice.on_paddle_hit(left_paddle.pos[0] + left_paddle.width, ball.pos[1], l_color)
+                if pu_mgr: pu_mgr.set_last_hit('left')
+            elif old_vx > 0 and ball.vel[0] < 0:
+                audio.play('paddle_hit')
+                juice.on_paddle_hit(right_paddle.pos[0], ball.pos[1], r_color)
+                if pu_mgr: pu_mgr.set_last_hit('right')
+
+            # Extra balls
             if pu_mgr:
                 for eb in pu_mgr.extra_balls:
                     eb.update()
@@ -173,14 +240,13 @@ async def main(vs_ai=False, settings=None):
                 pu_mgr.create_extra_balls(ball, mode='physics')
 
             # Scoring
+            scored = False
             if pu_mgr and (pu_mgr.extra_balls or pu_mgr.main_ball_parked):
-                # Multi-ball active: park main if it exits, wait for all
                 if not pu_mgr.main_ball_parked:
                     if ball.pos[0] < 0:
                         pu_mgr.park_main_ball(ball, 'left')
                     elif ball.pos[0] > WIDTH:
                         pu_mgr.park_main_ball(ball, 'right')
-                # Remove exited extra balls
                 pu_mgr.extra_balls = [
                     eb for eb in pu_mgr.extra_balls
                     if -eb.radius <= eb.pos[0] <= WIDTH + eb.radius
@@ -188,33 +254,77 @@ async def main(vs_ai=False, settings=None):
                 result = pu_mgr.check_multiball_done()
                 if result == 'right_scores':
                     right_score += 1
+                    scored = True
                     ball.reset()
                     pu_mgr.reset()
                 elif result == 'left_scores':
                     left_score += 1
+                    scored = True
                     ball.reset()
                     pu_mgr.reset()
             else:
-                # Normal scoring
                 if ball.pos[0] < 0:
                     right_score += 1
+                    scored = True
                     ball.reset()
                     if pu_mgr: pu_mgr.reset()
                 elif ball.pos[0] > WIDTH:
                     left_score += 1
+                    scored = True
                     ball.reset()
                     if pu_mgr: pu_mgr.reset()
 
+            if scored:
+                audio.play('score')
+                if left_score > right_score or (left_score == right_score and ball.vel[0] > 0):
+                    juice.on_score(WIDTH // 4, 20 + 25, str(left_score), FONT_LARGE_DIGITAL, LIGHT_PURPLE)
+                else:
+                    juice.on_score(WIDTH * 3 // 4, 20 + 25, str(right_score), FONT_LARGE_DIGITAL, LIGHT_PURPLE)
+
+        # Win condition
         if left_score >= win_score or right_score >= win_score:
             right_name = "AI" if vs_ai else "Right Player"
             winner = "Left Player Won!" if left_score > right_score else f"{right_name} Won!"
-            text = FONT_BIG_DIGITAL.render(winner, True, PURPLE)
-            WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
-            pygame.display.update()
-            await asyncio.sleep(3)
 
-            left_score, right_score = reset(ball, left_paddle, right_paddle)
-            if pu_mgr: pu_mgr.reset()
+            if left_score > right_score:
+                audio.play('win')
+            else:
+                audio.play('lose') if vs_ai else audio.play('win')
+
+            final_left, final_right = left_score, right_score
+            win_screen_ui.selected = 0
+            choosing = True
+            while choosing:
+                clock.tick(FPS)
+                for event in pygame.event.get():
+                    touch.handle_event(event)
+                    if event.type == pygame.QUIT:
+                        return
+                    action = win_screen_ui.handle_event(event)
+                    if action == 'play_again':
+                        left_score, right_score = reset(ball, left_paddle, right_paddle)
+                        if pu_mgr: pu_mgr.reset()
+                        choosing = False
+                    elif action == 'menu':
+                        return
+
+                action = win_screen_ui.handle_touch(touch)
+                if action == 'play_again':
+                    left_score, right_score = reset(ball, left_paddle, right_paddle)
+                    if pu_mgr: pu_mgr.reset()
+                    choosing = False
+                elif action == 'menu':
+                    return
+
+                draw_full_scene()
+                win_screen_ui.draw(WIN, winner, final_left, final_right)
+                draw_touch_buttons(WIN, False)
+                pygame.display.update()
+                touch.clear_taps()
+                await asyncio.sleep(0)
+
+            result = await countdown(WIN, draw_full_scene)
+            if result == 'quit': return
 
         touch.clear_taps()
         await asyncio.sleep(0)

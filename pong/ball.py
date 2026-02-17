@@ -134,12 +134,17 @@ class Ball(PhysicsObject):
         self.move()
 
     def bounce_box(self, width, height):
-        """Bounce off walls - used in menu and classic mode."""
+        """Bounce off walls - used in menu and classic mode.
+        Returns True if any bounce occurred, False otherwise."""
         self.move()
+        bounced = False
         if self.pos[0] <= 0 or self.pos[0] >= width:
             self.vel *= [-1, 1]
+            bounced = True
         if self.pos[1] <= 0 or self.pos[1] >= height:
             self.vel *= [1, -1]
+            bounced = True
+        return bounced
 
     def reset(self):
         """Resets ball to original position and velocity."""
